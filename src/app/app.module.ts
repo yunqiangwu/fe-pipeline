@@ -13,7 +13,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(config.homeDir, 'public'),
-      renderPath: '/public',
+      renderPath: '/public/',
     }),
     TypeOrmModule.forRoot({
       ...config.db,
