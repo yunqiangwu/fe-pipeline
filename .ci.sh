@@ -4,7 +4,7 @@ export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 #macos/linux
 # set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1 #windows
 
 set -e # 报错不继续执行
-
+yarn
 yarn build
 
 
