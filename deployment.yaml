@@ -46,7 +46,7 @@ metadata:
   name: fe-pipeline
 spec:
   rules:
-  - host: fe-pipeline.jd1.jajabjbj.top
+  - host: fe-pipeline.hft.jajabjbj.top
     http:
       paths:
       - backend:

@@ -15,4 +15,4 @@ docker push harbor.hft.jajabjbj.top:30088/hft/fe-pipeline:${CICD_EXECUTION_SEQUE
 
 envsubst '${CICD_EXECUTION_SEQUENCE}' < deployment.yaml > _deployment.yaml
 
-kubectl apply -f _deployment.yaml
+kubectl --context huawei apply -f _deployment.yaml
