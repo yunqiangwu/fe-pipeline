@@ -9,11 +9,16 @@ interface IConfig {
     db: ConnectionOptions;
 }
 
-function getDefaultConfig(): IConfig {
+export function getAppHomeDir() {
     const appHomeDir = path.resolve(process.cwd(), 'fe-pipeline-home');
     if (fs.existsSync(appHomeDir)) {
         fs.mkdirpSync(appHomeDir);
     }
+    return appHomeDir;
+}
+
+function getDefaultConfig(): IConfig {
+    const appHomeDir = getAppHomeDir();
     const defaultConfig: IConfig = {
         homeDir: appHomeDir,
         db: {
@@ -26,8 +31,13 @@ function getDefaultConfig(): IConfig {
 }
 
 function getConfig(): IConfig {
+    const defaultConfig = getDefaultConfig();
+
     let fileConfig;
-    const filePath = path.resolve(process.cwd(), 'config/config.yml');
+    let filePath = path.resolve(defaultConfig.homeDir, 'config/config.yml');
+    if(!fs.existsSync(filePath)) {
+        filePath = path.resolve(process.cwd(), 'config/config.yml');
+    }
     if (fs.existsSync(filePath)) {
         const file = fs.readFileSync(filePath).toString();
         try {
@@ -36,8 +46,9 @@ function getConfig(): IConfig {
             Logger.error(e.message);
         }
     }
+
     return {
-        ...getDefaultConfig(),
+        ...defaultConfig,
         ...fileConfig,
     };
 }

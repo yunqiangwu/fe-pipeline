@@ -6,6 +6,7 @@ import * as path from 'path';
 
 import { EnvConfig, ConfigOptions } from '@/config/interfaces';
 import { CONFIG_OPTIONS } from '@/config/constants';
+import { getAppHomeDir } from './config';
 
 @Injectable()
 export class ConfigService {
@@ -13,7 +14,10 @@ export class ConfigService {
 
   constructor(@Inject(CONFIG_OPTIONS) private options: ConfigOptions) {
     const filePath = `${process.env.NODE_ENV || 'development'}.env`;
-    const envFile = path.resolve(__dirname, '../../', options.folder, filePath);
+    let envFile = path.resolve(getAppHomeDir(), options.folder, filePath);
+    if(!fs.existsSync(envFile)) {
+      envFile = path.resolve(__dirname, '../../', options.folder, filePath);
+    }
     this.envConfig = dotenv.parse(fs.readFileSync(envFile));
   }
 
