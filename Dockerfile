@@ -1,23 +1,17 @@
-# FROM registry.cn-hangzhou.aliyuncs.com/choerodon-tools/hugo:0.40.3 as builder
-# WORKDIR /app
-# RUN npm install -g grunt-cli gulp
-# COPY . .
-# RUN npm install --save-dev toml grunt gulp string html-entities marked gulp-uglify gulp-htmlmin gulp-clean-css gulp-concat path js-yaml
-# RUN gulp && grunt index
-# RUN hugo
-# RUN gulp html
+FROM node as builder
+WORKDIR /app
+ADD ./ui/ /app/
+RUN yarn && yarn run build
 
-FROM node
+FROM node as runner
 EXPOSE 3000
-# COPY --from=builder /app/public /usr/share/nginx/html
+COPY --from=builder /app/dist /app/fe-pipeline-home/public
 WORKDIR /app
 ADD ./package.json /app/package.json
-RUN yarn
+RUN yarn && yarn run build
 
 ADD ./dist /app/dist
 ADD ./config /app/config
 # ADD ./node_modules /app/node_modules
-
-
 
 CMD [ "node", "dist/main.js" ]

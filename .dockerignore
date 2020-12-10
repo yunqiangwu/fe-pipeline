@@ -1,4 +1,7 @@
 node_modules
+ui/node_modules
+dist
+fe-pipeline-home
 .cache
 .git
 /fe-pipeline-home
