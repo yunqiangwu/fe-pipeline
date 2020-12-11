@@ -165,8 +165,6 @@ export class AuthService {
       });
       userInfo = response.data;
 
-      console.log(userInfo);
-
       // userInfo = {
       //   login: 'wuyun1',
       //   id: 12711404,
