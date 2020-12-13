@@ -1,35 +1,35 @@
-include: https://api.choerodon.com.cn/devops/v1/projects/1553/ci_contents/pipelines/5a95df53-e870-45ff-beb4-4c88ae096416/content.yaml
+# include: https://api.choerodon.com.cn/devops/v1/projects/1553/ci_contents/pipelines/5a95df53-e870-45ff-beb4-4c88ae096416/content.yaml
 
-#image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cifront:0.7.0
-#
-#stages:
-#  - docker_build
-#
-#docker_build:
-#  image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cibase:0.7.0
-#  stage: docker_build
-#  script:
-#    - docker_build
-#    - chart_build
-#  only:
-#    - master
-#
-#.auto_devops: &auto_devops |
-#  http_status_code=`curl -o .auto_devops.sh -s -m 10 --connect-timeout 10 -w %{http_code} "${CHOERODON_URL}/devops/ci?token=${Token}&type=front"`
-#  if [ "$http_status_code" != "200" ]; then
-#    cat .auto_devops.sh
-#    exit 1
-#  fi
-#  source .auto_devops.sh
-#  export TEMP_DIR=/cache/${CI_PROJECT_NAME}-${CI_PROJECT_ID}-${CI_COMMIT_REF_NAME}-front
-#  echo "gitlab-ci -- 缓存目录: $TEMP_DIR"
-#
-#  function docker_build(){
-#      docker login -u ${DOCKER_USER} -p ${DOCKER_PWD} ${DOCKER_REGISTRY}
-#      docker build --pull -t ${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG} ${1:-"."}
-#      docker push ${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG}
-#      echo "${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG}"
-#  }
-#
-#before_script:
-#  - *auto_devops
+image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cifront:0.7.0
+
+stages:
+ - docker_build
+
+docker_build:
+ image: registry.cn-hangzhou.aliyuncs.com/choerodon-tools/cibase:0.7.0
+ stage: docker_build
+ script:
+    - docker_build
+    - chart_build
+ only:
+    - master
+
+.auto_devops: &auto_devops |
+ http_status_code=`curl -o .auto_devops.sh -s -m 10 --connect-timeout 10 -w %{http_code} "${CHOERODON_URL}/devops/ci?token=${Token}&type=front"`
+ if [ "$http_status_code" != "200" ]; then
+    cat .auto_devops.sh
+    exit 1
+ fi
+ source .auto_devops.sh
+ export TEMP_DIR=/cache/${CI_PROJECT_NAME}-${CI_PROJECT_ID}-${CI_COMMIT_REF_NAME}-front
+ echo "gitlab-ci -- 缓存目录: $TEMP_DIR"
+
+ function docker_build(){
+     docker login -u ${DOCKER_USER} -p ${DOCKER_PWD} ${DOCKER_REGISTRY}
+     docker build --pull -t ${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG} ${1:-"."}
+     docker push ${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG}
+     echo "${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG}"
+ }
+
+before_script:
+ - *auto_devops
