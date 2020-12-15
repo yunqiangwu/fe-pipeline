@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { ThreeAccount } from './three-account.entity';
 
 @Entity()
 export class User {
@@ -23,4 +24,6 @@ export class User {
   @Column('int', {nullable: true})
   sex?: number;
 
+  @OneToMany(() => ThreeAccount, user => user.user)
+  threeAccounts: ThreeAccount[];
 }

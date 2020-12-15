@@ -1,7 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import { useModel } from 'umi';
-import { notification, Spin, Alert, Row, Col } from 'choerodon-ui';
+import { notification, Spin, Alert } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { useAsyncFn, useAsync } from 'react-use';
 import { setToken } from '@/utils/token'
@@ -16,7 +16,9 @@ import {
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ButtonColor, ButtonType } from 'choerodon-ui/pro/lib/button/enum';
 import { Size } from 'choerodon-ui/lib/_util/enum';
+import OtherLogin from './OtherLogin';
 import { LabelLayoutType } from 'choerodon-ui/pro/lib/form/Form';
+import { DEFAULT_GITHUB_CLIENT_ID } from './constants';
 
 const LoginPage: React.FC<RouteComponentProps> = (props) => {
 
@@ -127,33 +129,6 @@ const LoginPage: React.FC<RouteComponentProps> = (props) => {
     setOtherHandleLoading(false);
   }, []);
 
-  const otherLoginHandle = React.useCallback((e: string) => {
-    const type = e;
-    const current_redirect_uri = new URLSearchParams(props.location.search).get('redirect_uri');
-    let current_url = `${location.protocol}//${location.host}${location.pathname}`;
-    if(current_redirect_uri) {
-      current_url = `${current_url}?redirect_uri=${current_redirect_uri}`;
-    }
-    current_url = `${current_url}${current_url.includes('?') ? '&' : '?'}`
-    let redirect_uri;
-    switch (type) {
-      case 'choerodon':
-        redirect_uri = encodeURIComponent(`${current_url}login-type=${type}`);
-        location.href = `https://api.choerodon.com.cn/oauth/oauth/authorize?redirect_uri=${redirect_uri}&response_type=token&client_id=localhost`;
-        break;
-      case 'open-hand':
-        redirect_uri = encodeURIComponent(`javascript:(() => {location.href = \`${current_url}login-type=${type}&access_token=\${localStorage.getItem('user-token')}&refresh-token=\${localStorage.getItem('refresh-token')}\`;})();`);
-        location.href = `https://open.hand-china.com/user/login?redirect_url=${redirect_uri}`;
-        break;
-      case 'github':
-        redirect_uri = encodeURIComponent(`${current_url}login-type=${type}`);
-        location.href = `https://github.com/login/oauth/authorize?scope=user:email&client_id=a18b1ae435db47650112&redirect_uri=${redirect_uri}`;
-        break;
-      default:
-        break;
-    }
-  }, []);
-
   return (
     <div className="login-container">
       <Spin spinning={loginResponse.loading || otherHandleLoading}>
@@ -174,33 +149,7 @@ const LoginPage: React.FC<RouteComponentProps> = (props) => {
                 登录
               </Button>
             </div>
-            <div className="other-login">
-              <Row className="other-login-line">
-                <Col>
-                  <span>其他登录</span>
-                </Col>
-              </Row>
-              <Row type="flex" justify="space-around" align="middle" className="other-login-content">
-                <Col span={8}>
-                  <div onClick={() => otherLoginHandle('choerodon')} className="other-login-item">
-                    <img src={require('./assets/choerodon_logo.svg')} alt="choerodon" className="other-login-item-img" />
-                    <span className="other-login-item-desc">Choerodon</span>
-                  </div>
-                </Col>
-                <Col span={8}>
-                  <div onClick={() => otherLoginHandle('open-hand')} className="other-login-item">
-                    <img src={require('./assets/open-hand-logo2.png')} alt="open-hand" className="other-login-item-img" />
-                    <span className="other-login-item-desc">汉得开发平台</span>
-                  </div>
-                </Col>
-                <Col span={8}>
-                  <div onClick={() => otherLoginHandle('github')} className="other-login-item">
-                    <img src={require('./assets/gitlab-logo.svg')} alt="github" className="other-login-item-img" />
-                    <span className="other-login-item-desc">Github</span>
-                  </div>
-                </Col>
-              </Row>
-            </div>
+            <OtherLogin location={props.location} />
           </div>
         </div>
       </Spin>

@@ -1,0 +1,5 @@
+auth:
+  oauthConfig:
+    github:
+      client_secret: 1876ba4ec1f92abc2fb3285cefa2c75d9eb3f5c9
+      client_id: a18b1ae435db47650112

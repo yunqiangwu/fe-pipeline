@@ -3,7 +3,9 @@ import axios from 'axios';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
 import { JwtService } from '@nestjs/jwt';
-import { isArray } from 'util';
+import { isArray, cloneDeep } from 'lodash';
+import { Config } from '@/config/config';
+import { ThreePlatformType } from '@/users/enums';
 
 @Injectable()
 export class AuthService {
@@ -13,9 +15,11 @@ export class AuthService {
       private readonly jwtService: JwtService
     ) {}
 
-  async otherAccountBind({loginType, access_token, github_state}: { loginType: string; access_token: string; github_state?: string }) {
+  async otherAccountBind({loginType, access_token, github_state}: { loginType: ThreePlatformType; access_token: string; github_state?: string }) {
 
     let userInfo: any;
+    let oauthToken = '';
+    let accountData = {};
     if(loginType === 'open-hand') {
 
       const response = await axios.get("https://gateway.open.hand-china.com/iam/hzero/v1/users/self", {
@@ -29,8 +33,9 @@ export class AuthService {
         }
       });
 
-      userInfo = response.data;
-
+      userInfo = cloneDeep(response.data);
+      accountData = cloneDeep(response.data);
+      oauthToken = access_token;
       // userInfo = {
       //   id: 3008,
       //   loginName: '13485',
@@ -82,7 +87,9 @@ export class AuthService {
         }
       });
 
-      userInfo = response.data;
+      userInfo = cloneDeep(response.data);
+      accountData = cloneDeep(response.data);
+      oauthToken = access_token;
 
       // userInfo = {
       //   objectVersionNumber: 493,
@@ -137,9 +144,10 @@ export class AuthService {
       userInfo.avatar = userInfo.imageUrl || userInfo.favicon;
     } 
     if(loginType === 'github') {
+      const oauthConfig = Config.singleInstance().get('auth.oauthConfig.github') || {};
       const gitResponse = await axios.post("https://github.com/login/oauth/access_token", {
-        client_id: 'a18b1ae435db47650112',
-        client_secret: '1876ba4ec1f92abc2fb3285cefa2c75d9eb3f5c9',
+        client_id: oauthConfig.client_id || 'a18b1ae435db47650112',
+        client_secret: oauthConfig.client_secret ||'1876ba4ec1f92abc2fb3285cefa2c75d9eb3f5c9',
         code: access_token,
         scope: 'user:email',
         state: github_state,
@@ -163,7 +171,9 @@ export class AuthService {
           "sec-fetch-site": "same-site"
         }
       });
-      userInfo = response.data;
+      userInfo = cloneDeep(response.data);
+      accountData = cloneDeep(response.data);
+      oauthToken = access_token;
 
       // userInfo = {
       //   login: 'wuyun1',
@@ -239,6 +249,13 @@ export class AuthService {
     if(!user) {
       user = await this.usersService.createUser(userInfo as User);
     }
+
+    await this.usersService.updateOauthBindInfo({
+      user,
+      oauthToken,
+      loginType,
+      accountData,
+    });
 
     return this.login(user);
 

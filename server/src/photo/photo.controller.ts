@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Logger, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { PhotoService } from './photo.service';
 import { Photo } from './photo.entity';
 
+@ApiTags('photo')
 @Controller('api/photo')
 export class PhotoController {
   constructor(private readonly photoService: PhotoService) {}

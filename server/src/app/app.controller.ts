@@ -1,17 +1,13 @@
 import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { omit } from 'lodash';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../auth/auth.service';
 import { AppService } from '@/app/app.service';
 
+@ApiTags('fe-pipeline')
 @Controller('/api')
 export class AppController {
   constructor(private readonly appService: AppService) {}
-
-  // @UseGuards(AuthGuard('local'))
-  // @Post('auth/login')
-  // async login(@Request() req) {
-  //   return req.user;
-  // }
 
   @Get('hello')
   getHello(): string {
@@ -20,7 +16,7 @@ export class AppController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('config')
-  getConfig(): string {
-    return this.appService.getConfig();
+  getConfig(): any {
+    return omit(this.appService.getConfig(), ['auth']);
   }
 }

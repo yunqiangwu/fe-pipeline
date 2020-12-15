@@ -1,11 +1,14 @@
 import { Controller, Get, Post, Request, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { omit } from 'lodash';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
+import { Config } from '@/config/config';
 
+@ApiTags('auth')
 @Controller('api/auth')
 export class AuthController {
   constructor(
@@ -77,4 +80,8 @@ export class AuthController {
     return (omit(userInfo, ['password']));
   }
 
+  @Get('oauth-config')
+  async getOauthConfig(@Request() req): Promise<any> {
+    return (omit(Config.singleInstance().get('auth.oauthConfig'), ['github.client_secret']));
+  }
 }

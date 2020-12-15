@@ -15,6 +15,6 @@ export class AppService {
   }
 
   getConfig(): any {
-    return this.configService.getConfig();
+    return this.configService.configObj.config;
   }
 }

@@ -95,10 +95,10 @@ const BasicLayout = (props: any) => {
     if(!error) {
       return;
     }
-    notification.error({
-      message: '登录失败',
-      description: JSON.stringify(error.message),
-    });
+    // notification.error({
+    //   message: '登录失败',
+    //   description: JSON.stringify(error.message),
+    // });
     if(
       // (error as any).response.status === 401 && 
       !location.pathname.includes('/login')

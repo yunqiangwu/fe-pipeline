@@ -435,6 +435,11 @@
     "@types/jsonwebtoken" "8.5.0"
     jsonwebtoken "8.5.1"
 
+"@nestjs/mapped-types@0.1.1":
+  version "0.1.1"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@nestjs/mapped-types/-/mapped-types-0.1.1.tgz#2fa9ff0f1ddbe66d5d1c80ae59df21c0ed0d1361"
+  integrity sha1-L6n/Dx3b5m1dHICuWd8hwO0NE2E=
+
 "@nestjs/passport@^7.1.5":
   version "7.1.5"
   resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@nestjs/passport/-/passport-7.1.5.tgz#b32fc0492008d73ebae4327fbc0012a738a83664"
@@ -464,6 +469,15 @@
   version "1.0.2"
   resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@nestjs/serve-static/-/serve-static-1.0.2.tgz#8baa1a20fa39457186be4ec3e29b446d83d3fcb0"
   integrity sha1-i6oaIPo5RXGGvk7D4ptEbYPT/LA=
+
+"@nestjs/swagger@^4.7.6":
+  version "4.7.6"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@nestjs/swagger/-/swagger-4.7.6.tgz#7ac35d47ab09a944126a12f1f5727ad7c01f256c"
+  integrity sha512-9cj/rAqqnUxHnGqgO9GE1HU5x0BxQmWgWgenLh/cwdW4dFys7JI3xN2RWaEtZCVobvKYUWBPNvXnoduYI/1OKg==
+  dependencies:
+    "@nestjs/mapped-types" "0.1.1"
+    lodash "4.17.20"
+    path-to-regexp "3.2.0"
 
 "@nestjs/testing@^6.7.1":
   version "6.11.11"
@@ -624,6 +638,11 @@
   integrity sha1-JTHV4wCAOqYyebIywBSs94DJgcU=
   dependencies:
     "@types/node" "*"
+
+"@types/lodash@^4.14.165":
+  version "4.14.165"
+  resolved "https://registry.npm.taobao.org/@types/lodash/download/@types/lodash-4.14.165.tgz?cache=0&sync_timestamp=1604600563068&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Flodash%2Fdownload%2F%40types%2Flodash-4.14.165.tgz#74d55d947452e2de0742bad65270433b63a8c30f"
+  integrity sha1-dNVdlHRS4t4HQrrWUnBDO2Ooww8=
 
 "@types/mime@*":
   version "2.0.3"
@@ -4257,9 +4276,9 @@ lodash.toarray@^4.4.0:
   resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/lodash.toarray/-/lodash.toarray-4.4.0.tgz#24c4bfcd6b2fba38bfd0594db1179d8e9b656561"
   integrity sha1-JMS/zWsvuji/0FlNsRedjptlZWE=
 
-lodash@^4.17.10, lodash@^4.17.15, lodash@^4.17.19:
+lodash@4.17.20, lodash@^4.17.10, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20:
   version "4.17.20"
-  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha1-tEqbYpe8tpjxxRo1RaKzs2jVnFI=
 
 log-symbols@^3.0.0:
@@ -6262,6 +6281,18 @@ supports-color@^7.1.0:
   integrity sha1-G33NyzK4E4gBs+R4umpRyqiWSNo=
   dependencies:
     has-flag "^4.0.0"
+
+swagger-ui-dist@^3.18.1:
+  version "3.38.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/swagger-ui-dist/-/swagger-ui-dist-3.38.0.tgz#fd7c6c04f2eb2dbfedd94722aa3148f3bf354cb5"
+  integrity sha1-/XxsBPLrLb/t2UciqjFI8781TLU=
+
+swagger-ui-express@^4.1.5:
+  version "4.1.5"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/swagger-ui-express/-/swagger-ui-express-4.1.5.tgz#114f3ce017ca6d6069d960ea8ffef677784b6f2f"
+  integrity sha1-EU884BfKbWBp2WDqj/72d3hLby8=
+  dependencies:
+    swagger-ui-dist "^3.18.1"
 
 symbol-observable@1.2.0:
   version "1.2.0"

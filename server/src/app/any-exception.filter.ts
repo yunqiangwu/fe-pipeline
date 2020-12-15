@@ -6,8 +6,6 @@ import {
     HttpStatus,
   } from '@nestjs/common';
 import { Response } from 'express';
-import { config } from '@/config/config';
-import { join } from 'path';
   
   @Catch()
   export class AllExceptionsFilter implements ExceptionFilter {
@@ -20,11 +18,14 @@ import { join } from 'path';
         exception instanceof HttpException
           ? exception.getStatus()
           : HttpStatus.INTERNAL_SERVER_ERROR;
-  
+      if(!(exception instanceof HttpException)) {
+        console.error(exception);
+      }
       response.status(status).json({
         statusCode: status,
         timestamp: new Date().toISOString(),
         path: request.url,
+        message: (exception as any)?.message,
       });
     }
   }

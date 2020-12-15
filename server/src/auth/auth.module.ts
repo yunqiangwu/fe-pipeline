@@ -8,6 +8,8 @@ import { JwtStrategy } from './jwt.strategy'
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { jwtConstants } from './constants';
+import { ConfigService } from '@/config/config.service';
+import { ConfigModule } from '@/config/config.module';
 
 @Module({
   imports: [
