@@ -1,5 +1,5 @@
 
-homeDir: /tmp/fe-pipeline
+# homeDir: /tmp/fe-pipeline
 # db:
 #   type: 'mysql'
 #   host: 'localhost'
