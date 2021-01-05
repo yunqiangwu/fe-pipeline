@@ -25,7 +25,7 @@ export class WorkspaceController {
     description: 'The found record',
     type: [Workspace],
   })
-  async findAll(@CurrentUser() user: User): Promise<any> {
+  async findAll(@CurrentUser() user: User): Promise<Workspace[]> {
     return this.workspaceService.findAllByCurrentUser(user.userId);
   }
 
