@@ -18,7 +18,7 @@ export class WorkspaceController {
   @Get()
   @ApiParam({
     name: 'workspace',
-    type: [Workspace],
+    type: Workspace,
   })
   @ApiResponse({
     status: 200,
