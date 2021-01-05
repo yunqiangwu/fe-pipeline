@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Request, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards, HttpException, HttpStatus, Body } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOAuth2, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { omit } from 'lodash';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
+import { AuthInfoDto } from './dto/auth-info.dto';
+import { LoginAccountDto } from './dto/login-account.dto';
 import { Config } from '@/config/config';
 
 @ApiTags('auth')
@@ -19,8 +21,17 @@ export class AuthController {
 
   @UseGuards(AuthGuard('local'))
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  @ApiResponse({
+    status: 200,
+    description: 'auth info',
+    type: AuthInfoDto,
+  })
+  @ApiBody({
+    description: 'login user info',
+    type: LoginAccountDto,
+  })
+  async login(@Body() user: LoginAccountDto) {
+    return this.authService.login(user);
   }
 
   /**
@@ -48,6 +59,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('self')
+  @ApiOAuth2([])
+  @ApiResponse({
+    status: 200,
+    description: 'user info',
+    type: User,
+  })
   async getSelfInfo(@Request() req: Request): Promise<User> {
     const jwtTokenUserInfo = this.jwtService.decode(req.headers['authorization'].split(' ')[1]);
     const userInfo = await this.usersService.findOne((jwtTokenUserInfo as any).username);

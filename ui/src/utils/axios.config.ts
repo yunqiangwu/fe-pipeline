@@ -2,10 +2,15 @@ import axios from 'axios';
 import { getToken } from './token';
 
 if(!(axios as any)._IS_CONFIGED) {
-  if(process.env.NODE_ENV === 'development') {
-    axios.defaults.baseURL = 'http://localhost:3000/api/';
+  const apiBasePath = process.env.API_BASE_PATH;
+  if(apiBasePath) {
+    axios.defaults.baseURL = `${apiBasePath}api/`;
   } else {
-    axios.defaults.baseURL = '/api/';
+    if(process.env.NODE_ENV === 'development') {
+      axios.defaults.baseURL = 'http://localhost:3000/api/';
+    } else {
+      axios.defaults.baseURL = '/api/';
+    }
   }
   axios.interceptors.request.use((config) => {
     const token = getToken();

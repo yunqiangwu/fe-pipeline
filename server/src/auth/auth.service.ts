@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { isArray, cloneDeep } from 'lodash';
 import { Config } from '@/config/config';
 import { ThreePlatformType } from '@/users/enums';
+import { AuthInfoDto } from './dto/auth-info.dto';
 
 @Injectable()
 export class AuthService {
@@ -273,7 +274,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any): Promise<AuthInfoDto> {
     const payload = { username: user.username, sub: user.userId };
     return {
       access_token: this.jwtService.sign(payload),

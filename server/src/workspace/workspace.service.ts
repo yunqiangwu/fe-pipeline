@@ -14,7 +14,19 @@ export class WorkspaceService {
     return await this.workspaceRepository.find();
   }
 
+  async findAllByCurrentUser(): Promise<Workspace[]> {
+    return await this.workspaceRepository.find();
+  }
+
   async save(workspaces: Workspace[]): Promise<Workspace[]> {
     return await this.workspaceRepository.save(workspaces);
+  }
+
+  async delete(workspace: Workspace){
+    return await this.workspaceRepository.delete(workspace);
+  }
+
+  async deleteById(workspaceId: number){
+    return await this.workspaceRepository.delete(workspaceId);
   }
 }

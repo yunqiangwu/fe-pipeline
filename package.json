@@ -28,6 +28,7 @@
     "@nestjs/serve-static": "^1.0.1",
     "@nestjs/swagger": "^4.7.6",
     "@nestjs/typeorm": "^6.2.0",
+    "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.20",
