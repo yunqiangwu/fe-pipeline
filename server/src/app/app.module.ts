@@ -16,9 +16,9 @@ import { Config } from '@/config/config';
 @Module({
   imports: [
     ConfigModule.register({ folder: './config' }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(Config.singleInstance().get('homeDir'), 'public'),
-    // }),
+    ServeStaticModule.forRoot({
+      rootPath: join(Config.singleInstance().get('homeDir'), 'public'),
+    }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
         return {
