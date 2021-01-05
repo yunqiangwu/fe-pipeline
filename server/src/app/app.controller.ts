@@ -1,5 +1,5 @@
 import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
-import { ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { omit } from 'lodash';
 import { AuthGuard } from '@nestjs/passport';
 import { AppService } from '@/app/app.service';
@@ -21,7 +21,7 @@ export class AppController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('config')
-  @ApiBearerAuth()
+  @ApiOAuth2([])
   @ApiResponse({
     status: 200,
     description: 'Config',
