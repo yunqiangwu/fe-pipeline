@@ -6,7 +6,7 @@ import styles from './index.less';
 
 const WorkSpaces : React.FC<any> = () => {
   const [state, fetch] = useAsyncFn(async () => {
-    const response = await axios.get('/photo');
+    const response = await axios.get('/workspace');
     return response.data;
   }, []);
 
