@@ -6,8 +6,8 @@ export default defineConfig({
     'process.env.NODE_ENV': process.env.NODE_ENV,
     'process.env.API_BASE_PATH': process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : '/',
   },
-  // base: process.env.NODE_ENV === 'production' ? '/public/' : '/',
-  // publicPath: process.env.NODE_ENV === 'production' ? '/public/' : '/',
+  // base: process.env.NODE_ENV === 'development' ? '/' : '/app/',
+  // publicPath: process.env.NODE_ENV === 'development' ? '/' : '/app/',
   plugins: [path.resolve(__dirname, './plugin.ts')],
   extraBabelPlugins: [
     [

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, UseGuards, HttpException, HttpStatus, Body } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards, Headers, HttpException, HttpStatus, Body } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { ApiOAuth2, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -9,6 +9,7 @@ import { User } from '../users/users.entity';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
 import { Config } from '@/config/config';
+import { CurrentUser } from '@/common/decos';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -19,7 +20,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
-  @UseGuards(AuthGuard('local'))
+  // @UseGuards(AuthGuard('local'))
   @Post('login')
   @ApiResponse({
     status: 200,
@@ -65,9 +66,8 @@ export class AuthController {
     description: 'user info',
     type: User,
   })
-  async getSelfInfo(@Request() req: Request): Promise<User> {
-    const jwtTokenUserInfo = this.jwtService.decode(req.headers['authorization'].split(' ')[1]);
-    const userInfo = await this.usersService.findOne((jwtTokenUserInfo as any).username);
+  async getSelfInfo(@CurrentUser() user: User): Promise<User> {
+    const userInfo = await this.usersService.findOne(user.username);
     if(!userInfo) {
       throw new HttpException('用户信息不存在', HttpStatus.UNAUTHORIZED);
     }

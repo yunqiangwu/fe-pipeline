@@ -1,28 +1,32 @@
-import { Controller, Get, Post, Body, Delete, Logger, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { WorkspaceService } from './workspace.service';
 import { Workspace } from './workspace.entity';
+import { User } from '@/users/users.entity';
+import { CurrentUser } from '@/common/decos';
 
 @ApiTags('workspaces')
 @ApiOAuth2([])
 @Controller('api/workspace')
 export class WorkspaceController {
-  constructor(private readonly workspaceService: WorkspaceService) {}
+  constructor(
+    private readonly workspaceService: WorkspaceService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
   @ApiParam({
     name: 'workspace',
-    type: Workspace,
+    type: [Workspace],
   })
   @ApiResponse({
     status: 200,
     description: 'The found record',
-    type: Workspace,
+    type: [Workspace],
   })
-  findAll(): Promise<Workspace[]> {
-    return this.workspaceService.findAllByCurrentUser();
+  async findAll(@CurrentUser() user: User): Promise<any> {
+    return this.workspaceService.findAllByCurrentUser(user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -37,10 +41,16 @@ export class WorkspaceController {
     type: [Workspace],
   })
   @ApiResponse({ status: 401, description: 'Forbidden.' })
-  save( @Body() workspaces: Workspace[]): Promise<Workspace[]> {
-    Logger.log(`receive Workspaces: ${workspaces}`);
+  save(@CurrentUser() user: User, @Body() workspaces: Workspace[]): Promise<Workspace[]> {
+    Logger.log(`receive Workspaces: ${JSON.stringify(workspaces)}`);
+    Logger.log(`current User: ${JSON.stringify(user)}`);
     
-    return this.workspaceService.save(workspaces);
+    return this.workspaceService.save(workspaces.map(item => {
+      return {
+        ...item,
+        userId: user.userId,
+      };
+    }));
   }
 
   @UseGuards(AuthGuard('jwt'))

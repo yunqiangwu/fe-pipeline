@@ -11,7 +11,7 @@ export class Workspace {
 
   @ApiProperty({ required: false, example: 1, description: '关联用户id' })
   @Column({ type: 'int' })
-  userId: string;
+  userId: number;
 
   @Column({ length: 500 })
   @ApiProperty({ required: false, description: '工作空间名字' })

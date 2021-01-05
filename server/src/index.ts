@@ -34,7 +34,7 @@ export async function startServer(port = 3000) {
 
   SwaggerModule.setup(SWAGGER_UI_BASE_PATH, app, document, {
     swaggerOptions: {
-      oauth2RedirectUrl: `/swagger-ui/oauth2-redirect.html`,
+      oauth2RedirectUrl: `${SWAGGER_UI_BASE_PATH}/oauth2-redirect.html`,
       oauth: {
         clientId: process.env.NODE_ENV === 'development' ? "localhost" : 'prod',
       },

@@ -14,8 +14,8 @@ export class WorkspaceService {
     return await this.workspaceRepository.find();
   }
 
-  async findAllByCurrentUser(): Promise<Workspace[]> {
-    return await this.workspaceRepository.find();
+  async findAllByCurrentUser(userId: number): Promise<Workspace[]> {
+    return await this.workspaceRepository.find({ userId });
   }
 
   async save(workspaces: Workspace[]): Promise<Workspace[]> {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
@@ -7,6 +7,7 @@ import { isArray, cloneDeep } from 'lodash';
 import { Config } from '@/config/config';
 import { ThreePlatformType } from '@/users/enums';
 import { AuthInfoDto } from './dto/auth-info.dto';
+import { LoginAccountDto } from './dto/login-account.dto';
 
 @Injectable()
 export class AuthService {
@@ -257,9 +258,7 @@ export class AuthService {
       loginType,
       accountData,
     });
-
-    return this.login(user);
-
+    return this.login(user as LoginAccountDto);
   }
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -274,8 +273,15 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any): Promise<AuthInfoDto> {
-    const payload = { username: user.username, sub: user.userId };
+  async login(user: LoginAccountDto): Promise<AuthInfoDto> {
+    const userInfo = await this.usersService.findOneByExample({ username: user.username });
+    if(!userInfo) {
+      throw new HttpException('用户不存在', HttpStatus.UNAUTHORIZED);
+    }
+    if(userInfo.password !== user.password) {
+      throw new HttpException('密码错误', HttpStatus.UNAUTHORIZED);
+    }
+    const payload = { username: (await userInfo).username, sub: userInfo.userId, userId: userInfo.userId };
     return {
       access_token: this.jwtService.sign(payload),
       ...payload,
