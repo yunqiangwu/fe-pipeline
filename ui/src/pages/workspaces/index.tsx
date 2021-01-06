@@ -96,7 +96,7 @@ const WSCardGrid = ({ ws, onDeleted }: {ws: IWorkspaces, onDeleted: Function  })
       const res = await axios.delete(`/workspace/${ws.id}`);
       notification.success({
         message: '删除成功',
-        // description: JSON.stringify(res.data,null,2),
+        description: '',
       });
       if(onDeleted) {
         await onDeleted();
