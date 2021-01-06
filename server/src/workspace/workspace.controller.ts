@@ -54,7 +54,7 @@ export class WorkspaceController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete()
+  @Delete('/:workspaceId')
   delete(@Param('workspaceId') workspaceId: number): Promise<any> {
     Logger.log(`receive Workspaces id: ${workspaceId}`);
     return this.workspaceService.deleteById( workspaceId );

@@ -14,29 +14,29 @@ export class Workspace {
   userId: number;
 
   @Column({ length: 500 })
-  @ApiProperty({ required: false, description: '工作空间名字' })
+  @ApiProperty({ required: false, description: '工作空间名称' })
   name: string;
 
-  @Column({ length: 20 })
+  @Column({ nullable: true, length: 20 })
   @ApiProperty({ required: false, example: 'k8s', description: `工作空间类型: 'k8s' | 'docker' | 'host'` })
   environment: EnvironmentType; 
 
-  @Column({ length: 200 })
+  @Column({ nullable: true, length: 200 })
   image: string;
 
-  @Column({ length: 200 })
+  @Column({ nullable: true, length: 200 })
   gitUrl: string;
 
-  @Column({ length: 20 })
+  @Column({ nullable: true, length: 20 })
   hostIp: string;
 
-  @Column({ length: 200 })
+  @Column({ nullable: true, length: 200 })
   hostPassword: string;
 
-  @Column({ length: 20 })
+  @Column({ nullable: true, length: 20 })
   hostUsername: string;
 
-  @Column({ length: 20 })
+  @Column({ nullable: true, length: 20 })
   hostPort: string;
 
 }

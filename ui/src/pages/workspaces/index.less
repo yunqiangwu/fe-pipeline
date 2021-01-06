@@ -3,5 +3,40 @@
 }
 
 .title {
-  background: rgb(121, 242, 157);
+  // background: rgb(121, 242, 157);
+  font-weight: bold;
+}
+
+
+.ws-card {
+  height: 100px;
+  line-height: 20px;
+
+  .ws-card-remove-btn-wrap {
+    opacity: 0;
+    position: relative;
+    width: 100%;
+    transition: opacity .2s;
+    
+    .ws-card-remove-btn {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+    }
+  }
+
+  &:hover {
+    .ws-card-remove-btn-wrap {
+      opacity: 1;
+    }
+  }
+}
+
+.add-new-ws-card {
+  line-height: 48px;
+  background-color: #80808030;
+  .inner-text {
+    transform: translateY(2px);
+    display: inline-block;
+  }
 }

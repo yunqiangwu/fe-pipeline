@@ -143,7 +143,7 @@ const BasicLayout = (props: any) => {
       location={location}
       title={userConfig.name || userConfig.title}
       className="umi-plugin-layout-main"
-      navTheme="dark"
+      navTheme="realDark"
       siderWidth={256}
       onMenuHeaderClick={e => {
         e.stopPropagation();
