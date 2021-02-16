@@ -20,8 +20,8 @@ const OtherLogin = (props: any) => {
             location.href = `https://api.choerodon.com.cn/oauth/oauth/authorize?redirect_uri=${redirect_uri}&response_type=token&client_id=localhost`;
             break;
           case 'open-hand':
-            redirect_uri = encodeURIComponent(`javascript:(() => {location.href = \`${current_url}login-type=${type}&access_token=\${localStorage.getItem('user-token')}&refresh-token=\${localStorage.getItem('refresh-token')}\`;})();`);
-            location.href = `https://open.hand-china.com/user/login?redirect_url=${redirect_uri}`;
+            redirect_uri = encodeURIComponent(`${current_url}login-type=${type}`);
+            location.href = `https://gateway.open.hand-china.com/oauth/oauth/authorize?redirect_uri=${redirect_uri}&response_type=token&client_id=hsop-app`;
             break;
           case 'github':
             let client_id = DEFAULT_GITHUB_CLIENT_ID;

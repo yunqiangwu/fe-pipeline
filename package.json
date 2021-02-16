@@ -39,7 +39,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.0",
     "simple-git": "^1.126.0",
-    "sqlite3": "^4.1.0",
+    "sqlite3": "^5.0.2",
     "swagger-ui-express": "^4.1.5",
     "typeorm": "^0.2.20",
     "yaml": "^1.7.2"
