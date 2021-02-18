@@ -4,7 +4,7 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: node-daemon:node-daemon
+  name: fe-pipeline-rolebinding
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 roleRef:
