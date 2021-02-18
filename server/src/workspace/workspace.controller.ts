@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { WorkspaceService } from './workspace.service';
@@ -58,5 +58,17 @@ export class WorkspaceController {
   delete(@Param('workspaceId') workspaceId: number): Promise<any> {
     Logger.log(`receive Workspaces id: ${workspaceId}`);
     return this.workspaceService.deleteById( workspaceId );
+  }
+
+  @Post('nodes')
+  @ApiResponse({
+    status: 200,
+    description: 'k8s nodes',
+  })
+  @ApiBody({
+    type: Object,
+  })
+  getNodes(@Request() req): Promise<any> {
+    return this.workspaceService.findNodes(req.body);
   }
 }
