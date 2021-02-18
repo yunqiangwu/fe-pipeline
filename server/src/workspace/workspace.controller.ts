@@ -3,8 +3,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { WorkspaceService } from './workspace.service';
 import { Workspace } from './workspace.entity';
-import { User } from '@/users/users.entity';
-import { CurrentUser } from '@/common/decos';
+import { User } from '../users/users.entity';
+import { CurrentUser } from '../common/decos';
 
 @ApiTags('workspaces')
 @ApiOAuth2([])

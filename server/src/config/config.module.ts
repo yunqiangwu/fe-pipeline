@@ -1,7 +1,7 @@
 import { DynamicModule, Module } from '@nestjs/common';
 
-import { ConfigService } from '@/config/config.service';
-import { CONFIG_OPTIONS } from '@/config/constants';
+import { ConfigService } from '../config/config.service';
+import { CONFIG_OPTIONS } from '../config/constants';
 
 @Module({})
 export class ConfigModule {

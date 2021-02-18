@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 jest.mock('dotenv');
 jest.mock('fs');
 
-import { ConfigService } from '@/config/config.service';
-import { CONFIG_OPTIONS } from '@/config/constants';
+import { ConfigService } from '../config/config.service';
+import { CONFIG_OPTIONS } from '../config/constants';
 
 describe('ConfigService', () => {
   let service: ConfigService;

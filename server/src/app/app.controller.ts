@@ -2,7 +2,7 @@ import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
 import { ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { omit } from 'lodash';
 import { AuthGuard } from '@nestjs/passport';
-import { AppService } from '@/app/app.service';
+import { AppService } from '../app/app.service';
 
 @ApiTags('fe-pipeline')
 @Controller('/api')

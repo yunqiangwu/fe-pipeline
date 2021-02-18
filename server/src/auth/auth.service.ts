@@ -4,8 +4,8 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
 import { JwtService } from '@nestjs/jwt';
 import { isArray, cloneDeep } from 'lodash';
-import { Config } from '@/config/config';
-import { ThreePlatformType } from '@/users/enums';
+import { Config } from '../config/config';
+import { ThreePlatformType } from '../users/enums';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
 

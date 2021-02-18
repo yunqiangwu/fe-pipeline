@@ -8,7 +8,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "NODE_ENV=development nest start",
+    "start": "NODE_ENV=development ts-node ./server/src/main.ts",
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "NODE_ENV=development nest start --debug --watch",
     "start:prod": "cd ui && yarn run build && cd ../ && yarn run build && rm -rf ./fe-pipeline-home/public && mkdir -p ./fe-pipeline-home && cp -r ./ui/dist ./fe-pipeline-home/public && node dist/main",

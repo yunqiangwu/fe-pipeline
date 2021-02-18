@@ -8,8 +8,8 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/users.entity';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
-import { Config } from '@/config/config';
-import { CurrentUser } from '@/common/decos';
+import { Config } from '../config/config';
+import { CurrentUser } from '../common/decos';
 
 @ApiTags('auth')
 @Controller('api/auth')

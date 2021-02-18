@@ -4,8 +4,8 @@ import { Injectable, Inject } from '@nestjs/common';
 // import * as fs from 'fs';
 // import * as path from 'path';
 
-import { EnvConfig, ConfigOptions } from '@/config/interfaces';
-import { CONFIG_OPTIONS } from '@/config/constants';
+import { EnvConfig, ConfigOptions } from '../config/interfaces';
+import { CONFIG_OPTIONS } from '../config/constants';
 import { Config } from './config';
 
 @Injectable()
