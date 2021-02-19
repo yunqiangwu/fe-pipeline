@@ -5,4 +5,6 @@ export type IWorkspaces = {
     id: number;
     name: string;
     gitUrl: string;
+    state: string;
+    podObject: string;
 };

@@ -6,6 +6,14 @@ import { Workspace } from './workspace.entity';
 import { User } from '../users/users.entity';
 import { CurrentUser } from '../common/decos';
 
+
+// import {
+//   SubscribeMessage,
+//   WsResponse,
+// } from '@nestjs/websockets';
+// import { Observable, interval, timer } from 'rxjs';
+// import { map, takeUntil } from 'rxjs/operators';
+
 @ApiTags('workspaces')
 @ApiOAuth2([])
 @Controller('api/workspace')
@@ -71,4 +79,11 @@ export class WorkspaceController {
   getNodes(@Request() req): Promise<any> {
     return this.workspaceService.findNodes(req.body);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/open-ws/:workspaceId')
+  openWs(@Param('workspaceId') workspaceId: number): Promise<any> {
+    return this.workspaceService.openWs( workspaceId );
+  }
+
 }

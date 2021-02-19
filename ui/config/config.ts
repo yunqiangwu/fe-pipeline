@@ -59,5 +59,6 @@ export default defineConfig({
       ],
     },
     { path: "/login", name: "Login", component: '@/pages/Login' },
+    { path: "/ws-pod/:id", name: "ws-pod", component: '@/pages/Home' },
   ],
 });

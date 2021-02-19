@@ -25,6 +25,15 @@ export class Workspace {
   image: string;
 
   @Column({ nullable: true, length: 200 })
+  state: 'pending' | 'opening' | 'saved' | 'created' | 'error';
+
+  @Column({ nullable: true, length: 1200 })
+  podObject: string;
+
+  @Column({ nullable: true, length: 500 })
+  errorMsg: string;
+
+  @Column({ nullable: true, length: 200 })
   gitUrl: string;
 
   @Column({ nullable: true, length: 20 })

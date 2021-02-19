@@ -1,12 +1,17 @@
 // import { NpiInterceptor } from './npi.interceptor';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
+import { WsAdapter } from '@nestjs/platform-ws';
+import { ProxyHandler } from './proxy/proxy.handler';
 import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './app/any-exception.filter'
 
 export async function startServer(port = 3000) {
   const app = await NestFactory.create(AppModule, {cors: true});
+
+  app.useWebSocketAdapter(new WsAdapter(app));
   app.useGlobalFilters(  new AllExceptionsFilter()  );
+  app.use(ProxyHandler());
 
   const SWAGGER_UI_BASE_PATH = '/swagger-ui';
 

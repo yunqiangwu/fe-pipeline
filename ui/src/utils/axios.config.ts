@@ -1,3 +1,4 @@
+import { notification } from 'choerodon-ui/pro';
 import axios from 'axios';
 import { getToken } from './token';
 
@@ -26,11 +27,27 @@ if(!(axios as any)._IS_CONFIGED) {
     return config
   });
 
-  // axios.interceptors.response.use((response) => {
-  //   return response;
-  // }, (error) => {
-  //   throw error;
-  // });
+  axios.interceptors.response.use((response) => {
+    return response;
+  }, (error) => {
+
+    let err = null;
+    if(error?.response?.data?.message) {
+      err = new Error(error?.response?.data?.message);
+    }  else  {
+      err = error;
+    }
+
+    if(error.config.showError) {
+      console.error(error);
+      notification.error({
+        message: '操作失败',
+        description: err.message,
+      });
+    }
+
+    throw err;
+  });
 
   (axios as any)._IS_CONFIGED = true;
 }

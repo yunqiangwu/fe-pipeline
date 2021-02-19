@@ -9,12 +9,14 @@ import { WorkspaceModule } from '../workspace/workspace.module';
 import { AuthService } from '../auth/auth.service';
 import { AppController } from '../app/app.controller';
 import { AppService } from '../app/app.service';
+import { EventsModule } from '../events/events.module';
 import { ConfigModule } from '../config/config.module';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { Config } from '../config/config';
 @Module({
   imports: [
+    EventsModule,
     ConfigModule.register({ folder: './config' }),
     ServeStaticModule.forRoot({
       rootPath: join(Config.singleInstance().get('homeDir'), 'public'),
