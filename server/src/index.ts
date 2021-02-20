@@ -9,9 +9,9 @@ import { AllExceptionsFilter } from './app/any-exception.filter'
 export async function startServer(port = 3000) {
   const app = await NestFactory.create(AppModule, {cors: true});
 
+  app.use(ProxyHandler(app));
   app.useWebSocketAdapter(new WsAdapter(app));
   app.useGlobalFilters(  new AllExceptionsFilter()  );
-  app.use(ProxyHandler());
 
   const SWAGGER_UI_BASE_PATH = '/swagger-ui';
 
