@@ -19,7 +19,7 @@ import { Response } from 'express';
           ? exception.getStatus()
           : HttpStatus.INTERNAL_SERVER_ERROR;
       if(!(exception instanceof HttpException)) {
-        console.error(exception);
+        console.log(`Error: ${ (exception as HttpException ).message} \n ${ (exception as HttpException ).stack}`);
       }
       response.status(status).json({
         statusCode: status,

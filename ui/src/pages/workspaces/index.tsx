@@ -163,18 +163,13 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
           return JSON.stringify(r.data.pod);
         } );
         if(r.data.type === 'created')  {
-          console.log('ffsadfsfsfsadfasd');
           break$.complete();
         }
       });
 
       const res = await axios.post(`/workspace/open-ws/${ws.id}`, {}, { showError: true } as any);
 
-
-      console.log('---start await example.toPromise');
       await break$.toPromise();
-      console.log('---end await example.toPromise');
-
 
       if(isTimeout) {
         notification.error({
@@ -270,8 +265,8 @@ const WorkSpaces: React.FC<any> = () => {
           return (<WSCardGrid key={`k_${ws.id}`} onChange={fetch} ws ={ws} />);
         })}
         <Card.Grid key="add-new-ws-card" className={`${styles['add-new-ws-card']} ${styles['ws-card']}`} style={gridStyle}>
-          <div onClick={newWs}>
-            <Icon type="add_box-o" title="abc" /> 
+          <div style={{ height: '100%' }} onClick={newWs}>
+            <Icon type="add_box-o" title="创建工作空间" /> 
             <span className={styles['inner-text']}>创建工作空间</span>
           </div>
         </Card.Grid>

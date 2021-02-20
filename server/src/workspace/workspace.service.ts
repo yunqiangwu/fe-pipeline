@@ -125,23 +125,26 @@ export class WorkspaceService {
           }
         );
 
-        const kubePodResStream = await this.kubeClient.api.v1.watch.namespace(this.ns).pods(podName).getStream();
-        const jsonStream = new JSONStream();
-        kubePodResStream.pipe(jsonStream);
-        jsonStream.on('data', object => {
+        // @ts-ignore
+        const kubePodResStream = await this.kubeClient.api.v1.watch.namespace(this.ns).pods(podName).getObjectStream();
+        // const jsonStream = new JSONStream();
+        // kubePodResStream.pipe(jsonStream);
+        kubePodResStream.on('data', object => {
           const pod = object.object;
           const type =  pod.status.phase === 'Running' ? 'created' : 'creating';
-
           if(type === 'created') {
-            kubePodResStream.abort();
-            (async () => {
-              ws = await this.workspaceRepository.findOne(workspaceId);
-              ws.state = 'opening';
-              ws.podObject = JSON.stringify(pod);
-              await this.workspaceRepository.save(ws);
-            })();
+            try{
+              kubePodResStream.destroy();
+              (async () => {
+                ws = await this.workspaceRepository.findOne(workspaceId);
+                ws.state = 'opening';
+                ws.podObject = JSON.stringify(pod);
+                await this.workspaceRepository.save(ws);
+              })();
+            }catch(e) {
+              console.error(e);
+            }
           }
-
           globalSubject.next(
             {
               wsId: workspaceId,
@@ -153,7 +156,6 @@ export class WorkspaceService {
             }
           );
         })
-
       } else {
         // @ts-ignore
         if(ws.state !== 'opening') {
@@ -179,7 +181,6 @@ export class WorkspaceService {
       ws.state = 'error';
       ws.errorMsg = e.message;
       await this.workspaceRepository.save(ws);
-
       throw e;
     }
 
