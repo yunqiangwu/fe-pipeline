@@ -221,8 +221,12 @@ export class WorkspaceService {
   }
 
   async deleteById(workspaceId: number) {
-    const podName = `ws-pod-${workspaceId}`;
-    await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
+    try{
+      const podName = `ws-pod-${workspaceId}`;
+      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
+    } catch (e) {
+      console.error(e);
+    }
     return await this.workspaceRepository.delete(workspaceId);
   }
 }

@@ -12,7 +12,18 @@ rules:
   - ""
   resources:
   - pods
+  - pods/log
+  - events
+  - services
+  - endpoints
+  - configmaps
   verbs:
   - get
   - list
+  - create
+  - update
+  - patch
   - watch
+  - delete
+  - deletecollection
+  
