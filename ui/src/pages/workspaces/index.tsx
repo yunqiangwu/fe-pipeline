@@ -90,7 +90,7 @@ const ModalContent = ({ modal }: any) => {
 };
 
 const getPodWsUrl = (podObj: any) => {
-  const podIp = podObj.status.podIP;
+  const podIp = podObj.status.podIP.replace(/\./g, '-');
   return `http://3000-${podIp}.ws.${location.host}`;
 }
 

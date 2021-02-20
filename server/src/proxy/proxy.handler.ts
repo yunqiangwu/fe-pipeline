@@ -17,6 +17,7 @@ const isK8s = () => {
 export const ProxyHandler = (app: INestApplication) => {
 
     const wsReg = /^(\d+)-?([^\/]+)\.ws\.(.+)(\/|$)/;
+    const ipReg = /^(\d+)-(\d+)-(\d+)-(\d+)$/;
 
     const proxy = httpProxy.createProxyServer({
         timeout: 6000,
@@ -42,6 +43,8 @@ export const ProxyHandler = (app: INestApplication) => {
             let [ _, port, ip  ] = match;
             if(!isK8s()) {
                 ip = '127.0.0.1'
+            } else {
+                ip = ip.replace(ipReg, '$1.$2.$3.$4')
             }
 
             proxy.ws(req, socket, head, {
@@ -73,6 +76,8 @@ export const ProxyHandler = (app: INestApplication) => {
                 let [ _, port, ip  ] = match;
                 if(!isK8s()) {
                     ip = '127.0.0.1'
+                } else {
+                    ip = ip.replace(ipReg, '$1.$2.$3.$4')
                 }
     
                 const targetUrl = `http://${ip}:${port}`;
