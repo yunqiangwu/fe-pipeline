@@ -133,6 +133,7 @@ export class WorkspaceService {
           const type =  pod.status.phase === 'Running' ? 'created' : 'creating';
 
           if(type === 'created') {
+            kubePodResStream.abort();
             (async () => {
               ws = await this.workspaceRepository.findOne(workspaceId);
               ws.state = 'opening';
@@ -154,6 +155,13 @@ export class WorkspaceService {
         })
 
       } else {
+        // @ts-ignore
+        if(ws.state !== 'opening') {
+          ws = await this.workspaceRepository.findOne(workspaceId);
+          ws.state = 'opening';
+          ws.podObject = JSON.stringify(kubePodRes.body);
+          await this.workspaceRepository.save(ws);
+        }
         globalSubject.next(
           {
             wsId: workspaceId,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAsyncFn } from 'react-use';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { from, Observable, interval, timer } from 'rxjs';
+import { from, Observable, Subject, timer } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Spin, Alert, Card, Icon } from 'choerodon-ui';
 import { Modal, Button, notification, Form, TextField, DataSet } from 'choerodon-ui/pro';
@@ -126,6 +126,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
     // setOpenMessage('\"正在创建 pod ...\"');
     // await (new Promise(resolve=> setTimeout(resolve, 1000)));
+    let _ws: any;
     try{
 
       let wsUrl;
@@ -134,7 +135,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       } else {
         wsUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${location.host}/`;
       }
-      const _ws = webSocket(wsUrl);
+      _ws = webSocket(wsUrl);
 
       _ws.next(
         {
@@ -145,10 +146,12 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
       // 5秒后发出值
       const timer$ = timer(40000);
+      const break$ = new Subject<any>();
 
       let isTimeout = false;
       timer$.subscribe(() => {
         isTimeout = true;
+        break$.complete();
       });
 
       // 当5秒后 timer 发出值时， source 则完成
@@ -160,12 +163,19 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
           return JSON.stringify(r.data.pod);
         } );
         if(r.data.type === 'created')  {
-          _ws.unsubscribe();
+          console.log('ffsadfsfsfsadfasd');
+          break$.complete();
         }
       });
 
       const res = await axios.post(`/workspace/open-ws/${ws.id}`, {}, { showError: true } as any);
-      await example.toPromise();
+
+
+      console.log('---start await example.toPromise');
+      await break$.toPromise();
+      console.log('---end await example.toPromise');
+
+
       if(isTimeout) {
         notification.error({
           message: '操作超时',
@@ -184,6 +194,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       
       setOpenMessage('');
     } finally {
+      _ws.unsubscribe();
     }
   }, []);
 
