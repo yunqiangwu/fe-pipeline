@@ -73,6 +73,7 @@ const BasicLayout = (props: any) => {
   const userConfig = {
     logout: async () => {
       setToken(null);
+      setInitialState({});
       refresh();
     },
     title: 'VS Code Online',

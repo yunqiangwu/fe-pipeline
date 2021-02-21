@@ -63,12 +63,12 @@ const LoginPage: React.FC<RouteComponentProps> = (props) => {
         const current_redirect_uri = urlParams.get('redirect_uri');
         if(current_redirect_uri) {
           let gotoUrl = current_redirect_uri;
-            if(gotoUrl.includes('?')) {
-              gotoUrl = `${gotoUrl}&`;
-            } else {
-              gotoUrl = `${gotoUrl}?`;
-            }
-            gotoUrl = `${gotoUrl}access_token=${access_token}`;
+            // if(gotoUrl.includes('?')) {
+            //   gotoUrl = `${gotoUrl}&`;
+            // } else {
+            //   gotoUrl = `${gotoUrl}?`;
+            // }
+            // gotoUrl = `${gotoUrl}access_token=${access_token}`;
           if(gotoUrl.startsWith('http')) {
             location.href=gotoUrl;
             return;
@@ -141,7 +141,7 @@ const LoginPage: React.FC<RouteComponentProps> = (props) => {
       <Spin spinning={loginResponse.loading || otherHandleLoading}>
         <div className="login-border">
           <div className="login-wrapper">
-            <h1 className="login-title">登录</h1>
+            <h1 onClick={() => { props.history.replace(`/`); }} className="login-title">登录</h1>
             {loginResponse.error && <Alert className="login-error" type="error" message={loginResponse.error.message} />}
             <div className="login-form">
               <Form labelLayout={ "placeholder" as LabelLayoutType } onKeyDown={(e) => { 

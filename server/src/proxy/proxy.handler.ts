@@ -42,7 +42,8 @@ export const ProxyHandler = (app: INestApplication) => {
         if(match) {
             let [ _, port, ip  ] = match;
             if(!isK8s()) {
-                ip = '127.0.0.1'
+                ip = '127.0.0.1';
+                port = '3001';
             } else {
                 ip = ip.replace(ipReg, '$1.$2.$3.$4')
             }
@@ -75,12 +76,15 @@ export const ProxyHandler = (app: INestApplication) => {
             if(match) {
                 let [ _, port, ip  ] = match;
                 if(!isK8s()) {
-                    ip = '127.0.0.1'
+                    ip = '127.0.0.1';
+                    port = '3001';
                 } else {
                     ip = ip.replace(ipReg, '$1.$2.$3.$4')
                 }
     
                 const targetUrl = `http://${ip}:${port}`;
+
+                console.log(targetUrl);
     
                 proxy.web(req, res, { target: targetUrl });
 

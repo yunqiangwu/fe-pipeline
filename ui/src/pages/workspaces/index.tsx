@@ -91,7 +91,23 @@ const ModalContent = ({ modal }: any) => {
 
 const getPodWsUrl = (podObj: any) => {
   const podIp = podObj.status.podIP.replace(/\./g, '-');
-  return `http://3000-${podIp}.ws.${location.host}`;
+  const webUiPort = 3000;
+  let host = location.host;
+  if (process.env.NODE_ENV === 'development') {
+    host = 'localhost:3000';
+  } 
+  return `http://${webUiPort}-${podIp}.ws.${host}`;
+}
+
+const windowOpen = (wsUrl: any) => {
+  const a = document.createElement('a');
+  a.href = wsUrl;
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    a.remove();
+  }, 0);
 }
 
 const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) => {
@@ -120,7 +136,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     if(ws.podObject) {
       podJsonObject = JSON.parse(ws.podObject);
       const openUrl = getPodWsUrl(podJsonObject);
-      window.open(openUrl);
+      windowOpen(openUrl);
       return;
     }
 
@@ -181,7 +197,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       }
 
       const openUrl = getPodWsUrl(podJsonObject);
-      window.open(openUrl);
+      windowOpen(openUrl);
 
       if(onChange) {
         await onChange();
