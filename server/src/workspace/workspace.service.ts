@@ -83,6 +83,9 @@ export class WorkspaceService {
               {
                 "name": "web",
                 "image":  'theiaide/theia-full:latest',// "nginx",
+                "securityContext": {
+                  privileged: true
+                },
                 "ports": [
                   {
                     "name": "web",
