@@ -84,8 +84,6 @@ export const ProxyHandler = (app: INestApplication) => {
     
                 const targetUrl = `http://${ip}:${port}`;
 
-                console.log(targetUrl);
-    
                 proxy.web(req, res, { target: targetUrl });
 
                 if(proxyError) {

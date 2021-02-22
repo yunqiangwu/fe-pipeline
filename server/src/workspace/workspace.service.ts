@@ -82,7 +82,7 @@ export class WorkspaceService {
             "containers": [
               {
                 "name": "web",
-                "image":  'theiaide/theia:latest',// "nginx",
+                "image":  'theiaide/theia-full:latest',// "nginx",
                 "ports": [
                   {
                     "name": "web",
