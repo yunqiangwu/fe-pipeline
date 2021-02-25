@@ -4,22 +4,33 @@ import { Repository } from 'typeorm';
 import { Client1_13, ApiRoot } from 'kubernetes-client';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
-
-import {
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-  WsResponse,
-} from '@nestjs/websockets';
-import { from, Observable, interval, timer } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
-import { Server } from 'ws';
 import { existsSync, readFileSync } from 'fs-extra';
-
-const JSONStream = require('json-stream');
 
 @Injectable()
 export class WorkspaceService {
+  async isAlive(workspaceId: number): Promise<any> {
+    const podName = `ws-pod-${workspaceId}`;
+    let kubePodRes: any = null;
+    kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
+    
+    const podObj = kubePodRes.body;
+    const podIp = podObj.status.podIP;
+    let webUiPort = 3000;
+  
+    for(const container of podObj.spec.containers ) {
+      if(container.name ===  'web') {
+        for(const portObj of container.ports) {
+          if(portObj.name === 'web') {
+            webUiPort = portObj.containerPort;
+            break;
+          }
+        }
+        break;
+      }
+    }
+    
+    return `http://${podIp}:${webUiPort}`;
+  }
   async openWs(workspaceId: number): Promise<any> {
 
     if(!workspaceId) {
@@ -68,50 +79,135 @@ export class WorkspaceService {
         ws.state = 'pending';
 
         await this.workspaceRepository.save(ws);
-        const podConfig = {
-          "apiVersion": "v1",
-          "kind": "Pod",
-          "metadata": {
-            "name": podName,
-            "labels": {
-              "ws-podName": "ws-podName",
-              "ws-pod": podName,
-            },
-          },
-          "spec": {
-            "containers": [
-              {
-                "name": "web",
-                "image":  'theiaide/theia-full:latest',// "nginx",
-                "securityContext": {
-                  privileged: true
+
+        // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
+        
+        const podConfig = (() => {
+          if(ws.image === 'vscode') {
+            return {
+              "apiVersion": "v1",
+              "kind": "Pod",
+              "metadata": {
+                "name": podName,
+                "labels": {
+                  "ws-podName": "ws-podName",
+                  "ws-pod": podName,
+                  "ws-id": workspaceId,
                 },
-                "ports": [
+              },
+              "spec": {
+                volumes: [
                   {
-                    "name": "web",
-                    "containerPort": 3000,
-                    "protocol": "TCP"
-                  }
+                    name: 'ws-volume',
+                    emptyDir: {},
+                  },
                 ],
-                "livenessProbe": {
-                  "initialDelaySeconds": 30,
-                  "failureThreshold": 1000,
-                  "periodSeconds": 20,
-                  "httpGet": {
-                    "path": "/",
-                    "port": 3000
+                "containers": [
+                  {
+                    volumeMounts: [
+                      {
+                        mountPath: '/home/coder/project',
+                        name: 'ws-volume'
+                      },
+                    ],
+                    "name": "web",
+                    "image":  'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest',// "nginx",
+                    "securityContext": {
+                      privileged: true
+                    },
+                    "env": [{
+                      name: 'PASSWORD',
+                      value: '',
+                    }],
+                    args: ["--port", "3000", "--auth", "none", "/home/coder/project"],
+                    "ports": [
+                      {
+                        "name": "web",
+                        "containerPort": 3000,
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "livenessProbe": {
+                      "initialDelaySeconds": 30,
+                      "failureThreshold": 1000,
+                      "periodSeconds": 20,
+                      "httpGet": {
+                        "path": "/",
+                        "port": 3000
+                      }
+                    },
+                    "readinessProbe": {
+                      "httpGet": {
+                        "path": "/",
+                        "port": 3000
+                      }
+                    }
                   }
+                ]
+              }
+            };
+          }
+
+          return {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+              "name": podName,
+              "labels": {
+                "ws-podName": "ws-podName",
+                "ws-pod": podName,
+                "ws-id": workspaceId,
+              },
+            },
+            "spec": {
+              volumes: [
+                {
+                  name: 'ws-volume',
+                  emptyDir: {},
                 },
-                "readinessProbe": {
-                  "httpGet": {
-                    "path": "/",
-                    "port": 3000
+              ],
+              "containers": [
+                {
+                  "name": "web",
+                  "image":  'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
+                  "securityContext": {
+                    privileged: true
+                  },
+                  "ports": [
+                    {
+                      "name": "web",
+                      "containerPort": 3000,
+                      "protocol": "TCP"
+                    }
+                  ],
+                  volumeMounts: [
+                    {
+                      mountPath: '/home/project',
+                      name: 'ws-volume'
+                    },
+                  ],
+                  "livenessProbe": {
+                    "initialDelaySeconds": 30,
+                    "failureThreshold": 1000,
+                    "periodSeconds": 20,
+                    "httpGet": {
+                      "path": "/",
+                      "port": 3000
+                    }
+                  },
+                  "readinessProbe": {
+                    "httpGet": {
+                      "path": "/",
+                      "port": 3000
+                    }
                   }
                 }
-              }
-            ]
-          }
-        };
+              ]
+            }
+          };
+        })();
+
+
   
         kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods.post({
           body: podConfig

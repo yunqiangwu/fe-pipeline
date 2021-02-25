@@ -4,11 +4,12 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { from, Observable, Subject, timer } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Spin, Alert, Card, Icon } from 'choerodon-ui';
-import { Modal, Button, notification, Form, TextField, DataSet } from 'choerodon-ui/pro';
+import { Modal, Button, notification, Form, TextField, DataSet, Select } from 'choerodon-ui/pro';
 import axios from '@/utils/axios.config';
 import styles from './index.less';
 import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
+import { ifError } from 'assert';
 
 
 const gridStyle = {
@@ -39,6 +40,14 @@ const ModalContent = ({ modal }: any) => {
           name: 'gitUrl',
           type,
           label: 'Git仓库地址',
+          required: true,
+        },
+        {
+          name: 'image',
+          type,
+          defaultValue: 'vscode',
+          // defaultValue: 'theia-full',
+          label: '镜像运行环境',
           required: true,
         },
         {
@@ -84,22 +93,73 @@ const ModalContent = ({ modal }: any) => {
       <Form dataSet={formDS}>
         <TextField name="name" />
         <TextField name="gitUrl" />
+        <Select name="image" >
+          <Select.Option value="vscode">VS Code</Select.Option>
+          <Select.Option value="theia-full">Theia IDE</Select.Option>
+        </Select>
       </Form>
     </div>
   );
 };
 
-const getPodWsUrl = (podObj: any) => {
+const getPodWsUrl = async (podObj: any) => {
+
   const podIp = podObj.status.podIP.replace(/\./g, '-');
-  const webUiPort = 3000;
+  let webUiPort = 3000;
+
+  for(const container of podObj.spec.containers ) {
+    if(container.name ===  'web') {
+      for(const portObj of container.ports) {
+        if(portObj.name === 'web') {
+          webUiPort = portObj.containerPort;
+          break;
+        }
+      }
+      break;
+    }
+  }
+
   let host = location.host;
   if (process.env.NODE_ENV === 'development') {
     host = 'localhost:3000';
   } 
+
+  // 等待容器激活
+  let isSuccess  = false;
+  let errorCount = 0;
+
+  try {
+    while(isSuccess === false) {
+      let errObj = null;
+      let res: any = null;
+      try{
+        const wsId = podObj.metadata.labels['ws-id'] || podObj.metadata.name.replace(/^(.*)-(\d+)$/, '$2');
+        res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
+      }catch(err) {
+        errObj = err;
+      }
+      if(res && res.status >= 200 && res.status < 400) {
+        isSuccess = true
+      } else {
+        errorCount++;
+        isSuccess = false;
+        await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
+      }
+      if(errorCount >=4 ) {
+        throw errObj;
+      }
+    }
+  } catch(e)  {
+    console.error(e);
+    return;
+  }
+
   return `http://${webUiPort}-${podIp}.ws.${host}`;
 }
 
-const windowOpen = (wsUrl: any) => {
+const windowOpen = async (wsUrl: any) => {
+
+  // await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
   const a = document.createElement('a');
   a.href = wsUrl;
   a.target = '_blank';
@@ -113,7 +173,7 @@ const windowOpen = (wsUrl: any) => {
 const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) => {
 
   const [delWsRes, delWs] = useAsyncFn(async (ws: IWorkspaces) => {
-    await (new Promise(resolve=> setTimeout(resolve, 1000)));
+    // await (new Promise(resolve=> setTimeout(resolve, 1000)));
     try{
       const res = await axios.delete(`/workspace/${ws.id}`,  { showError: true } as any);
       notification.success({
@@ -135,8 +195,8 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
     if(ws.podObject) {
       podJsonObject = JSON.parse(ws.podObject);
-      const openUrl = getPodWsUrl(podJsonObject);
-      windowOpen(openUrl);
+      const openUrl = await getPodWsUrl(podJsonObject);
+      await windowOpen(openUrl);
       return;
     }
 
@@ -161,7 +221,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       );
 
       // 5秒后发出值
-      const timer$ = timer(40000);
+      const timer$ = timer(400000);
       const break$ = new Subject<any>();
 
       let isTimeout = false;
@@ -196,8 +256,8 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       } else {
       }
 
-      const openUrl = getPodWsUrl(podJsonObject);
-      windowOpen(openUrl);
+      const openUrl = await getPodWsUrl(podJsonObject);
+      await windowOpen(openUrl);
 
       if(onChange) {
         await onChange();

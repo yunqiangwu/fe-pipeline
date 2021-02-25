@@ -86,4 +86,10 @@ export class WorkspaceController {
     return this.workspaceService.openWs( workspaceId );
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/ws-is-alive/:workspaceId')
+  isAlive(@Param('workspaceId') workspaceId: number): Promise<any> {
+    return this.workspaceService.isAlive( workspaceId );
+  }
+
 }
