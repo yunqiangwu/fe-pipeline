@@ -90,8 +90,9 @@ export class WorkspaceService {
               "metadata": {
                 "name": podName,
                 "labels": {
-                  "ws-podName": "ws-podName",
+                  "fe-pipeline": "ws",
                   "ws-pod": podName,
+                  "app": "fe-pipeline",
                   "ws-id": workspaceId,
                 },
               },
@@ -154,6 +155,8 @@ export class WorkspaceService {
             "metadata": {
               "name": podName,
               "labels": {
+                "fe-pipeline": "ws",
+                "app": "fe-pipeline",
                 "ws-podName": "ws-podName",
                 "ws-pod": podName,
                 "ws-id": workspaceId,
@@ -298,7 +301,7 @@ export class WorkspaceService {
     this.kubeClient = new Client1_13({});
 
 
-    this.ns = 'default'; // /var/run/secrets/kubernetes.io/serviceaccount/namespace
+    this.ns = 'fe-pipeline'; // /var/run/secrets/kubernetes.io/serviceaccount/namespace
 
     try{
       const filePath = '/var/run/secrets/kubernetes.io/serviceaccount/namespace';

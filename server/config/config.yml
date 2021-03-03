@@ -15,3 +15,8 @@ auth:
       client_id: f236349a490be375714e
       
 HELLO_MESSAGE: 'Hello there, world!'
+
+# hostname: localhost
+hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost}
+fe-port: 80
+fe-path: /fed/

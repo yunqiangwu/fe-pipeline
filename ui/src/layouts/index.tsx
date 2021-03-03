@@ -108,6 +108,12 @@ const BasicLayout = (props: any) => {
     }
   }, [error]);
 
+  useEffect(() => {
+    if(location.search.includes('?access_token=')) {
+      props.history.replace(`${location.pathname}${location.search.replace(/[\?\&]?access_token=([^=&])+\&?/,'?')}${location.hash}`);
+    }
+  }, []);
+
 
   useEffect(() => {
     const { menuData } = transformRoute(

@@ -278,6 +278,15 @@ export class AuthService {
     if(!userInfo) {
       throw new HttpException('用户不存在', HttpStatus.UNAUTHORIZED);
     }
+
+    if(!userInfo.password) {
+
+      
+
+
+
+    }
+
     if(userInfo.password !== user.password) {
       throw new HttpException('密码错误', HttpStatus.UNAUTHORIZED);
     }

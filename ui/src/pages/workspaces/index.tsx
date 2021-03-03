@@ -104,6 +104,10 @@ const ModalContent = ({ modal }: any) => {
 
 const getPodWsUrl = async (podObj: any) => {
 
+  if(!podObj) {
+    return;
+  }
+
   const podIp = podObj.status.podIP.replace(/\./g, '-');
   let webUiPort = 3000;
 
@@ -121,7 +125,7 @@ const getPodWsUrl = async (podObj: any) => {
 
   let host = location.host;
   if (process.env.NODE_ENV === 'development') {
-    host = 'localhost:3000';
+    host = location.hostname;
   } 
 
   // 等待容器激活
@@ -158,6 +162,12 @@ const getPodWsUrl = async (podObj: any) => {
 }
 
 const windowOpen = async (wsUrl: any) => {
+
+  if(!wsUrl) {
+    return;
+  }
+
+  console.log(wsUrl);
 
   // await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
   const a = document.createElement('a');
@@ -206,8 +216,8 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     try{
 
       let wsUrl;
-      if (process.env.NODE_ENV === 'development') {
-        wsUrl = 'ws://localhost:3000/';
+      if (process.env.API_WEBSOCKET) {
+        wsUrl = process.env.API_WEBSOCKET;
       } else {
         wsUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${location.host}/`;
       }

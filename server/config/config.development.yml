@@ -1,3 +1,18 @@
+
+
+
+# hostname: localhost
+hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost}
+
+fe-port: 8000
+fe-path: /
+
+backend-port: 3000
+ingress-backend-port: 3000
+
+# proxy-backend-host: 127.0.0.1
+# proxy-backend-port: 80
+
 auth:
   oauthConfig:
     github:

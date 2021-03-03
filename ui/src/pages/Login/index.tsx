@@ -63,12 +63,12 @@ const LoginPage: React.FC<RouteComponentProps> = (props) => {
         const current_redirect_uri = urlParams.get('redirect_uri');
         if(current_redirect_uri) {
           let gotoUrl = current_redirect_uri;
-            // if(gotoUrl.includes('?')) {
-            //   gotoUrl = `${gotoUrl}&`;
-            // } else {
-            //   gotoUrl = `${gotoUrl}?`;
-            // }
-            // gotoUrl = `${gotoUrl}access_token=${access_token}`;
+            if(gotoUrl.includes('?')) {
+              gotoUrl = `${gotoUrl}&`;
+            } else {
+              gotoUrl = `${gotoUrl}?`;
+            }
+            gotoUrl = `${gotoUrl}access_token=${access_token}`;
           if(gotoUrl.startsWith('http')) {
             location.href=gotoUrl;
             return;

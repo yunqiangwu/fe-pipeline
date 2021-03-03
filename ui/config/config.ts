@@ -4,10 +4,16 @@ import { defineConfig } from 'umi';
 export default defineConfig({
   define: {
     'process.env.NODE_ENV': process.env.NODE_ENV,
-    'process.env.API_BASE_PATH': process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : '/',
+    'process.env.API_BASE_PATH': process.env.API_BASE_PATH || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : '/'),
+    'process.env.API_WEBSOCKET': process.env.API_BASE_PATH || (process.env.NODE_ENV === 'development' ? 'ws://localhost:3000/' : '/'),
   },
+  
   // base: process.env.NODE_ENV === 'development' ? '/' : '/app/',
   // publicPath: process.env.NODE_ENV === 'development' ? '/' : '/app/',
+
+  base: process.env.FED_BASE_PATH, // '/app/',
+  publicPath: process.env.FED_PUBLIC_PATH, // '/app/',
+
   plugins: [path.resolve(__dirname, './plugin.ts')],
   extraBabelPlugins: [
     [

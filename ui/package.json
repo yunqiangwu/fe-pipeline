@@ -2,7 +2,9 @@
   "private": true,
   "scripts": {
     "start": "umi dev",
+    "start:dev": "cross-env API_BASE_PATH=/ FED_BASE_PATH=/fed/ FED_PUBLIC_PATH=/fed/ umi dev",
     "build": "umi build",
+    "build:prod": "cross-env API_BASE_PATH=/ FED_BASE_PATH=/fed/ FED_PUBLIC_PATH=/fed/ umi build",
     "build:test": "umi build && cp -r ./dist/  ../fe-pipeline-home/public",
     "postinstall": "umi generate tmp",
     "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
@@ -24,19 +26,22 @@
     "@ant-design/pro-layout": "^5.0.12",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.3.1",
+    "axios": "0.19.2",
     "choerodon-ui": "^0.8.67",
-    "rxjs": "6.3.3",
-    "rxjs-hooks": "0.2.0",
     "core-js": "3.6.5",
     "lint-staged": "^10.0.7",
     "mobx": "^4.15.5",
-    "axios": "0.19.2",
     "mobx-react": "~6.1.4",
     "prettier": "^1.19.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-use": "^15.3.4",
+    "rxjs": "6.3.3",
+    "rxjs-hooks": "0.2.0",
     "umi": "^3.3.1",
     "yorkie": "^2.0.0"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

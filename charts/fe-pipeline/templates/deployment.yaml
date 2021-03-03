@@ -21,6 +21,14 @@ spec:
       serviceAccountName: {{ include "fe-pipeline.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+      - name: fe-pipeline
+        {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           env:
@@ -34,6 +42,12 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+          - mountPath: /app/fe-pipeline-home/data
+            name: fe-pipeline
+            {{- if not (empty .Values.persistence.subPath) }}
+            subPath: {{ .Values.persistence.subPath }}
+            {{- end }}
           ports:
             - name: http
               containerPort: 3000

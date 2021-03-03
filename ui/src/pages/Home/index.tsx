@@ -9,8 +9,8 @@ const WsPod: FC = (props) => {
     console.log((props as any).match.params);
 
     let wsUrl;
-    if (process.env.NODE_ENV === 'development') {
-      wsUrl = 'ws://localhost:3000/';
+    if (process.env.API_WEBSOCKET) {
+      wsUrl = process.env.API_WEBSOCKET;
     } else {
       wsUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${location.host}/`;
     }
