@@ -5,7 +5,7 @@ export default defineConfig({
   define: {
     'process.env.NODE_ENV': process.env.NODE_ENV,
     'process.env.API_BASE_PATH': process.env.API_BASE_PATH || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : '/'),
-    'process.env.API_WEBSOCKET': process.env.API_BASE_PATH,
+    'process.env.API_WEBSOCKET': process.env.API_WEBSOCKET,
   },
   
   // base: process.env.NODE_ENV === 'development' ? '/' : '/app/',
