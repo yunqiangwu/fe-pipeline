@@ -1,0 +1,22 @@
+# Copyright (c) 2020 Gitpod GmbH. All rights reserved.
+# Licensed under the MIT License. See License-MIT.txt in the project root for license information.
+
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fe-pipeline-config
+  labels:
+    {{- include "fe-pipeline.labels" . | nindent 4 }}
+data:
+  config.production.yml: |-
+    auth:
+    oauthConfig:
+        github:
+        client_secret: 2e6c3b196c09f0f5c0e47f02f1175586b16b742b
+        client_id: f236349a490be375714e
+    HELLO_MESSAGE: 'Hello there, world!'
+    existingClaimForWs: {{ .Values.persistence.existingClaim }}
+    hostname: {{.Values.hostname}}
+    fe-port: 80
+    fe-path: /fed/

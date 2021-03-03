@@ -25,7 +25,7 @@ function getDefaultConfig(): IConfig {
         homeDir: appHomeDir,
         db: {
             type: 'sqlite',
-            database: path.resolve(appHomeDir, 'db'),
+            database: path.resolve(appHomeDir, 'data/sqlite.db'),
             key: 'fe-pipeline',
         },
     };

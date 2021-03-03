@@ -22,13 +22,16 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-      - name: fe-pipeline
+      - name: fe-pipeline-ws-data
         {{- if .Values.persistence.enabled }}
         persistentVolumeClaim:
           claimName: {{ .Values.persistence.existingClaim }}
         {{- else }}
         emptyDir: {}
         {{- end }}
+      - name: config
+        configMap:
+          name: fe-pipeline-config
       containers:
         - name: {{ .Chart.Name }}
           env:
@@ -43,8 +46,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
+          - mountPath: /app/server/config/config.production.yml
+            name: config
+            subPath: 'config.production.yml'
           - mountPath: /app/fe-pipeline-home/data
-            name: fe-pipeline
+            name: fe-pipeline-ws-data
             {{- if not (empty .Values.persistence.subPath) }}
             subPath: {{ .Values.persistence.subPath }}
             {{- end }}

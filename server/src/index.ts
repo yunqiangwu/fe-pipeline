@@ -2,13 +2,24 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './app/any-exception.filter';
 import { Config } from './config/config';
+import { existsSync, mkdirp } from 'fs-extra';
 
 
 export async function startServer(port = 3000) {
+
+  const dbType = Config.singleInstance().get('db.type');
+
+  if(dbType === 'sqlite') {
+    const dbFileDir = dirname(Config.singleInstance().get('db.database'));
+    if(!existsSync(dbFileDir)) {
+      mkdirp(dbFileDir);
+    }
+  }
+
   const app = await NestFactory.create(AppModule, {cors: true});
 
   app.useWebSocketAdapter(new WsAdapter(app));

@@ -115,6 +115,20 @@ export class WorkspaceService {
 
         await this.workspaceRepository.save(ws);
 
+        const vol: any = {
+          name: 'ws-volume',
+        };
+        const pvcName = Config.singleInstance().get('existingClaimForWs');
+        if(pvcName) {
+          vol.persistentVolumeClaim = {
+            claimName: pvcName
+          };
+        } else {
+          vol.emptyDir = {};
+        }
+
+        console.log(vol);
+
         // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
 
         const podConfig = (() => {
@@ -133,17 +147,15 @@ export class WorkspaceService {
               },
               "spec": {
                 volumes: [
-                  {
-                    name: 'ws-volume',
-                    emptyDir: {},
-                  },
+                  vol,
                 ],
                 "containers": [
                   {
                     volumeMounts: [
                       {
                         mountPath: '/home/coder/project',
-                        name: 'ws-volume'
+                        subPath: podName,
+                        name: vol.name
                       },
                     ],
                     "name": "web",
@@ -199,10 +211,7 @@ export class WorkspaceService {
             },
             "spec": {
               volumes: [
-                {
-                  name: 'ws-volume',
-                  emptyDir: {},
-                },
+                vol,
               ],
               "containers": [
                 {
@@ -218,10 +227,12 @@ export class WorkspaceService {
                       "protocol": "TCP"
                     }
                   ],
+                  workingDir: "/home/coder/project",
                   volumeMounts: [
                     {
-                      mountPath: '/home/project',
-                      name: 'ws-volume'
+                      mountPath: '/home/coder/project',
+                      subPath: podName,
+                      name: vol.name
                     },
                   ],
                   "livenessProbe": {
