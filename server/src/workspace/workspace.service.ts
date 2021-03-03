@@ -227,7 +227,8 @@ export class WorkspaceService {
                       "protocol": "TCP"
                     }
                   ],
-                  workingDir: "/home/coder/project",
+                  command: [ "node", "/home/theia/src-gen/backend/main.js", "/home/coder/project", "--hostname=0.0.0.0" ],
+                  // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {
                       mountPath: '/home/coder/project',
