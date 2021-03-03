@@ -147,7 +147,7 @@ const getPodWsUrl = async (podObj: any) => {
       } else {
         errorCount++;
         isSuccess = false;
-        await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
+        await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
       }
       if(errorCount >=4 ) {
         throw errObj;
@@ -155,7 +155,7 @@ const getPodWsUrl = async (podObj: any) => {
     }
   } catch(e)  {
     console.error(e);
-    return;
+    // return;
   }
 
   return `http://${webUiPort}-${podIp}.ws.${host}`;

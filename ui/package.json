@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start": "umi dev",
+    "start": "cross-env API_WEBSOCKET=ws://localhost:3000/ umi dev",
     "start:dev": "cross-env API_BASE_PATH=/ FED_BASE_PATH=/fed/ FED_PUBLIC_PATH=/fed/ umi dev",
     "build": "umi build",
     "build:prod": "cross-env API_BASE_PATH=/ FED_BASE_PATH=/fed/ FED_PUBLIC_PATH=/fed/ umi build",

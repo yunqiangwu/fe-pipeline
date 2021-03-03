@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import axios from 'axios';
 import { Client1_13, ApiRoot } from 'kubernetes-client';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
 import { existsSync, readFileSync } from 'fs-extra';
+import { Config } from 'src/config/config';
 
 @Injectable()
 export class WorkspaceService {
   async isAlive(workspaceId: number): Promise<any> {
     const podName = `ws-pod-${workspaceId}`;
     let kubePodRes: any = null;
+
     kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
-    
-    const podObj = kubePodRes.body;
-    const podIp = podObj.status.podIP;
-    let webUiPort = 3000;
-  
-    for(const container of podObj.spec.containers ) {
-      if(container.name ===  'web') {
-        for(const portObj of container.ports) {
-          if(portObj.name === 'web') {
+
+    let podObj = kubePodRes.body;
+    let podIp = podObj.status.podIP;
+    let webUiPort: any = 3000;
+
+    for (const container of podObj.spec.containers) {
+      if (container.name === 'web') {
+        for (const portObj of container.ports) {
+          if (portObj.name === 'web') {
             webUiPort = portObj.containerPort;
             break;
           }
@@ -28,62 +31,94 @@ export class WorkspaceService {
         break;
       }
     }
+    let realIP  = podIp;
+    let realPort = webUiPort;
+    if (process.env.PROXY_BACKEND_HOST) {
+      realIP = process.env.PROXY_BACKEND_HOST;
+    }
+    if (process.env.PROXY_BACKEND_PORT) {
+      realPort = process.env.PROXY_BACKEND_PORT;
+    }
+    try {
+      return await axios(
+        { url: `http://${realIP}:${realPort}`, headers: { host: `${webUiPort}-${podIp.replace(/\./g,'-')}.ws.${Config.singleInstance().get('hostname')}` }, timeout: 500 } // 
+      ).then(
+        r => {
+          return ({ status: r.status });
+        }
+      );
+    }catch(r) {
+      throw new Error(JSON.stringify({ config: r.config, status: r.status, message: r.message  }));
+    }
     
-    return `http://${podIp}:${webUiPort}`;
   }
   async openWs(workspaceId: number): Promise<any> {
 
-    if(!workspaceId) {
+    if (!workspaceId) {
       throw new Error(`not workspaceId: ${workspaceId}`);
     }
 
     let ws = await this.workspaceRepository.findOne(workspaceId);
 
-    if(!ws) {
+    if (!ws) {
       throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
     }
 
-    if(ws.state === 'pending') {
+    if (ws.state === 'pending') {
       return {
         data: workspaceId,
       };
     }
 
-    if(ws.state === 'opening') {
-      return {
-        data: workspaceId,
-      };
+    const podName = `ws-pod-${workspaceId}`;
+
+    if (ws.state === 'opening') {
+      try {
+        const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
+        if (!ws.podObject) {
+          ws.podObject = JSON.stringify(kubePodRes.body);
+          await this.workspaceRepository.save(ws);
+        }
+        return {
+          data: workspaceId,
+          podObject: kubePodRes.body, // JSON.stringify(kubePodRes.body),
+        };
+
+      } catch (e) {
+        ws.state = "error"
+        ws.errorMsg = e.message;
+        await this.workspaceRepository.save(ws);
+      }
     }
 
-    if(ws.state !== 'created' && ws.state !== 'error' && ws.state) {
+    if (ws.state !== 'created' && ws.state !== 'error' && ws.state) {
       throw new Error(`error ws  state: ${ws.state}, wsId: ${workspaceId}`);
     }
 
-    try{
+    try {
 
-      const podName = `ws-pod-${workspaceId}`;
       let kubePodRes: any = null;
-      
-      try{
+
+      try {
         kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
-      } catch(errByGet){
-        if(errByGet.statusCode === 404) {
+      } catch (errByGet) {
+        if (errByGet.statusCode === 404) {
           kubePodRes = null;
         } else {
           throw errByGet;
         }
       }
 
-      if(!kubePodRes || (kubePodRes.statusCode > 299 && kubePodRes.statusCode < 200) ) {
+      if (!kubePodRes || (kubePodRes.statusCode > 299 && kubePodRes.statusCode < 200)) {
 
         ws.state = 'pending';
 
         await this.workspaceRepository.save(ws);
 
         // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
-        
+
         const podConfig = (() => {
-          if(ws.image === 'vscode') {
+          if (ws.image === 'vscode') {
             return {
               "apiVersion": "v1",
               "kind": "Pod",
@@ -112,7 +147,7 @@ export class WorkspaceService {
                       },
                     ],
                     "name": "web",
-                    "image":  'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest',// "nginx",
+                    "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest',// "nginx",
                     "securityContext": {
                       privileged: true
                     },
@@ -172,7 +207,7 @@ export class WorkspaceService {
               "containers": [
                 {
                   "name": "web",
-                  "image":  'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
+                  "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
                   "securityContext": {
                     privileged: true
                   },
@@ -210,8 +245,6 @@ export class WorkspaceService {
           };
         })();
 
-
-  
         kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods.post({
           body: podConfig
         });
@@ -233,9 +266,9 @@ export class WorkspaceService {
         // kubePodResStream.pipe(jsonStream);
         kubePodResStream.on('data', object => {
           const pod = object.object;
-          const type =  pod.status.phase === 'Running' ? 'created' : 'creating';
-          if(type === 'created') {
-            try{
+          const type = pod.status.phase === 'Running' ? 'created' : 'creating';
+          if (type === 'created') {
+            try {
               kubePodResStream.destroy();
               (async () => {
                 ws = await this.workspaceRepository.findOne(workspaceId);
@@ -243,7 +276,7 @@ export class WorkspaceService {
                 ws.podObject = JSON.stringify(pod);
                 await this.workspaceRepository.save(ws);
               })();
-            }catch(e) {
+            } catch (e) {
               console.error(e);
             }
           }
@@ -260,7 +293,7 @@ export class WorkspaceService {
         })
       } else {
         // @ts-ignore
-        if(ws.state !== 'opening') {
+        if (ws.state !== 'opening') {
           ws = await this.workspaceRepository.findOne(workspaceId);
           ws.state = 'opening';
           ws.podObject = JSON.stringify(kubePodRes.body);
@@ -278,7 +311,7 @@ export class WorkspaceService {
         );
       }
 
-    } catch(e) {
+    } catch (e) {
       ws = await this.workspaceRepository.findOne(workspaceId);
       ws.state = 'error';
       ws.errorMsg = e.message;
@@ -303,12 +336,12 @@ export class WorkspaceService {
 
     this.ns = 'fe-pipeline'; // /var/run/secrets/kubernetes.io/serviceaccount/namespace
 
-    try{
+    try {
       const filePath = '/var/run/secrets/kubernetes.io/serviceaccount/namespace';
-      if(existsSync(filePath)) {
+      if (existsSync(filePath)) {
         this.ns = readFileSync(filePath).toString();
-      } 
-    }catch(e){}
+      }
+    } catch (e) { }
   }
 
   async findNodes(options?: any): Promise<any[]> {
@@ -332,7 +365,7 @@ export class WorkspaceService {
   }
 
   async deleteById(workspaceId: number) {
-    try{
+    try {
       const podName = `ws-pod-${workspaceId}`;
       await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
     } catch (e) {

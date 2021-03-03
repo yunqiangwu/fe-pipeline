@@ -11,7 +11,7 @@
     "start": "NODE_ENV=development ts-node ./server/src/main.ts",
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "NODE_ENV=development nest start --debug --watch",
-    "start:debug:prod": "NODE_ENV=development PROXY_BACKEND_HOST=127.0.0.1 PROXY_BACKEND_PORT=80 nest start --debug --watch",
+    "start:debug:proxy": "NODE_ENV=development PROXY_BACKEND_HOST=127.0.0.1 PROXY_BACKEND_PORT=80 nest start --debug --watch",
     "start:prod": "cd ui && yarn run build:prod && cd ../ && yarn run build && rm -rf ./fe-pipeline-home/public && mkdir -p ./fe-pipeline-home && cp -r ./ui/dist ./fe-pipeline-home/public && export NODE_ENV=production && node dist/main",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "jest",
