@@ -142,7 +142,7 @@ export class Config {
      * get value
      */
     public get(key) {
-        return get(this.config, key);
+        return get(this.config, key, null);
     }
 }
 

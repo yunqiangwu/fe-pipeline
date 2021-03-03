@@ -158,7 +158,7 @@ const getPodWsUrl = async (podObj: any) => {
     // return;
   }
 
-  return `http://${webUiPort}-${podIp}.ws.${host}`;
+  return `http://${webUiPort}-${podIp}.ws.${host}/#/home/coder/project`;
 }
 
 const windowOpen = async (wsUrl: any) => {

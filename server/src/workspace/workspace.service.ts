@@ -5,8 +5,9 @@ import axios from 'axios';
 import { Client1_13, ApiRoot } from 'kubernetes-client';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
-import { existsSync, readFileSync } from 'fs-extra';
-import { Config } from 'src/config/config';
+import { emptyDir, existsSync, readFileSync, rmdir } from 'fs-extra';
+import { Config, getAppHomeDir } from 'src/config/config';
+import { join } from 'path';
 
 @Injectable()
 export class WorkspaceService {
@@ -119,7 +120,7 @@ export class WorkspaceService {
           name: 'ws-volume',
         };
         const pvcName = Config.singleInstance().get('existingClaimForWs');
-        if(pvcName) {
+        if(pvcName && typeof pvcName === 'string') {
           vol.persistentVolumeClaim = {
             claimName: pvcName
           };
@@ -127,76 +128,10 @@ export class WorkspaceService {
           vol.emptyDir = {};
         }
 
-        console.log(vol);
-
         // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
 
         const podConfig = (() => {
-          if (ws.image === 'vscode') {
-            return {
-              "apiVersion": "v1",
-              "kind": "Pod",
-              "metadata": {
-                "name": podName,
-                "labels": {
-                  "fe-pipeline": "ws",
-                  "ws-pod": podName,
-                  "app": "fe-pipeline",
-                  "ws-id": workspaceId,
-                },
-              },
-              "spec": {
-                volumes: [
-                  vol,
-                ],
-                "containers": [
-                  {
-                    volumeMounts: [
-                      {
-                        mountPath: '/home/coder/project',
-                        subPath: podName,
-                        name: vol.name
-                      },
-                    ],
-                    "name": "web",
-                    "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest',// "nginx",
-                    "securityContext": {
-                      privileged: true
-                    },
-                    "env": [{
-                      name: 'PASSWORD',
-                      value: '',
-                    }],
-                    args: ["--port", "3000", "--auth", "none", "/home/coder/project"],
-                    "ports": [
-                      {
-                        "name": "web",
-                        "containerPort": 3000,
-                        "protocol": "TCP"
-                      }
-                    ],
-                    "livenessProbe": {
-                      "initialDelaySeconds": 30,
-                      "failureThreshold": 1000,
-                      "periodSeconds": 20,
-                      "httpGet": {
-                        "path": "/",
-                        "port": 3000
-                      }
-                    },
-                    "readinessProbe": {
-                      "httpGet": {
-                        "path": "/",
-                        "port": 3000
-                      }
-                    }
-                  }
-                ]
-              }
-            };
-          }
-
-          return {
+          let resultConfig = {
             "apiVersion": "v1",
             "kind": "Pod",
             "metadata": {
@@ -227,7 +162,14 @@ export class WorkspaceService {
                       "protocol": "TCP"
                     }
                   ],
-                  command: [ "node", "/home/theia/src-gen/backend/main.js", "/home/coder/project", "--hostname=0.0.0.0" ],
+                  "env": [
+                    {
+                      name: 'FE_PIPELINE_GIT_URL',
+                      value: ws.gitUrl,
+                    }
+                  ],
+                  // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
+                  args: ["--port=3000", "--auth=none", "/home/coder/project"],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {
@@ -255,6 +197,12 @@ export class WorkspaceService {
               ]
             }
           };
+
+          if (ws.image === 'vscode') {
+            const container = resultConfig.spec.containers[0];
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest'; // "nginx",
+          }
+          return resultConfig;
         })();
 
         kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods.post({
@@ -344,8 +292,6 @@ export class WorkspaceService {
     private readonly workspaceRepository: Repository<Workspace>,
   ) {
     this.kubeClient = new Client1_13({});
-
-
     this.ns = 'fe-pipeline'; // /var/run/secrets/kubernetes.io/serviceaccount/namespace
 
     try {
@@ -376,6 +322,7 @@ export class WorkspaceService {
     return await this.workspaceRepository.delete(workspace);
   }
 
+
   async deleteById(workspaceId: number) {
     try {
       const podName = `ws-pod-${workspaceId}`;
@@ -383,6 +330,17 @@ export class WorkspaceService {
     } catch (e) {
       console.error(e);
     }
-    return await this.workspaceRepository.delete(workspaceId);
+    const podName = `ws-pod-${workspaceId}`;
+    const wsDir = join(getAppHomeDir(), `data/${podName}`);
+    try{
+      if(existsSync(wsDir)) {
+        await emptyDir(wsDir);
+        await rmdir(wsDir);
+      }
+    }catch(e){
+      console.error(e);
+    }
+    await this.workspaceRepository.delete(workspaceId);
+    return { workspaceId };
   }
 }
