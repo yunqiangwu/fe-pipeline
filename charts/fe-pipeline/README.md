@@ -2,6 +2,10 @@
 
 在线 vscode 服务.
 
+## 在线演示
+
+- [http://fe-pipeline.open-front.hand-china.com/](http://fe-pipeline.open-front.hand-china.com/)
+
 ## 安装
 
 ```bash
