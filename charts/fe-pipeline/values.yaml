@@ -52,11 +52,11 @@ tolerations: []
 
 affinity: {}
 
+
 env:
   open:
     WATCH: none
     WATCH_FILES: none
-    WEB_HOSTNAME: fe-pipeline.localhost
 
 
 persistence:
@@ -75,6 +75,8 @@ service:
   # externalIPs:
   # - 192.168.1.1
 
+
+hostname: fe-pipeline.localhost
 
 ingress:
   enabled: false
