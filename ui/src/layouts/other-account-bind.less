@@ -1,0 +1,66 @@
+
+
+
+    .other-login {
+      margin-top: 20px;
+      .other-login-line {
+        text-align: center;
+        font-size: 14px;
+        color: #8a909a;
+        letter-spacing: 0;
+
+        span {
+          display: block;
+          position: relative;
+
+          &::before, &::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            background: #ddd;
+            width: 30%;
+            height: 1px;
+          }
+
+          &::before {
+            left: 0;
+          }
+          &::after {
+            right: 0;
+          }
+        }
+      }
+      .other-login-content { // type="flex" justify="space-around" align="middle"
+        padding: 0 10px;
+        display: flex;
+        justify-content: space-between;
+
+        .other-login-col {
+          width: auto;
+        }
+
+        .other-login-item {
+          display: flex;
+          align-items: center;
+          flex-direction: column;
+          .other-login-item-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 80%;
+            box-shadow: 2px 2px 2px #ddd;
+          }
+          .other-login-item-unbind {
+            border-radius: 80%;
+            box-shadow: 2px 2px 2px #ddd;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+          }
+          .other-login-item-desc {
+            display: inline-block;
+            text-align: center;
+            font-size: 12px;
+          }
+        }
+      }
+    }

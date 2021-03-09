@@ -5,6 +5,8 @@ import { WorkspaceService } from './workspace.service';
 import { Workspace } from './workspace.entity';
 import { User } from '../users/users.entity';
 import { CurrentUser } from '../common/decos';
+import { CreateTempWorkspaceDto } from './dto/create-temp-workspace.dto';
+import { CreateTempWorkspaceDtoResp } from './dto/create-temp-workspace-resp.dto';
 
 
 // import {
@@ -66,6 +68,47 @@ export class WorkspaceController {
   delete(@Param('workspaceId') workspaceId: number): Promise<any> {
     Logger.log(`receive Workspaces id: ${workspaceId}`);
     return this.workspaceService.deleteById( workspaceId );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/workspace-temp')
+  @ApiBody({
+    type: CreateTempWorkspaceDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The saved record',
+    type: CreateTempWorkspaceDtoResp,
+  })
+  async createTempWorkspace(@CurrentUser() user: User, @Body() _createTempWorkspaceDto: CreateTempWorkspaceDto): Promise<CreateTempWorkspaceDtoResp> {
+
+    if(!_createTempWorkspaceDto.gitUrl && !_createTempWorkspaceDto.zipUrl) {
+      throw new Error(`now gitUrl or zipUrl`);
+    }
+    const createTempWorkspaceDto = { ..._createTempWorkspaceDto };
+    
+    createTempWorkspaceDto.userId = user.userId;
+    createTempWorkspaceDto.envJsonData = JSON.stringify(_createTempWorkspaceDto);
+
+    const ws = await this.workspaceService.createTempWorkspace(createTempWorkspaceDto as Workspace);
+
+    const createTempWorkspaceDtoResp = new CreateTempWorkspaceDtoResp();
+
+    createTempWorkspaceDtoResp.ws = ws;
+
+    return createTempWorkspaceDtoResp;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/:workspaceId')
+  @ApiResponse({
+    status: 200,
+    description: 'The record',
+    type: Workspace,
+  })
+  get(@Param('workspaceId') workspaceId: number, @CurrentUser() user: User): Promise<Workspace> {
+    Logger.log(`receive Workspaces id: ${workspaceId}`);
+    return this.workspaceService.findById( workspaceId, user );
   }
 
   @Post('nodes')

@@ -8,6 +8,11 @@ import { User } from './users.entity';
 
 @Injectable()
 export class UsersService {
+  async findThreeAccountInfoByExample(threeAccountExample: Partial<ThreeAccount>): Promise<ThreeAccount> {
+    return this.threeAccountRepository.findOne(threeAccountExample, {
+      loadEagerRelations: true,
+    });
+  }
 
   async createUser(user: User): Promise<User> {
     return this.usersRepository.save(user);
@@ -25,9 +30,9 @@ export class UsersService {
 
   constructor(
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    public readonly usersRepository: Repository<User>,
     @InjectRepository(ThreeAccount)
-    private readonly threeAccountRepository: Repository<ThreeAccount>,
+    public readonly threeAccountRepository: Repository<ThreeAccount>,
   ) {
   }
 
@@ -39,8 +44,8 @@ export class UsersService {
     return this.usersRepository.findOne(user);
   }
 
-  async updateOauthBindInfo(options: { user: User; loginType: ThreePlatformType; oauthToken: string; accountData: any; }) {
-    const { user, loginType, oauthToken } = options;
+  async updateOauthBindInfo(options: { threeAccountUsername: string; user: User; loginType: ThreePlatformType; oauthToken: string; accountData: any; tokenInfo?: any; authClientId: string; authHost: string; }) {
+    const { user, loginType, authClientId, authHost, oauthToken, threeAccountUsername } = options;
     let threePlatform = user.threeAccounts && user.threeAccounts.find(item => item.threePlatformType === loginType);
     if (!threePlatform) {
       threePlatform = new ThreeAccount();
@@ -54,9 +59,15 @@ export class UsersService {
     }
     threePlatform.threePlatformType = loginType;
     threePlatform.accessToken = oauthToken;
+    threePlatform.authHost = authHost;
+    threePlatform.authClientId = authClientId;
+    threePlatform.threeAccountUsername = threeAccountUsername;
     threePlatform.accountData = JSON.stringify(options.accountData);
+    if(options.tokenInfo) {
+      threePlatform.tokenInfo = JSON.stringify(options.tokenInfo);
+    }
 
-    const example = { threePlatformType: threePlatform.threePlatformType, user: threePlatform.user };
+    const example:Partial<ThreeAccount> = { threePlatformType: threePlatform.threePlatformType, authClientId, user: threePlatform.user };
 
     const count = await this.threeAccountRepository.count(example);
     if(count) {

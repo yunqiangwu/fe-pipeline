@@ -69,7 +69,7 @@ const ModalContent = ({ modal }: any) => {
         const res = await axios.post('/workspace', [data]);
         notification.success({
           message: '创建成功',
-          description: JSON.stringify(res.data,null,2),
+          description: '', // JSON.stringify(res.data,null,2)
         });
         return true;
       }catch(e) {
@@ -126,7 +126,7 @@ const getPodWsUrl = async (podObj: any) => {
   let host = location.host;
   if (process.env.NODE_ENV === 'development') {
     host = location.hostname;
-  } 
+  }
 
   // 等待容器激活
   let isSuccess  = false;
@@ -242,7 +242,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
       // 当5秒后 timer 发出值时， source 则完成
       const example = _ws.pipe(takeUntil(timer$));
-      
+
       example.subscribe((r: any) => {
         setOpenMessage( (state) => {
           podJsonObject = r.data.pod;
@@ -272,7 +272,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       if(onChange) {
         await onChange();
       }
-      
+
       setOpenMessage('');
     } finally {
       _ws.unsubscribe();
@@ -352,7 +352,7 @@ const WorkSpaces: React.FC<any> = () => {
         })}
         <Card.Grid key="add-new-ws-card" className={`${styles['add-new-ws-card']} ${styles['ws-card']}`} style={gridStyle}>
           <div style={{ height: '100%' }} onClick={newWs}>
-            <Icon type="add_box-o" title="创建工作空间" /> 
+            <Icon type="add_box-o" title="创建工作空间" />
             <span className={styles['inner-text']}>创建工作空间</span>
           </div>
         </Card.Grid>

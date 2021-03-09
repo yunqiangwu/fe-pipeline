@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import axios from 'axios';
@@ -7,10 +7,68 @@ import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
 import { emptyDir, existsSync, readFileSync, rmdir } from 'fs-extra';
 import { Config, getAppHomeDir } from 'src/config/config';
+import { User } from '../users/users.entity';
 import { join } from 'path';
 
 @Injectable()
 export class WorkspaceService {
+  async createTempWorkspace(wsData: Workspace): Promise<Workspace> {
+
+    wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
+    wsData.isTemp = true;
+    wsData.image = wsData.image || 'theia-full';
+    
+    const example = new Workspace();
+
+    example.gitUrl = wsData.gitUrl;
+    // example.name = wsData.name;
+    example.userId = wsData.userId;
+
+    if(wsData.gitUrl)  {
+      example.gitUrl = wsData.gitUrl;
+    }
+
+    if(wsData.zipUrl) {
+      example.zipUrl = wsData.zipUrl;
+    }
+
+    let ws = await this.workspaceRepository.findOne(example);
+
+    if(!ws) {
+      // throw new HttpException(`ws: ${example} is not found`, 404);
+      ws = await this.workspaceRepository.save(wsData);
+    } else {
+     ws = {
+       ...ws,
+       ...wsData,
+       state: 'created',
+     } as Workspace;
+
+     
+     await this.workspaceRepository.save(ws);
+     if(ws.state === 'opening' || ws.state === 'pending') {
+      await this.stopWs(ws.id);
+     }
+    }
+
+    return ws;
+  }
+
+  async  findById(workspaceId: number, currentUser?: User): Promise<Workspace> {
+    const ws = await this.workspaceRepository.findOne(workspaceId);
+
+    if(!ws) {
+      throw new HttpException(`ws: ${workspaceId} is not found`, 404);;
+    }
+
+    if(!currentUser || +currentUser.userId !== ws.userId) {
+      throw new HttpException(`ws: ${ws.id} is not get`, 403);;
+    }
+
+    return ws;
+
+  }
+
   async isAlive(workspaceId: number): Promise<any> {
     const podName = `ws-pod-${workspaceId}`;
     let kubePodRes: any = null;
@@ -53,7 +111,17 @@ export class WorkspaceService {
     }
     
   }
+
   async openWs(workspaceId: number): Promise<any> {
+
+    // if(1===1) { // todo 存工作空间文件 
+    //   const err = new HttpException({
+    //     message: '需要获取 git 权限',
+    //     // autoAuthClientId: 'Github'
+    //   }, 401);
+    //   (err as any).autoAuthClientId = 'Github';
+    //   throw err;
+    // }
 
     if (!workspaceId) {
       throw new Error(`not workspaceId: ${workspaceId}`);
@@ -197,10 +265,22 @@ export class WorkspaceService {
               ]
             }
           };
-
-          if (ws.image === 'vscode') {
-            const container = resultConfig.spec.containers[0];
+          const container = resultConfig.spec.containers[0];
+          if (ws.image === 'theia-full') {
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand'; // "nginx",
+          } else if (ws.image === 'vscode') {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest'; // "nginx",
+          } else if(!ws.image) {
+            container.image = ws.image; // "nginx",
+          }
+          if(ws.envJsonData) {
+            const env = JSON.parse(ws.envJsonData);
+            for (const key in env) {
+              container.env.push({
+                name: key.toLocaleUpperCase(),
+                value: env[key],
+              });
+            }
           }
           return resultConfig;
         })();
@@ -284,6 +364,24 @@ export class WorkspaceService {
     };
   }
 
+  async stopWs(workspaceId): Promise<any>{
+    const podName = `ws-pod-${workspaceId}`;
+    try {
+      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
+    } catch (e) {
+      console.error(e);
+    }
+    const wsDir = join(getAppHomeDir(), `data/${podName}`);
+    try{
+      if(existsSync(wsDir)) {
+        await emptyDir(wsDir);
+        await rmdir(wsDir);
+      }
+    }catch(e){
+      console.error(e);
+    }
+  }
+
   private kubeClient: ApiRoot;
   private ns: string;
 
@@ -322,15 +420,13 @@ export class WorkspaceService {
     return await this.workspaceRepository.delete(workspace);
   }
 
-
   async deleteById(workspaceId: number) {
+    const podName = `ws-pod-${workspaceId}`;
     try {
-      const podName = `ws-pod-${workspaceId}`;
-      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
+      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
     } catch (e) {
       console.error(e);
     }
-    const podName = `ws-pod-${workspaceId}`;
     const wsDir = join(getAppHomeDir(), `data/${podName}`);
     try{
       if(existsSync(wsDir)) {
@@ -343,4 +439,5 @@ export class WorkspaceService {
     await this.workspaceRepository.delete(workspaceId);
     return { workspaceId };
   }
+
 }

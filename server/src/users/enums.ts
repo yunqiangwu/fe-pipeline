@@ -1,5 +1,6 @@
 export enum ThreePlatformType {
-    'Github' = 'github',
+    'GitLab' = 'GitLab',
+    'Github' = 'GitHub',
+    'Choerodon' = 'Choerodon',
     'OpenHand' = 'open-hand',
-    'Choerodon' = 'choerodon',
 }

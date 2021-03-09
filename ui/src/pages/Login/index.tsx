@@ -5,7 +5,7 @@ import { notification, Spin, Alert } from 'choerodon-ui';
 import { Button } from 'choerodon-ui/pro';
 import { useAsyncFn, useAsync } from 'react-use';
 import { setToken } from '@/utils/token'
-import './index.less';
+import styles from './index.less';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   DataSet,
@@ -22,144 +22,53 @@ import { DEFAULT_GITHUB_CLIENT_ID } from './constants';
 
 const LoginPage: React.FC<RouteComponentProps> = (props) => {
 
-  const formDS = React.useMemo(() => {
-    const type: FieldType = 'string' as FieldType;
-    const ds = new DataSet({
-      autoCreate: true,
-      fields: [
-        {
-          name: 'username',
-          type,
-          label: '用户名',
-          required: true,
-        },
-        {
-          name: 'password',
-          type,
-          label: '密码',
-          required: true,
-        }
-      ]
-    });
-    return ds;
-  }, []);
+  // const formDS = React.useMemo(() => {
+  //   const type: FieldType = 'string' as FieldType;
+  //   const ds = new DataSet({
+  //     autoCreate: true,
+  //     fields: [
+  //       {
+  //         name: 'username',
+  //         type,
+  //         label: '用户名',
+  //         required: true,
+  //       },
+  //       {
+  //         name: 'password',
+  //         type,
+  //         label: '密码',
+  //         required: true,
+  //       }
+  //     ]
+  //   });
+  //   return ds;
+  // }, []);
 
-  const initialInfo = (useModel('@@initialState'));
-
-  const [otherHandleLoading, setOtherHandleLoading] = React.useState(false);
-  const [loginResponse, doLogin] = useAsyncFn(async (existToken: string | undefined | null = null) => {
-    if (existToken || await formDS.validate()) {
-      try{
-        let access_token = existToken;
-        if(!access_token) {
-          const data = formDS.toData()[0]
-          const res = await axios.post('/auth/login', {
-            ...data,
-          });
-          access_token = res.data.access_token;
-        }
-        setToken(access_token);
-        const urlParams = new URLSearchParams(props.location.search);
-        const current_redirect_uri = urlParams.get('redirect_uri');
-        if(current_redirect_uri) {
-          let gotoUrl = current_redirect_uri;
-            if(gotoUrl.includes('?')) {
-              gotoUrl = `${gotoUrl}&`;
-            } else {
-              gotoUrl = `${gotoUrl}?`;
-            }
-            gotoUrl = `${gotoUrl}access_token=${access_token}`;
-          if(gotoUrl.startsWith('http')) {
-            location.href=gotoUrl;
-            return;
-          } else {
-            props.history.replace(gotoUrl);
-          }
-        } else {
-          props.history.replace(`/app`);
-        }
-        setTimeout(() => {
-          const { refresh } = initialInfo;
-          refresh();
-        }, 0);
-      }catch(err){
-        const errorMsg = JSON.stringify(err.data || err.message);
-        notification.error({
-          message: '登录失败',
-          description: <pre>{errorMsg}</pre>,
-        });
-        throw err;
-      }
-    } else {
-      return {};
-    }
-  }, []);
-
-  useAsync(async () => {
-    const urlParams = new URLSearchParams(props.location.search+props.location.hash.replace('#', '&'));
-    const redirect_uri = urlParams.get('redirect_uri');
-    const access_token = urlParams.get('access_token');
-    const github_code = urlParams.get('code');
-    const github_state = urlParams.get('state');
-    const loginType = urlParams.get('login-type');
-
-    if(access_token || (loginType === 'github' && github_code)) {
-      setOtherHandleLoading(true);
-      if(loginType) {
-        const data : any = {
-          redirect_uri,
-          loginType,
-          access_token,
-        };
-        try{
-          if(loginType === 'github') {
-            data.access_token = github_code;
-            data.state = github_state;
-          }
-          const response = await axios.post('/auth/other-login', data);
-          if(response.data.access_token){
-            setTimeout(() => {
-              doLogin(response.data.access_token);
-            }, 0);
-          }
-        }catch(e) {
-          notification.error({
-            message: e.message,
-            description: '',
-          });
-        }
-      } else {
-        const access_token = urlParams.get('access_token');
-        doLogin(access_token);
-      }
-    }
-    setOtherHandleLoading(false);
-  }, []);
 
   return (
-    <div className="login-container">
-      <Spin spinning={loginResponse.loading || otherHandleLoading}>
-        <div className="login-border">
-          <div className="login-wrapper">
-            <h1 onClick={() => { props.history.replace(`/`); }} className="login-title">登录</h1>
-            {loginResponse.error && <Alert className="login-error" type="error" message={loginResponse.error.message} />}
-            <div className="login-form">
-              <Form labelLayout={ "placeholder" as LabelLayoutType } onKeyDown={(e) => { 
+    <div className={styles['login-container']}>
+      {/* <Spin spinning={loginResponse.loading}> */}
+        <div className={styles['login-border']}>
+          <div className={styles['login-wrapper']}>
+            <h1 onClick={() => { props.history.replace(`/`); }} className={styles['login-title']}>ONLINE IDE</h1>
+            {/* {loginResponse.error && <Alert className={styles['login-error']} type="error" message={loginResponse.error.message} />} */}
+            {/* <div className={styles['login-form']}>
+              <Form labelLayout={ "placeholder" as LabelLayoutType } onKeyDown={(e) => {
                 if(e.key === 'Enter'){return doLogin()}
                } } dataSet={formDS}>
                 <TextField name="username" />
                 <Password name="password" />
               </Form>
             </div>
-            <div className="login-submit">
-              <Button dataSet={formDS} onClick={() => doLogin()} type={"submit" as ButtonType} className="submit-btn" size={"large" as Size} color={ "primary" as ButtonColor}>
+            <div className={styles['login-submit']}>
+              <Button dataSet={formDS} onClick={() => doLogin()} type={"submit" as ButtonType} className={styles['submit-btn']} size={"large" as Size} color={ "primary" as ButtonColor}>
                 登录
               </Button>
-            </div>
-            <OtherLogin location={props.location} />
+            </div> */}
+            <OtherLogin />
           </div>
         </div>
-      </Spin>
+      {/* </Spin> */}
     </div >
   )
 }

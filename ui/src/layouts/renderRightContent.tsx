@@ -5,7 +5,7 @@ import { useModel } from 'umi';
 import { notification } from 'choerodon-ui';
 import { setToken } from '@/utils/token'
 import axios from 'axios';
-import { Button, Modal } from 'choerodon-ui/pro';
+import { Button, Modal, Output } from 'choerodon-ui/pro';
 import { useAsyncFn } from 'react-use';
 import { LabelLayoutType } from 'choerodon-ui/pro/lib/form/Form';
 import { LogoutOutlined, SettingOutlined } from '@ant-design/icons';
@@ -17,74 +17,92 @@ import {
   Password,
 } from 'choerodon-ui/pro';
 import { ILayoutRuntimeConfig } from '../types/interface.d';
+import { OtherAccountBind } from './other-account-bind';
 
 const ModalContent = ({ modal, history, location }: any) => {
 
-  const initialInfo = (useModel('@@initialState'));
+  const initialInfo = (useModel('initialState'));
 
   const formDS = React.useMemo(() => {
-    const type: FieldType = 'string' as FieldType;
+    // const type: FieldType = 'string' as FieldType;
     const ds = new DataSet({
-      autoCreate: true,
+      primaryKey: 'id',
+      data: [
+        initialInfo.initialState
+      ],
+      autoCreate: false,
       fields: [
         {
-          name: 'password',
-          type,
-          label: '修改密码',
-          required: true,
+          name: 'username',
+          // type,
+          label: '账号',
+          // required: true,
         },
         {
-          name: 'repassword',
-          type,
-          label: '确认密码',
-          required: true,
-          validator: async (value, _, record) => {
-            if(value){
-              const password = (record as any).get('password');
-              if(password && value !== password) {
-                return '两次密码不一致!';
-              }
-            }
-            return;
-          },
-        }
+          name: 'email',
+          // type,
+          label: '邮箱',
+          // required: true,
+        },
+        // {
+        //   name: 'password',
+        //   type,
+        //   label: '修改密码',
+        //   required: true,
+        // },
+        // {
+        //   name: 'repassword',
+        //   type,
+        //   label: '确认密码',
+        //   required: true,
+        //   validator: async (value, _, record) => {
+        //     if(value){
+        //       const password = (record as any).get('password');
+        //       if(password && value !== password) {
+        //         return '两次密码不一致!';
+        //       }
+        //     }
+        //     return;
+        //   },
+        // }
       ]
     });
     return ds;
+
   }, []);
 
   const [loginResponse, doChangePassword] = useAsyncFn(async () => {
-    if (await formDS.validate()) {
-      try{
-        const data = formDS.toData()[0]
-        const res = await axios.post('/auth/change-password', {
-          ...data,
-        });
-        notification.success({
-          message: '密码修改成功',
-          description: <pre>2 秒后, 请重新登录!</pre>,
-        });
-        setTimeout(() => {
-          setToken(null);
-          const { refresh } = initialInfo;
-          refresh();
-        }, 2000);
-      }catch(err){
-        const errorMsg = JSON.stringify(err.data || err.message);
-        notification.error({
-          message: '密码修改失败',
-          description: <pre>{errorMsg}</pre>,
-        });
-        throw err;
-      }
-    } else {
-      return Promise.reject(false);
-    }
+    // if (await formDS.validate()) {
+    //   try{
+    //     const data = formDS.toData()[0]
+    //     const res = await axios.post('/auth/change-password', {
+    //       ...data,
+    //     });
+    //     notification.success({
+    //       message: '密码修改成功',
+    //       description: <pre>2 秒后, 请重新登录!</pre>,
+    //     });
+    //     setTimeout(() => {
+    //       setToken(null);
+    //       const { refresh } = initialInfo;
+    //       refresh();
+    //     }, 2000);
+    //   }catch(err){
+    //     const errorMsg = JSON.stringify(err.data || err.message);
+    //     notification.error({
+    //       message: '密码修改失败',
+    //       description: <pre>{errorMsg}</pre>,
+    //     });
+    //     throw err;
+    //   }
+    // } else {
+    //   return Promise.reject(false);
+    // }
   }, []);
 
 
   modal.handleOk(() => {
-    return doChangePassword();
+    // return doChangePassword();
   });
   modal.handleCancel(() => {
     console.log('do Cancel');
@@ -94,17 +112,21 @@ const ModalContent = ({ modal, history, location }: any) => {
   return (
     <div>
       <div className="login-form">
-        <Form onKeyDown={(e) => { 
+        <Form
+          pristine
+          onKeyDown={(e) => {
           if(e.key === 'Enter'){return doChangePassword()}
           } } dataSet={formDS}>
-          <Password name="password" />
-          <Password name="repassword" />
+          <Output name="username" />
+          <Output name="email" />
+          {/* <Password name="password" />
+          <Password name="repassword" /> */}
         </Form>
+        <OtherAccountBind />
       </div>
     </div>
   );
 };
-
 
 export default function renderRightContent(
   runtimeLayout: ILayoutRuntimeConfig,
@@ -127,14 +149,14 @@ export default function renderRightContent(
         onClick={
           () => {
             Modal.open({
-              title: '修改密码',
+              title: '用户信息',
               children: <ModalContent />,
             });
           }
         }
       >
         <SettingOutlined />
-        修改密码
+        用户信息
       </Menu.Item>
       <Menu.Item
         key="logout"

@@ -36,6 +36,9 @@ export class Workspace {
   @Column({ nullable: true, length: 200 })
   gitUrl: string;
 
+  @Column({ nullable: true, length: 200 })
+  zipUrl: string;
+
   @Column({ nullable: true, length: 20 })
   hostIp: string;
 
@@ -47,5 +50,11 @@ export class Workspace {
 
   @Column({ nullable: true, length: 20 })
   hostPort: string;
+
+  @Column({ nullable: true, type: 'boolean' })
+  isTemp: boolean;
+
+  @Column({ nullable: true })
+  envJsonData: string;
 
 }

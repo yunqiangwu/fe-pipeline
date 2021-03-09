@@ -7,7 +7,7 @@ export default defineConfig({
     'process.env.API_BASE_PATH': process.env.API_BASE_PATH || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000/' : '/'),
     'process.env.API_WEBSOCKET': process.env.API_WEBSOCKET,
   },
-  
+
   // base: process.env.NODE_ENV === 'development' ? '/' : '/app/',
   // publicPath: process.env.NODE_ENV === 'development' ? '/' : '/app/',
 
@@ -49,7 +49,8 @@ export default defineConfig({
     },
     {
       path: '/',
-      redirect: '/app',
+      component: '@/pages/workspaces/create-temp-ws',
+      // redirect: '/app',
     },
     {
       path: '/app',
@@ -65,6 +66,8 @@ export default defineConfig({
       ],
     },
     { path: "/login", name: "Login", component: '@/pages/Login' },
-    { path: "/ws-pod/:id", name: "ws-pod", component: '@/pages/Home' },
+    { path: "/auth/:host/callback", name: "AuthCallback", component: '@/pages/Login/auth-callback' },
+    { path: "/ws-pod1/:id", name: "ws-pod", component: '@/pages/Home' },
+    { path: "/ws-pod/:id", name: "ws-pod", component: '@/pages/workspaces/ws-loading' },
   ],
 });

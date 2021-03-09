@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useModel, history } from 'umi';
-import { notification } from 'choerodon-ui';
+import { notification, Spin } from 'choerodon-ui';
+
 import ProLayout, { BasicLayoutProps } from '@ant-design/pro-layout';
 import { SmileOutlined, HeartOutlined, CodepenCircleOutlined  } from '@ant-design/icons';
 import './style.less';
@@ -11,6 +12,8 @@ import logo from '../components/logo';
 import { setToken } from '@/utils/token';
 import { ModalContainer as C7nModalContainer } from 'choerodon-ui/pro';
 import { withRouter } from 'umi';
+import Axios from 'axios';
+import {InitStateProvider} from './InitStateProvider';
 
 const WithRouterC7nModalContainer = (withRouter as any)(C7nModalContainer);
 
@@ -65,55 +68,47 @@ const loopMenuItem = (menus: MenuDataItem[]): MenuDataItem[] =>
 
 const BasicLayout = (props: any) => {
   const { children, location, route, ...restProps } = props;
-  const initialInfo = (useModel('@@initialState'));
+  const initialInfo = (useModel('initialState'));
+  const { logout, loading, refresh,
+    initialState, setInitialState,
+  }  = initialInfo;
 
-  const { initialState, setInitialState, loading, refresh, error } = initialInfo;
+  // // @ts-ignore
+  // const { initialState, setInitialState, loading, refresh, error } = initialInfo;
+
+  useEffect(() => {
+    refresh();
+  }, [])
+
   const [currentPathConfig, setCurrentPathConfig] = useState<MenuDataItem>({});
 
   const userConfig = {
-    logout: async () => {
-      setToken(null);
-      setInitialState({});
-      refresh();
-    },
+    logout: logout,
     title: 'VS Code Online',
     patchMenus: loopMenuItem,
   } as any;
 
-  useEffect(() => {
-    if(!initialState) {
-      return;
-    }
-    if(initialState.username) {
-      notification.success({
-        message: '登录成功',
-        description: `欢迎 ${initialState.username || ''}!`,
-      });
-    }
-  }, [initialState]);
-
-  useEffect(() => {
-    if(!error) {
-      return;
-    }
-    // notification.error({
-    //   message: '登录失败',
-    //   description: JSON.stringify(error.message),
-    // });
-    if(
-      // (error as any).response.status === 401 && 
-      !location.pathname.includes('/login')
-      ) {
-        history.replace(`/login?redirect_uri=${encodeURIComponent(window.location.href)}`);
-    }
-  }, [error]);
+  // useEffect(() => {
+  //   if(!error) {
+  //     return;
+  //   }
+  //   // notification.error({
+  //   //   message: '登录失败',
+  //   //   description: JSON.stringify(error.message),
+  //   // });
+  //   if(
+  //     // (error as any).response.status === 401 &&
+  //     !location.pathname.includes('/login')
+  //     ) {
+  //       history.replace(`/login?redirect_uri=${encodeURIComponent(window.location.href)}`);
+  //   }
+  // }, [error]);
 
   useEffect(() => {
     if(location.search.includes('?access_token=')) {
       props.history.replace(`${location.pathname}${location.search.replace(/[\?\&]?access_token=([^=&])+\&?/,'?')}${location.hash}`);
     }
   }, []);
-
 
   useEffect(() => {
     const { menuData } = transformRoute(
@@ -143,8 +138,10 @@ const BasicLayout = (props: any) => {
     ...getLayoutRender(currentPathConfig as any),
   };
 
+
   return (
-    <ProLayout
+    <InitStateProvider>
+      <ProLayout
       route={route}
       loading={loading}
       location={location}
@@ -211,6 +208,7 @@ const BasicLayout = (props: any) => {
           : children}
       </WithExceptionOpChildren>
     </ProLayout>
+    </InitStateProvider>
   );
 };
 

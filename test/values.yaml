@@ -1,25 +1,15 @@
 
 
+# helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --set service.enabled=true --set hostname=fe-pipeline.localhost --set ingress.enabled=true --set persistence.enabled=true --set persistence.existingClaim=fe-pipeline-pvc 
 
-# hostname: localhost
-hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost}
-
-fe-port: 8000
-fe-path: /
-
-backend-port: 3000
-ingress-backend-port: 3000
-
-existingClaimForWs: fe-pipeline-pvc2
-
-# proxy-backend-host: 127.0.0.1
-# proxy-backend-port: 80
-
-# auth:
-#   oauthConfig:
-#     github:
-#       client_secret: 1876ba4ec1f92abc2fb3285cefa2c75d9eb3f5c9
-#       client_id: a18b1ae435db47650112
+service:
+  enabled:  true
+hostname: fe-pipeline.localhost
+ingress:
+  enabled: true
+persistence:
+  enabled: true
+  existingClaim: fe-pipeline-pvc2
 
 authProviders:
   - id: "GitLab"
@@ -30,8 +20,8 @@ authProviders:
       args:
         response_type: code
         scope: 'read_user api'
-      clientId: "92fdff9ebedb28166c425b902045285bb7d45c138fc8ed8b902f6e5d0d1070ca"
-      clientSecret: "623c4aaa71e60d86b6e04e64983298d7cdcb5fbabeee51d8c729a8c0d59f4456"
+      clientId: "b5a73be21b138bc526c7ac4eba9f1fb8774cd9b81e6620f4f9e390614f1522fa"
+      clientSecret: "a050c67bbbc87b54c273ea172a1816461e0bb7157b69559d4412eb8432d5847a"
       callBackUrl: "/oauth/authorize"
       settingsUrl: "https://code.choerodon.com.cn/profile/applications"
 
@@ -42,8 +32,8 @@ authProviders:
     oauth:
       args:
         scope: user:email
-      clientId: "ea1ed85b812f07ede99a"
-      clientSecret: "c91adc1052627475aee4bd7b547f4a8a5e724210"
+      clientId: "c7eab48221991b2c7063"
+      clientSecret: "5da37a39dc724dadc372924755f573ad746c1970"
       callBackUrl: "/login/oauth/authorize"
       settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
 
@@ -55,9 +45,7 @@ authProviders:
       args:
         response_type: token
       clientId: "localhost"
-      # clientSecret: "49ffb90f07a2dfa40623c37c06f77a90a3b21be7"
       callBackUrl: "/oauth/oauth/authorize"
-      # settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
 
   - id: "open-hand"
     host: "gateway.open.hand-china.com"
@@ -67,6 +55,6 @@ authProviders:
       args:
         response_type: token
       clientId: "hsop-app"
-      # clientSecret: "49ffb90f07a2dfa40623c37c06f77a90a3b21be7"
       callBackUrl: "/oauth/oauth/authorize"
-      # settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
+
+

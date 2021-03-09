@@ -1,6 +1,6 @@
 import { notification } from 'choerodon-ui/pro';
 import axios from 'axios';
-import { getToken } from './token';
+import { getToken, getTokenFromUrlParam } from './token';
 
 if(!(axios as any)._IS_CONFIGED) {
   const apiBasePath = process.env.API_BASE_PATH;
@@ -14,6 +14,7 @@ if(!(axios as any)._IS_CONFIGED) {
     }
   }
   axios.interceptors.request.use((config) => {
+
     const token = getToken();
     if(token) {
       return {
@@ -23,7 +24,23 @@ if(!(axios as any)._IS_CONFIGED) {
           ...config.headers,
         }
       }
+    } else if((config as any).fetchTokenFromUrlParam){
+      return (async () => {
+        const _token = await getTokenFromUrlParam();
+        if(_token) {
+          const newConfig = {
+            ...config,
+            headers: {
+              'Authorization': `Bearer ${_token}`,
+              ...config.headers,
+            }
+          };
+          return newConfig;
+        }
+        return config;
+      })();
     }
+
     return config
   });
 
@@ -44,6 +61,24 @@ if(!(axios as any)._IS_CONFIGED) {
         message: '操作失败',
         description: err.message,
       });
+    }
+
+    if(
+      // (!(error.config as any).fetchTokenFromUrlParam)
+      // &&
+      ((error as any).response.status === 401 &&
+      !window.location.pathname.includes(`${(window as any).routerBase || '/'}login`))
+      ) {
+        let gotoUrl = (`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}login?redirect_uri=${encodeURIComponent(window.location.href)}`);
+        if(window.location.pathname === '/' || window.location.pathname === (window as any).routerBase ) {
+          if(error?.response?.data?.autoAuthClientId) {
+            (window as any).autoAuthClientId = error?.response?.data?.autoAuthClientId;
+          }
+          const clientId = (window as any).autoAuthClientId || 'GitLab';
+          gotoUrl = `${gotoUrl}&autoAuthClientId=${clientId}`;
+        }
+        console.log(gotoUrl);
+        window.location.href = gotoUrl;
     }
 
     throw err;

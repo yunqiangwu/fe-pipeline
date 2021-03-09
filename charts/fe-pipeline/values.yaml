@@ -90,3 +90,51 @@ ingress:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
+
+
+authProviders:
+  - id: "GitLab"
+    host: "code.choerodon.com.cn"
+    protocol: "https"
+    type: "GitLab"
+    oauth:
+      args:
+        response_type: code
+        scope: 'read_user api'
+      clientId: "ed82323117dc3284d48cf7c33ab2bbd3f4cf6c13da90727ceae9ea00a50d4891"
+      clientSecret: "8e5d5e8d0ef3aa4fe51a02d43adbf9c5567d029e4453b9a8b0bfd6a58591df28"
+      callBackUrl: "/oauth/authorize"
+      settingsUrl: "https://code.choerodon.com.cn/profile/applications"
+
+  - id: "Github"
+    host: "github.com"
+    protocol: "https"
+    type: "GitHub"
+    oauth:
+      args:
+        scope: user:email
+      clientId: "d3984fa2a3031780fbfc"
+      clientSecret: "59ba70c2d773ca2f724938684267401f99b0bc99"
+      callBackUrl: "/login/oauth/authorize"
+      settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
+
+  - id: "Choerodon"
+    host: "api.choerodon.com.cn"
+    protocol: "https"
+    type: "Choerodon"
+    oauth:
+      args:
+        response_type: token
+      clientId: "localhost"
+      callBackUrl: "/oauth/oauth/authorize"
+
+  - id: "open-hand"
+    host: "gateway.open.hand-china.com"
+    protocol: "https"
+    type: "open-hand"
+    oauth:
+      args:
+        response_type: token
+      clientId: "hsop-app"
+      callBackUrl: "/oauth/oauth/authorize"
+

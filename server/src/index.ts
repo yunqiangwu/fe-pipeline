@@ -2,6 +2,7 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { WsAdapter } from '@nestjs/platform-ws';
+import axios from 'axios';
 import { join, dirname } from 'path';
 import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './app/any-exception.filter';
@@ -10,6 +11,14 @@ import { existsSync, mkdirp } from 'fs-extra';
 
 
 export async function startServer(port = 3000) {
+
+  // axios.defaults.proxy={
+  //   host: '127.0.0.1',
+  //   port: 8001,
+  //   protocol: 'http',
+  // };
+
+  axios.defaults.timeout = 40000;
 
   const dbType = Config.singleInstance().get('db.type');
 

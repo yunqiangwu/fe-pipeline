@@ -37,6 +37,7 @@ import { Config } from '../config/config';
         statusCode: status,
         timestamp: new Date().toISOString(),
         path: request.url,
+        autoAuthClientId: (exception as any).autoAuthClientId,
         message: (exception as any)?.message,
       });
     }
