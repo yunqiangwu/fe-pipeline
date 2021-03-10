@@ -59,6 +59,7 @@ export class WorkspaceController {
       return {
         ...item,
         userId: user.userId,
+        isZipUrl: item.gitUrl.includes('.zip'),
       };
     }));
   }
@@ -82,7 +83,7 @@ export class WorkspaceController {
   })
   async createTempWorkspace(@CurrentUser() user: User, @Body() _createTempWorkspaceDto: CreateTempWorkspaceDto): Promise<CreateTempWorkspaceDtoResp> {
 
-    if(!_createTempWorkspaceDto.gitUrl && !_createTempWorkspaceDto.zipUrl) {
+    if(!_createTempWorkspaceDto.gitUrl) {
       throw new Error(`now gitUrl or zipUrl`);
     }
     const createTempWorkspaceDto = { ..._createTempWorkspaceDto };
@@ -127,6 +128,12 @@ export class WorkspaceController {
   @Post('/open-ws/:workspaceId')
   openWs(@Param('workspaceId') workspaceId: number): Promise<any> {
     return this.workspaceService.openWs( workspaceId );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/close-ws/:workspaceId')
+  closeWs(@Param('workspaceId') workspaceId: number): Promise<any> {
+    return this.workspaceService.closeWs( workspaceId );
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -36,8 +36,8 @@ export class Workspace {
   @Column({ nullable: true, length: 200 })
   gitUrl: string;
 
-  @Column({ nullable: true, length: 200 })
-  zipUrl: string;
+  @Column({ nullable: true })
+  isZipUrl: boolean;
 
   @Column({ nullable: true, length: 20 })
   hostIp: string;

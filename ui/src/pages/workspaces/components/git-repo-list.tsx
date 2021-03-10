@@ -68,13 +68,7 @@ export const GitRepoList: FC = () => {
           <tbody>
             <tr>
               <td>gitUrl</td>
-              <td>克隆地址, git 克隆地址, 和 zipUrl 两个参数其中一个必填 </td>
-              <td></td>
-              <td>是</td>
-            </tr>
-            <tr>
-              <td>zipUrl</td>
-              <td>zip地址, 支持通过 zip 包创建工作空间, 和 gitUrl 两个参数其中一个必填 </td>
+              <td>克隆地址, git 克隆地址(也可以写一个 zip 压缩包下载地址) </td>
               <td></td>
               <td>是</td>
             </tr>

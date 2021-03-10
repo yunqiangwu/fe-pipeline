@@ -245,8 +245,14 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
       example.subscribe((r: any) => {
         setOpenMessage( (state) => {
-          podJsonObject = r.data.pod;
-          return JSON.stringify(r.data.pod);
+          if(r.data.message) {
+            return r.data.message;
+          }
+          if(r.data.pod)  {
+            podJsonObject = r.data.pod;
+            return JSON.stringify(podJsonObject);
+          }
+          return 'loading...';
         } );
         if(r.data.type === 'created')  {
           break$.complete();
@@ -296,10 +302,10 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     <Card.Grid className={styles['ws-card']} style={gridStyle}>
       <div className={styles['ws-card-inner']}>
         <div>
-        {ws.name} {ws.state && <span>( {ws.state} )</span>}
+        {ws.name} {ws.state && <span>[{ws.state}]</span>} {<span>({ws.id})</span>}
         </div>
         <div>
-        Git: {ws.gitUrl}
+        Context: {ws.gitUrl}
         </div>
         <div className={styles['ws-card-btn-wrap']}>
           <Button onClick={() => {return openWs(ws)}} color={'primary' as any}>打开</Button>

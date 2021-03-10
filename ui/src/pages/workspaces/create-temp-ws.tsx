@@ -70,7 +70,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
     // setToken todo
 
-    if(queryObj.gitUrl || queryObj.zipUrl) {
+    if(queryObj.gitUrl) {
       try{
         const res = await axios.post(`/workspace/workspace-temp`, {
           ...queryObj,
@@ -173,8 +173,14 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
       example.subscribe((r: any) => {
         setState( (state) => {
-          podJsonObject = r.data.pod;
-          return JSON.stringify(r.data.pod);
+          if(r.data.message) {
+            return r.data.message;
+          }
+          if(r.data.pod)  {
+            podJsonObject = r.data.pod;
+            return `pod being ${podJsonObject.status.phase} ...`;
+          }
+          return 'loading...';
         } );
         if(r.data.type === 'created')  {
           break$.complete();
@@ -182,8 +188,6 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       });
 
       const res = await axios.post(`/workspace/open-ws/${ws.id}`, {}, { showError: true } as any);
-
-
 
       await break$.toPromise();
 
