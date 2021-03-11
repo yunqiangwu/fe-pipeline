@@ -5,16 +5,20 @@ import axios from 'axios';
 import { Client1_13, ApiRoot } from 'kubernetes-client';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
-import { emptyDir, emptyDirSync, existsSync, mkdirpSync, readFileSync, rmdir } from 'fs-extra';
+import { emptyDir, emptyDirSync, existsSync, fstat, mkdirpSync, readdir, readFileSync, rmdir } from 'fs-extra';
 import { Config, getAppHomeDir } from 'src/config/config';
 import { User } from '../users/users.entity';
 import { join } from 'path';
+import * as yaml from 'yaml';
 import { UsersService } from 'src/users/users.service';
 import { ContextParser } from './utils/context-parser';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { URL } from "url";
-import { unlinkSync } from 'fs';
+import { unlinkSync, lstatSync } from 'fs';
+import { isURL } from 'class-validator';
+import { isString } from 'lodash';
+import { JwtService } from '@nestjs/jwt';
 
 const extract = require('extract-zip');
 
@@ -33,6 +37,7 @@ export class WorkspaceService {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
+    public readonly jwtService: JwtService,
   ) {
     try {
       const filePath = '/var/run/secrets/kubernetes.io/serviceaccount/namespace';
@@ -47,6 +52,9 @@ export class WorkspaceService {
     wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
     wsData.isTemp = true;
     wsData.image = wsData.image || 'theia-full';
+    if(wsData.gitpodConfig) {
+      wsData.gitpodConfig = isString(wsData.gitpodConfig) ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
+    }
 
     if (wsData.isZipUrl === undefined) {
       wsData.isZipUrl = wsData.gitUrl.includes('.zip');
@@ -135,7 +143,7 @@ export class WorkspaceService {
 
   }
 
-  async openWs(workspaceId: number): Promise<any> {
+  async openWs(workspaceId: number, currentUser?: User): Promise<any> {
 
     if (!workspaceId) {
       throw new Error(`not workspaceId: ${workspaceId}`);
@@ -179,125 +187,138 @@ export class WorkspaceService {
     }
 
     try {
-
-      const contextToDir = this.getWsdir(podName);
-
-      const existContextDir = existsSync(contextToDir);
-
-      if(ws.state !== "saved" || !existContextDir) {
-
-        if(existContextDir) {
-          emptyDirSync(contextToDir);
-        } else {
-          mkdirpSync(contextToDir)
+      let projectDirname  = '';
+      let gitpodConfig = ws.gitpodConfig ? JSON.parse(ws.gitpodConfig) : null;
+      if(ws.gitUrl) {
+        if(!isURL(ws.gitUrl)) {
+          throw new Error(`${ws.gitUrl} is not correct url!`);
         }
-
-        if (ws.isZipUrl) {
-          const zipUrl = ws.gitUrl;
-
-          let token = '';
-
-          const url = new URL(zipUrl);
-
-          const ta = await this.usersService.threeAccountRepository.findOne({
-            authHost: url.host,
-            user: {
-              userId: ws.userId,
-            }
-          });
-
-          if(ta) {
-            token = ta.accessToken;
+        const contextToDir = this.getWsdir(podName);
+        const existContextDir = existsSync(contextToDir);
+        if(ws.state !== "saved" || !existContextDir) {
+          if(existContextDir) {
+            emptyDirSync(contextToDir);
+          } else {
+            mkdirpSync(contextToDir)
           }
-
-          globalSubject.next(
-            {
-              wsId: workspaceId,
-              data: {
-                type: 'download-zip-file',
-                message: `正在下载代码... ${zipUrl}`,
-                workspaceId,
-              },
-            }
-          );
-          const tempFileName = `/tmp/ws-pod-download-zip-${ws.id}.zip`
-          try {
-            await promisify(exec)(`curl --location --request GET ${token ? `--header 'Authorization: Bearer ${token}'` : ''} -o ${tempFileName} '${zipUrl}'`);
-          }catch(e) {
-            console.error(e);
-            throw new HttpException(`下载文件 ${zipUrl} 失败!`, 403);
-          }
-          globalSubject.next(
-            {
-              wsId: workspaceId,
-              data: {
-                type: 'unzip',
-                message: `正在解压代码... ${zipUrl}`,
-                workspaceId,
-              },
-            }
-          );
-          try {
-            await extract(tempFileName, { dir: contextToDir });
-            unlinkSync(tempFileName);
-            // await promisify(exec)(`unzip -O ${tempFileName}  ${zipUrl}`);
-          }catch(e) {
-            console.error(e);
-            throw new HttpException(`解压文件失败 ${zipUrl} 失败!`, 403);
-          }
-        } else {
-          const repoObj = await this.contextParser.parseURL(ws.gitUrl);
-          const ta = await this.usersService.threeAccountRepository.findOne({
-            authHost: repoObj.host,
-            user: {
-              userId: ws.userId,
-            }
-          });
+          if (ws.isZipUrl) {
+            const zipUrl = ws.gitUrl;
   
-          const config = Config.singleInstance();
-          if (ta) {
-            const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
-            if(existsSync(contextToDir)) {
-              emptyDirSync(contextToDir);
+            let token = '';
+  
+            const url = new URL(zipUrl);
+  
+            const ta = await this.usersService.threeAccountRepository.findOne({
+              authHost: url.host,
+              user: {
+                userId: ws.userId,
+              }
+            });
+            if(ta) {
+              token = ta.accessToken;
             }
+  
+            globalSubject.next(
+              {
+                wsId: workspaceId,
+                data: {
+                  type: 'download-zip-file',
+                  message: `正在下载代码... ${zipUrl}`,
+                  workspaceId,
+                },
+              }
+            );
+            const tempFileName = `/tmp/ws-pod-download-zip-${ws.id}.zip`
             try {
-              globalSubject.next(
-                {
-                  wsId: workspaceId,
-                  data: {
-                    type: 'clone',
-                    message: '正在克隆代码...',
-                    workspaceId,
-                  },
-                }
-              );
-              await promisify(exec)(`git clone ${cloneUrl} ${contextToDir}`);
+              await promisify(exec)(`curl --location --request GET ${token ? `--header 'Authorization: Bearer ${token}'` : ''} -o ${tempFileName} '${zipUrl}'`);
             }catch(e) {
               console.error(e);
-              throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
+              throw new HttpException(`下载文件 ${zipUrl} 失败!`, 403);
             }
-            console.log(`clone dir ${cloneUrl}`);
+            globalSubject.next(
+              {
+                wsId: workspaceId,
+                data: {
+                  type: 'unzip',
+                  message: `正在解压代码... ${zipUrl}`,
+                  workspaceId,
+                },
+              }
+            );
+            try {
+              await extract(tempFileName, { dir: contextToDir });
+              unlinkSync(tempFileName);
+              // await promisify(exec)(`unzip -O ${tempFileName}  ${zipUrl}`);
+            }catch(e) {
+              console.error(e);
+              throw new HttpException(`解压文件失败 ${zipUrl} 失败!`, 403);
+            }
           } else {
-            const err = new HttpException({
-              message: '需要获取 git 权限',
-              // autoAuthClientId: 'Github'
-            }, 401);
-            const authProviders = config.get('authProviders');
-            const authItem = authProviders.find(item => item.host === repoObj.host);
-            (err as any).autoAuthClientId = authItem.id || 'Github';
-            throw err;
+            const repoObj = await this.contextParser.parseURL(ws.gitUrl);
+            const ta = await this.usersService.threeAccountRepository.findOne({
+              authHost: repoObj.host,
+              user: {
+                userId: ws.userId,
+              }
+            });
+    
+            const config = Config.singleInstance();
+            if (ta) {
+              const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
+              try {
+                globalSubject.next(
+                  {
+                    wsId: workspaceId,
+                    data: {
+                      type: 'clone',
+                      message: '正在克隆代码...',
+                      workspaceId,
+                    },
+                  }
+                );
+                await promisify(exec)(`cd ${contextToDir} \n git clone ${cloneUrl}`);
+              }catch(e) {
+                console.error(e);
+                throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
+              }
+              console.log(`clone dir ${cloneUrl}`);
+            } else {
+              const err = new HttpException({
+                message: '需要获取 git 权限',
+                // autoAuthClientId: 'Github'
+              }, 401);
+              const authProviders = config.get('authProviders');
+              const authItem = authProviders.find(item => item.host === repoObj.host);
+              (err as any).autoAuthClientId = authItem.id || 'Github';
+              throw err;
+            }
+            // if(1===1) { // todo 存工作空间文件 
+            //   const err = new HttpException({
+            //     message: '需要获取 git 权限',
+            //     // autoAuthClientId: 'Github'
+            //   }, 401);
+            //   (err as any).autoAuthClientId = 'Github';
+            //   throw err;
+            // }
           }
-          // if(1===1) { // todo 存工作空间文件 
-          //   const err = new HttpException({
-          //     message: '需要获取 git 权限',
-          //     // autoAuthClientId: 'Github'
-          //   }, 401);
-          //   (err as any).autoAuthClientId = 'Github';
-          //   throw err;
-          // }
+          projectDirname = ((await promisify(readdir)(contextToDir)) as string[]).find(dirOrFileName => {
+            if(dirOrFileName.startsWith('.')) {
+              return false;
+            }
+            let stat = lstatSync(join(contextToDir, dirOrFileName))
+            if (stat.isDirectory() === true) { 
+              return true;
+            }
+          });
+
+          const gitpodYamlPath = join(contextToDir, projectDirname, '.gitpod.yml');
+          if(projectDirname && existsSync(gitpodYamlPath)) {
+            const gitpodYmlContent  = readFileSync(gitpodYamlPath).toString();
+            gitpodConfig = yaml.parse(gitpodYmlContent);
+          }
         }
       }
-
+  
       // throw new HttpException(`${ws.gitUrl}`, 404);
 
       let kubePodRes: any = null;
@@ -355,27 +376,31 @@ export class WorkspaceService {
                   "name": "web",
                   "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
                   "securityContext": {
-                    privileged: true
+                    privileged: !ws.isTemp
                   },
                   "ports": [
                     {
                       "name": "web",
-                      "containerPort": 3000,
+                      "containerPort": 23000,
                       "protocol": "TCP"
                     }
                   ],
                   "env": [
+                    {
+                      name: 'FE_PIPELINE_WORK_DIR',
+                      value: join(`/workspace`, projectDirname),
+                    },
                     {
                       name: 'FE_PIPELINE_GIT_URL',
                       value: ws.gitUrl,
                     }
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
-                  args: ["--port=3000", "--auth=none", "/home/coder/project"],
+                  args: [`--home=//${Config.singleInstance().get('hostname')}/app/workspaces`, "--port=23000", "--auth=none", `/workspace/${projectDirname}`],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {
-                      mountPath: '/home/coder/project',
+                      mountPath: '/workspace',
                       subPath: podName,
                       name: vol.name
                     },
@@ -386,13 +411,13 @@ export class WorkspaceService {
                     "periodSeconds": 20,
                     "httpGet": {
                       "path": "/",
-                      "port": 3000
+                      "port": 23000
                     }
                   },
                   "readinessProbe": {
                     "httpGet": {
                       "path": "/",
-                      "port": 3000
+                      "port": 23000
                     }
                   }
                 }
@@ -400,6 +425,19 @@ export class WorkspaceService {
             }
           };
           const container = resultConfig.spec.containers[0];
+          if(gitpodConfig.tasks) {
+            container.env.push({
+              name: 'GITPOD_TASKS',
+              value: JSON.stringify(gitpodConfig.tasks),
+            });
+          }
+          if(currentUser) {
+            const token = this.jwtService.sign({ username: currentUser.username, sub: currentUser.userId, userId: currentUser.userId });
+            container.env.push({
+              name: 'FE_PIPELINE_TOKEN',
+              value: token,
+            });
+          }
           if (ws.image === 'theia-full') {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand'; // "nginx",
           } else if (ws.image === 'vscode') {
@@ -501,7 +539,7 @@ export class WorkspaceService {
   async stopWs(workspaceId): Promise<any> {
     const podName = `ws-pod-${workspaceId}`;
     try {
-      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({});
+      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
     } catch (e) {
       console.error(e);
     }
@@ -542,6 +580,9 @@ export class WorkspaceService {
   }
 
   async deleteById(workspaceId: number) {
+    const ws = await this.workspaceRepository.findOne(workspaceId);
+    ws.state = 'deleting';
+    await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;
     try {
       await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
@@ -569,6 +610,9 @@ export class WorkspaceService {
     if((ws).state !== "opening") {
       throw new Error(`ws ${workspaceId} state ${ws.state} is not correct!`);
     }
+    ws.state = 'saved';
+    ws.podObject = null;
+    await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;
     try {
       await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });

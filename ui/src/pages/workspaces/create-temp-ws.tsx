@@ -47,8 +47,9 @@ const getPodWsUrl = async (podObj: any) => {
   if (process.env.NODE_ENV === 'development') {
     host = location.hostname;
   }
+  const workDir =  podObj?.metadata?.labels['work-dir'] || '/workspace'
 
-  return `http://${webUiPort}-${podIp}.ws.${host}/#/home/coder/project`;
+  return `http://${webUiPort}-${podIp}.ws.${host}/#${workDir}`;
 }
 
 interface WsLoadingPageReactParams {

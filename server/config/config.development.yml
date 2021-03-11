@@ -2,7 +2,7 @@
 
 
 # hostname: localhost
-hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost}
+hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost:8000}
 
 fe-port: 8000
 fe-path: /

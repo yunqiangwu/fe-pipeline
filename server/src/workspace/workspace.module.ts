@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Workspace } from './workspace.entity';
 import { UsersModule } from 'src/users/users.module';
 import { ContextParser } from './utils/context-parser';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Workspace]), UsersModule],
+  imports: [TypeOrmModule.forFeature([Workspace]), UsersModule, AuthModule],
   providers: [WorkspaceService, ContextParser],
   controllers: [WorkspaceController],
 })

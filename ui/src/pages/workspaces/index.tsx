@@ -34,13 +34,15 @@ const ModalContent = ({ modal }: any) => {
           name: 'name',
           type,
           label: '工作空间名称',
+          defaultValue: 'test-gitpod',
           required: true,
         },
         {
           name: 'gitUrl',
           type,
           label: 'Git仓库地址',
-          required: true,
+          defaultValue: 'https://code.choerodon.com.cn/13485/test-gitpod',
+          // required: true,
         },
         {
           name: 'image',
@@ -110,12 +112,19 @@ const getPodWsUrl = async (podObj: any) => {
 
   const podIp = podObj.status.podIP.replace(/\./g, '-');
   let webUiPort = 3000;
+  let workDir =  '/workspace'
 
   for(const container of podObj.spec.containers ) {
     if(container.name ===  'web') {
       for(const portObj of container.ports) {
         if(portObj.name === 'web') {
           webUiPort = portObj.containerPort;
+          break;
+        }
+      }
+      for(const envObj of container.env) {
+        if(envObj.name === 'FE_PIPELINE_WORK_DIR') {
+          workDir = envObj.value;
           break;
         }
       }
@@ -158,7 +167,7 @@ const getPodWsUrl = async (podObj: any) => {
     // return;
   }
 
-  return `http://${webUiPort}-${podIp}.ws.${host}/#/home/coder/project`;
+  return `http://${webUiPort}-${podIp}.ws.${host}/#${workDir}`;
 }
 
 const windowOpen = async (wsUrl: any) => {
@@ -313,7 +322,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
           <Button onClick={() => {return delWs(ws)}} color={'red' as any}>删除</Button>
         </div>
         { openMessage && <div className={styles['ws-card-log-area']} onClick={() => {return showOpenMessage(openMessage)}}>
-          <Spin><pre>{openMessage && JSON.parse(openMessage).status.phase}</pre></Spin>
+          <Spin><pre>{openMessage}</pre></Spin>
           <span className={styles['ws-card-log-area-show-more-btn']} >查看更多...</span>
         </div> }
       </div>

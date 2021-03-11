@@ -91,8 +91,14 @@ export const GitRepoList: FC = () => {
               <td></td>
             </tr>
             <tr>
-              <td>ENV_XXX</td>
-              <td>ENV_ 开头的变量会直接输入到 创建的 pod 环境变量内</td>
+              <td>envJsonData</td>
+              <td>环境变量配置对象, JSON.stringify 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>gitpodConfig</td>
+              <td>.gitpod.yml 配置对象, JSON.stringify 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
               <td></td>
               <td></td>
             </tr>

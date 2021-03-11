@@ -25,8 +25,6 @@ export class AuthService {
 
   constructor(
     public readonly usersService: UsersService,
-    // @InjectRepository(ThreeAccount)
-    // private readonly threeAccountRepository: Repository<ThreeAccount>,
     public readonly jwtService: JwtService
   ) {}
 
@@ -600,7 +598,7 @@ export class AuthService {
     if(userInfo.password !== user.password) {
       throw new HttpException('密码错误', HttpStatus.UNAUTHORIZED);
     }
-    const payload = { username: (await userInfo).username, sub: userInfo.userId, userId: userInfo.userId };
+    const payload = { username: userInfo.username, sub: userInfo.userId, userId: userInfo.userId };
     return {
       access_token: this.jwtService.sign(payload),
       ...payload,

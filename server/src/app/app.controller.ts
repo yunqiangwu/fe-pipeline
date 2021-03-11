@@ -1,4 +1,4 @@
-import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
+import { Controller, Request, Post, Get, UseGuards, Headers } from '@nestjs/common';
 import { ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { omit } from 'lodash';
 import { AuthGuard } from '@nestjs/passport';
@@ -16,6 +16,7 @@ export class AppController {
     type: String,
   })
   getHello(): string {
+    // console.log(req);
     return this.appService.getHello();
   }
 

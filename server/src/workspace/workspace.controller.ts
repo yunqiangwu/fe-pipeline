@@ -89,7 +89,8 @@ export class WorkspaceController {
     const createTempWorkspaceDto = { ..._createTempWorkspaceDto };
     
     createTempWorkspaceDto.userId = user.userId;
-    createTempWorkspaceDto.envJsonData = JSON.stringify(_createTempWorkspaceDto);
+
+    // createTempWorkspaceDto.envJsonData = JSON.stringify(_createTempWorkspaceDto);
 
     const ws = await this.workspaceService.createTempWorkspace(createTempWorkspaceDto as Workspace);
 
@@ -126,8 +127,8 @@ export class WorkspaceController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/open-ws/:workspaceId')
-  openWs(@Param('workspaceId') workspaceId: number): Promise<any> {
-    return this.workspaceService.openWs( workspaceId );
+  openWs(@Param('workspaceId') workspaceId: number, @CurrentUser() currentUser: User): Promise<any> {
+    return this.workspaceService.openWs( workspaceId, currentUser );
   }
 
   @UseGuards(AuthGuard('jwt'))

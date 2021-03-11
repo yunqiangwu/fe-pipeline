@@ -25,7 +25,7 @@ export class Workspace {
   image: string;
 
   @Column({ nullable: true, length: 200 })
-  state: 'pending' | 'opening' | 'saved' | 'created' | 'error';
+  state: 'pending' | 'opening' | 'saved' | 'created' | 'error' | 'deleting';
 
   @Column({ nullable: true, length: 1200 })
   podObject: string;
@@ -55,6 +55,11 @@ export class Workspace {
   isTemp: boolean;
 
   @Column({ nullable: true })
+  @ApiProperty({ required: false, description: `环境变量配置对象, JSON.stringify 之后的字符串` })
   envJsonData: string;
+
+  @ApiProperty({ required: false, description: `.gitpod.yml 配置对象, JSON.stringify 之后的对象` })
+  @Column({ nullable: true })
+  gitpodConfig: string;
 
 }
