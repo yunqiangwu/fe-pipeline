@@ -24,8 +24,6 @@ RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-am
 EXPOSE 3000
 ENV NODE_ENV=production
 COPY ./docker/enterpoint.sh /enterpoint.sh
-RUN chmod +x /enterpoint.sh
-ENTRYPOINT ["/enterpoint.sh"]
 WORKDIR /app
 ADD ./package.json /app/package.json
 RUN yarn install --production false
@@ -38,8 +36,10 @@ ADD  ./nest-cli.json ./tsconfig.build.json ./tsconfig.json ./tslint.json /app/
 # ADD ./node_modules /app/node_modules
 RUN yarn build
 
+RUN chmod +x /enterpoint.sh
+ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
-COPY --from=vscode-extensions-builder /app/fe-pipeline-extensions*.vsix /app/fe-pipeline-home/vscode-extensions/
+COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
 COPY --from=theia-extensions-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
 
 CMD [ "node", "dist/main.js" ]
