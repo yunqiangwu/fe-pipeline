@@ -36,3 +36,7 @@ lerna-debug.log*
 # HomeDir
 /fe-pipeline-home
 /_deployment.yaml
+
+node_modules
+
+/test-temp

@@ -322,4 +322,7 @@ ENV SHELL=/bin/bash \
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ENTRYPOINT [ "node", "/home/theia/src-gen/backend/main.js", "/home/project", "--hostname=0.0.0.0" ]
+COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+
+# ENTRYPOINT [ "node", "/home/theia/src-gen/backend/main.js", "/home/project", "--hostname=0.0.0.0" ]

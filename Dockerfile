@@ -3,6 +3,16 @@ WORKDIR /app
 ADD ./ui/ /app/
 RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run build:prod
 
+FROM node:15.8.0 as vscode-extensions-builder
+WORKDIR /app
+ADD ./extensions/fe-pipeline-extensions/ /app/
+RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+
+FROM node:15.8.0 as theia-extensions-builder
+WORKDIR /app
+ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
+RUN yarn --registry=https://registry.npm.taobao.org/
+
 FROM node:15.8.0 as runner
 
 RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-amd64.tar.gz -O kubernetes-client-linux-amd64.tar.gz && \
@@ -27,6 +37,9 @@ ADD  ./nest-cli.json ./tsconfig.build.json ./tsconfig.json ./tslint.json /app/
 # ADD ./config /app/config
 # ADD ./node_modules /app/node_modules
 RUN yarn build
+
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
+COPY --from=vscode-extensions-builder /app/fe-pipeline-extensions*.vsix /app/fe-pipeline-home/vscode-extensions/
+COPY --from=theia-extensions-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
 
 CMD [ "node", "dist/main.js" ]

@@ -48,7 +48,7 @@ export const GitRepoList: FC = () => {
       </p>
       <p>url:</p>
       <textarea cols={180} rows={2}>
-        {`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod&image=registry.cn-shanghai.aliyuncs.com/wsh-dev/h-code-base:latest&envJsonData=%7B%22OPTIONS%22%3A%22--port%3D23000%22%7D`}
+        {`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod&image=registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand`}
       </textarea>
       <p>iframe:</p>
       <textarea cols={180} rows={2}>

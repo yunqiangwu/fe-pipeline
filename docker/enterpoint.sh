@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
-# npm install @umijs/utils@3.1.2 @umijs/preset-built-in@3.1.2 express@4.17.1 signale@1.4.0 mockjs@1.1.0 moment@2.24.0 @smock/mock@0.2.3 node-git-server express-http-proxy
+if [ -d "/app/fe-pipeline-home/vscode-extensions" ]; then
+  mkdir -p /app/fe-pipeline-home/data/vscode-extensions
+  cp /app/fe-pipeline-home/theia-extensions/* /app/fe-pipeline-home/data/vscode-extensions/
+fi
+
+if [ -d "/app/fe-pipeline-home/theia-extensions" ]; then
+  mkdir -p /app/fe-pipeline-home/data/theia-extensions/
+  cp /app/fe-pipeline-home/theia-extensions/* /app/fe-pipeline-home/data/theia-extensions/
+fi
 
 exec "$@"

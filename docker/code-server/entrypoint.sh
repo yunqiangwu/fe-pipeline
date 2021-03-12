@@ -17,4 +17,13 @@ if [ "${DOCKER_USER-}" ] && [ "$DOCKER_USER" != "$USER" ]; then
   sudo sed -i "/coder/d" /etc/sudoers.d/nopasswd
 fi
 
+if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
+
+  for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
+    echo todo --install-extension $EXTENSIONS_FILE
+    /usr/bin/code-server --install-extension $EXTENSIONS_FILE
+  done
+
+fi
+
 dumb-init /usr/bin/code-server "$@"

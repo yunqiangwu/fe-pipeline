@@ -416,6 +416,26 @@ export class WorkspaceService {
                       subPath: podName,
                       name: vol.name
                     },
+                    {
+                      mountPath: '/fe-pipeline-app/vscode-extensions',
+                      subPath: 'vscode-extensions',
+                      name: vol.name
+                    },
+                    {
+                      mountPath: '/fe-pipeline-app/theia-plugin',
+                      subPath: 'theia-plugin',
+                      name: vol.name
+                    },
+                    // {
+                    //   mountPath: '/home/theia/.theia/extensions/vscode-fe-pipeline-extension',
+                    //   subPath: 'fe-pipeline-extension/vscode-extensions/vscode-fe-pipeline-extension',
+                    //   name: vol.name
+                    // },
+                    // {
+                    //   mountPath: '/fe-pipeline-app/theia-extensions/theia-fe-pipeline-extension',
+                    //   subPath: 'fe-pipeline-extension/theia-extensions/theia-fe-pipeline-extension',
+                    //   name: vol.name
+                    // },
                   ],
                   "livenessProbe": {
                     "initialDelaySeconds": 30,
@@ -451,9 +471,11 @@ export class WorkspaceService {
             });
           }
           if (ws.image === 'theia-full') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
+            // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
           } else if (ws.image === 'vscode') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
+            // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
           } else if (ws.image) {
             container.image = ws.image;
           }
