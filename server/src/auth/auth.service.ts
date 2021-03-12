@@ -589,7 +589,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: LoginAccountDto): Promise<AuthInfoDto> {
+  async login(user: LoginAccountDto): Promise<any> {
     const userInfo = await this.usersService.findOneByExample({ username: user.username });
     if(!userInfo) {
       throw new HttpException('用户不存在', HttpStatus.UNAUTHORIZED);
@@ -598,7 +598,7 @@ export class AuthService {
     if(userInfo.password !== user.password) {
       throw new HttpException('密码错误', HttpStatus.UNAUTHORIZED);
     }
-    const payload = { username: userInfo.username, sub: userInfo.userId, userId: userInfo.userId };
+    const payload = { username: userInfo.username, sub: userInfo.userId, userId: userInfo.userId, email: userInfo.email } as Partial<User>;
     return {
       access_token: this.jwtService.sign(payload),
       ...payload,

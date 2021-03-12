@@ -366,7 +366,7 @@ export class WorkspaceService {
 
         // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
 
-        const podConfig = (() => {
+        const podConfig = await (async () => {
           let resultConfig = {
             "apiVersion": "v1",
             "kind": "Pod",
@@ -467,9 +467,18 @@ export class WorkspaceService {
           }
           if(currentUser) {
             const token = this.jwtService.sign({ username: currentUser.username, sub: currentUser.userId, userId: currentUser.userId });
+            // const user = await this.usersService.findOne(currentUser.username);
             container.env.push({
               name: 'FE_PIPELINE_TOKEN',
               value: token,
+            });
+            container.env.push({
+              name: 'GIT_USER',
+              value: currentUser.username,
+            });
+            container.env.push({
+              name: 'GIT_EMAIL',
+              value: currentUser.email,
             });
           }
           if (ws.image === 'theia-full') {

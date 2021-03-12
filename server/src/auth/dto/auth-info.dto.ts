@@ -1,6 +1,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsString } from 'class-validator';
+import { User } from 'src/users/users.entity';
 
 export class AuthInfoDto {
 
@@ -15,4 +16,6 @@ export class AuthInfoDto {
   @ApiProperty({ required: true, example: 'admin', description: '用户名' })
   @IsString()
   readonly username: string;
+
+
 }

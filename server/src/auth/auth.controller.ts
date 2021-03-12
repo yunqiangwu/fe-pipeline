@@ -109,6 +109,7 @@ export class AuthController {
     type: User,
   })
   async getSelfInfo(@CurrentUser() user: User): Promise<User> {
+    console.log(user);
     const userInfo = await this.usersService.findOne(user.username);
     if(!userInfo) {
       throw new HttpException('用户信息不存在', HttpStatus.UNAUTHORIZED);

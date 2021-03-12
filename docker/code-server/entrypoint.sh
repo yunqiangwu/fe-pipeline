@@ -26,4 +26,12 @@ if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
 fi
 
+if [ "$GIT_USER" != "" ]; then
+  git config --global user.name "$GIT_USER"
+fi
+
+if [ "$GIT_EMAIL" != "" ]; then
+  git config --global user.email "$GIT_EMAIL"
+fi
+
 dumb-init /usr/bin/code-server "$@"

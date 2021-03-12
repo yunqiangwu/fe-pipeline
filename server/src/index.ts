@@ -45,7 +45,7 @@ export async function startServer(port = 3000) {
       type: 'oauth2',
       flows: {
         implicit: {
-          authorizationUrl: `http://${Config.singleInstance().get('hostname')}:${Config.singleInstance().get('fe-port') || 80}${Config.singleInstance().get('fe-path')||'/'}login` ,
+          authorizationUrl: `http://${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')||'/'}login` ,
           scopes: {
             email: true,
           },
@@ -58,7 +58,7 @@ export async function startServer(port = 3000) {
 
   SwaggerModule.setup(SWAGGER_UI_BASE_PATH, app, document, {
     swaggerOptions: {
-      oauth2RedirectUrl: `http://${Config.singleInstance().get('hostname')}:${Config.singleInstance().get('ingress-backend-port') || 80}${SWAGGER_UI_BASE_PATH}/oauth2-redirect.html`,
+      oauth2RedirectUrl: `http://${Config.singleInstance().get('hostname').replace(':8000', '')}:${Config.singleInstance().get('ingress-backend-port') || 80}${SWAGGER_UI_BASE_PATH}/oauth2-redirect.html`,
       oauth: {
         clientId: process.env.NODE_ENV === 'development' ? "localhost" : 'prod',
       },

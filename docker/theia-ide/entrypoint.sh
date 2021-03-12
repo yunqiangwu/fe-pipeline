@@ -20,6 +20,16 @@ if [ -d "/fe-pipeline-app/theia-plugin" ]; then
   done
 fi
 
+
+if [ "$GIT_USER" != "" ]; then
+  git config --global user.name "$GIT_USER"
+fi
+
+if [ "$GIT_EMAIL" != "" ]; then
+  git config --global user.email "$GIT_EMAIL"
+fi
+
+
 exec node /home/theia/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
 
 # dumb-init /usr/bin/code-server "$@"
