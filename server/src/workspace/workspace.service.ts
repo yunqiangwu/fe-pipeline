@@ -457,11 +457,13 @@ export class WorkspaceService {
             }
           };
           const container = resultConfig.spec.containers[0];
-          if(gitpodConfig.tasks) {
-            container.env.push({
-              name: 'GITPOD_TASKS',
-              value: JSON.stringify(gitpodConfig.tasks),
-            });
+          if(gitpodConfig) {
+            if(gitpodConfig.tasks) {
+              container.env.push({
+                name: 'GITPOD_TASKS',
+                value: JSON.stringify(gitpodConfig.tasks),
+              });
+            }
           }
           if(currentUser) {
             const token = this.jwtService.sign({ username: currentUser.username, sub: currentUser.userId, userId: currentUser.userId });
