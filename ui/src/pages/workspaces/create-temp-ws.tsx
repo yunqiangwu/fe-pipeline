@@ -30,12 +30,18 @@ const getPodWsUrl = async (podObj: any) => {
 
   const podIp = podObj.status.podIP.replace(/\./g, '-');
   let webUiPort = 3000;
-
+  let workDir = '/workspace';
   for(const container of podObj.spec.containers ) {
     if(container.name ===  'web') {
       for(const portObj of container.ports) {
         if(portObj.name === 'web') {
           webUiPort = portObj.containerPort;
+          break;
+        }
+      }
+      for(const envObj of container.env) {
+        if(envObj.name === 'FE_PIPELINE_WORK_DIR') {
+          workDir = envObj.value;
           break;
         }
       }
@@ -47,9 +53,8 @@ const getPodWsUrl = async (podObj: any) => {
   if (process.env.NODE_ENV === 'development') {
     host = location.hostname;
   }
-  const workDir =  podObj?.metadata?.labels['work-dir'] || '/workspace'
 
-  return `http://${webUiPort}-${podIp}.ws.${host}/#${workDir}`;
+  return `http://${webUiPort}-${podIp}.ws.${host}/?folder=${workDir}#${workDir}`;
 }
 
 interface WsLoadingPageReactParams {

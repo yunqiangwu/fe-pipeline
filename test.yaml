@@ -1,0 +1,590 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2021-03-09T03:40:59Z"
+    generateName: fe-pipeline-78bf6499c9-
+    labels:
+      app.kubernetes.io/instance: fe-pipeline
+      app.kubernetes.io/name: fe-pipeline
+      pod-template-hash: 78bf6499c9
+    managedFields:
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:generateName: {}
+          f:labels:
+            .: {}
+            f:app.kubernetes.io/instance: {}
+            f:app.kubernetes.io/name: {}
+            f:pod-template-hash: {}
+          f:ownerReferences:
+            .: {}
+            k:{"uid":"a46c38ab-b903-49c0-83d6-dfc42b305bd5"}:
+              .: {}
+              f:apiVersion: {}
+              f:blockOwnerDeletion: {}
+              f:controller: {}
+              f:kind: {}
+              f:name: {}
+              f:uid: {}
+        f:spec:
+          f:containers:
+            k:{"name":"fe-pipeline"}:
+              .: {}
+              f:env:
+                .: {}
+                k:{"name":"WATCH"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+                k:{"name":"WATCH_FILES"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+              f:image: {}
+              f:imagePullPolicy: {}
+              f:livenessProbe:
+                .: {}
+                f:failureThreshold: {}
+                f:httpGet:
+                  .: {}
+                  f:path: {}
+                  f:port: {}
+                  f:scheme: {}
+                f:initialDelaySeconds: {}
+                f:periodSeconds: {}
+                f:successThreshold: {}
+                f:timeoutSeconds: {}
+              f:name: {}
+              f:ports:
+                .: {}
+                k:{"containerPort":3000,"protocol":"TCP"}:
+                  .: {}
+                  f:containerPort: {}
+                  f:name: {}
+                  f:protocol: {}
+              f:readinessProbe:
+                .: {}
+                f:failureThreshold: {}
+                f:httpGet:
+                  .: {}
+                  f:path: {}
+                  f:port: {}
+                  f:scheme: {}
+                f:periodSeconds: {}
+                f:successThreshold: {}
+                f:timeoutSeconds: {}
+              f:resources:
+                .: {}
+                f:limits:
+                  .: {}
+                  f:cpu: {}
+                  f:memory: {}
+                f:requests:
+                  .: {}
+                  f:cpu: {}
+                  f:memory: {}
+              f:securityContext: {}
+              f:terminationMessagePath: {}
+              f:terminationMessagePolicy: {}
+              f:volumeMounts:
+                .: {}
+                k:{"mountPath":"/app/fe-pipeline-home/data"}:
+                  .: {}
+                  f:mountPath: {}
+                  f:name: {}
+                k:{"mountPath":"/app/server/config/config.production.yml"}:
+                  .: {}
+                  f:mountPath: {}
+                  f:name: {}
+                  f:subPath: {}
+          f:dnsPolicy: {}
+          f:enableServiceLinks: {}
+          f:restartPolicy: {}
+          f:schedulerName: {}
+          f:securityContext: {}
+          f:serviceAccount: {}
+          f:serviceAccountName: {}
+          f:terminationGracePeriodSeconds: {}
+          f:volumes:
+            .: {}
+            k:{"name":"config"}:
+              .: {}
+              f:configMap:
+                .: {}
+                f:defaultMode: {}
+                f:name: {}
+              f:name: {}
+            k:{"name":"fe-pipeline-ws-data"}:
+              .: {}
+              f:name: {}
+              f:persistentVolumeClaim:
+                .: {}
+                f:claimName: {}
+      manager: kube-controller-manager
+      operation: Update
+      time: "2021-03-09T03:40:59Z"
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:status:
+          f:conditions:
+            k:{"type":"ContainersReady"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Initialized"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Ready"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:status: {}
+              f:type: {}
+          f:containerStatuses: {}
+          f:hostIP: {}
+          f:phase: {}
+          f:podIP: {}
+          f:podIPs:
+            .: {}
+            k:{"ip":"10.1.2.182"}:
+              .: {}
+              f:ip: {}
+          f:startTime: {}
+      manager: kubelet
+      operation: Update
+      time: "2021-03-11T14:34:04Z"
+    name: fe-pipeline-78bf6499c9-fhpf6
+    namespace: fe-pipeline
+    ownerReferences:
+    - apiVersion: apps/v1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: fe-pipeline-78bf6499c9
+      uid: a46c38ab-b903-49c0-83d6-dfc42b305bd5
+    resourceVersion: "3541344"
+    selfLink: /api/v1/namespaces/fe-pipeline/pods/fe-pipeline-78bf6499c9-fhpf6
+    uid: 18e6eb9d-d2b3-4ffa-8187-e1a207232cc2
+  spec:
+    containers:
+    - env:
+      - name: WATCH
+        value: none
+      - name: WATCH_FILES
+        value: none
+      image: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
+      imagePullPolicy: IfNotPresent
+      livenessProbe:
+        failureThreshold: 1000
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 20
+        successThreshold: 1
+        timeoutSeconds: 1
+      name: fe-pipeline
+      ports:
+      - containerPort: 3000
+        name: http
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /
+          port: 3000
+          scheme: HTTP
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources:
+        limits:
+          cpu: 100m
+          memory: 2Gi
+        requests:
+          cpu: 100m
+          memory: 2Gi
+      securityContext: {}
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /app/server/config/config.production.yml
+        name: config
+        subPath: config.production.yml
+      - mountPath: /app/fe-pipeline-home/data
+        name: fe-pipeline-ws-data
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: fe-pipeline-token-x6hqm
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: docker-desktop
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: fe-pipeline
+    serviceAccountName: fe-pipeline
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: fe-pipeline-ws-data
+      persistentVolumeClaim:
+        claimName: fe-pipeline-pvc2
+    - configMap:
+        defaultMode: 420
+        name: fe-pipeline-config
+      name: config
+    - name: fe-pipeline-token-x6hqm
+      secret:
+        defaultMode: 420
+        secretName: fe-pipeline-token-x6hqm
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-09T03:41:00Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-11T14:33:55Z"
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-11T14:33:55Z"
+      status: "True"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-09T03:40:59Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://cc5b825a40a7baf6b8e35c7f91fa4e7127b92436ccc012a306c2ea113079f994
+      image: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
+      imageID: docker://sha256:f6611e58eda1210365d1f26c34bab51cc9724cfa3040a25289c4a1d56808ef2f
+      lastState:
+        terminated:
+          containerID: docker://b1d767cac1b5a02967434106317490507510f287d81cddf6ea0de48fe62e22e4
+          exitCode: 255
+          finishedAt: "2021-03-09T14:51:49Z"
+          reason: Error
+          startedAt: "2021-03-09T03:41:03Z"
+      name: fe-pipeline
+      ready: true
+      restartCount: 1
+      started: true
+      state:
+        running:
+          startedAt: "2021-03-09T14:52:32Z"
+    hostIP: 192.168.65.4
+    phase: Running
+    podIP: 10.1.2.182
+    podIPs:
+    - ip: 10.1.2.182
+    qosClass: Guaranteed
+    startTime: "2021-03-09T03:41:00Z"
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    creationTimestamp: "2021-03-12T03:36:16Z"
+    deletionGracePeriodSeconds: 30
+    deletionTimestamp: "2021-03-12T03:37:47Z"
+    labels:
+      app: fe-pipeline
+      fe-pipeline: ws
+      ws-id: "64"
+      ws-pod: ws-pod-64
+      ws-podName: ws-podName
+    managedFields:
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:labels:
+            .: {}
+            f:app: {}
+            f:fe-pipeline: {}
+            f:ws-id: {}
+            f:ws-pod: {}
+            f:ws-podName: {}
+        f:spec:
+          f:containers:
+            k:{"name":"web"}:
+              .: {}
+              f:args: {}
+              f:env:
+                .: {}
+                k:{"name":"FE_PIPELINE_GIT_URL"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+                k:{"name":"FE_PIPELINE_TOKEN"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+                k:{"name":"FE_PIPELINE_WORK_DIR"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+                k:{"name":"GITPOD_TASKS"}:
+                  .: {}
+                  f:name: {}
+                  f:value: {}
+              f:image: {}
+              f:imagePullPolicy: {}
+              f:livenessProbe:
+                .: {}
+                f:failureThreshold: {}
+                f:httpGet:
+                  .: {}
+                  f:path: {}
+                  f:port: {}
+                  f:scheme: {}
+                f:initialDelaySeconds: {}
+                f:periodSeconds: {}
+                f:successThreshold: {}
+                f:timeoutSeconds: {}
+              f:name: {}
+              f:ports:
+                .: {}
+                k:{"containerPort":23000,"protocol":"TCP"}:
+                  .: {}
+                  f:containerPort: {}
+                  f:name: {}
+                  f:protocol: {}
+              f:readinessProbe:
+                .: {}
+                f:failureThreshold: {}
+                f:httpGet:
+                  .: {}
+                  f:path: {}
+                  f:port: {}
+                  f:scheme: {}
+                f:periodSeconds: {}
+                f:successThreshold: {}
+                f:timeoutSeconds: {}
+              f:resources: {}
+              f:securityContext:
+                .: {}
+                f:privileged: {}
+              f:terminationMessagePath: {}
+              f:terminationMessagePolicy: {}
+              f:volumeMounts:
+                .: {}
+                k:{"mountPath":"/workspace"}:
+                  .: {}
+                  f:mountPath: {}
+                  f:name: {}
+                  f:subPath: {}
+          f:dnsPolicy: {}
+          f:enableServiceLinks: {}
+          f:restartPolicy: {}
+          f:schedulerName: {}
+          f:securityContext: {}
+          f:terminationGracePeriodSeconds: {}
+          f:volumes:
+            .: {}
+            k:{"name":"ws-volume"}:
+              .: {}
+              f:name: {}
+              f:persistentVolumeClaim:
+                .: {}
+                f:claimName: {}
+      manager: unknown
+      operation: Update
+      time: "2021-03-12T03:36:16Z"
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:status:
+          f:conditions:
+            k:{"type":"ContainersReady"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Initialized"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Ready"}:
+              .: {}
+              f:lastProbeTime: {}
+              f:lastTransitionTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+          f:containerStatuses: {}
+          f:hostIP: {}
+          f:phase: {}
+          f:podIP: {}
+          f:podIPs:
+            .: {}
+            k:{"ip":"10.1.2.225"}:
+              .: {}
+              f:ip: {}
+          f:startTime: {}
+      manager: kubelet
+      operation: Update
+      time: "2021-03-12T03:37:49Z"
+    name: ws-pod-64
+    namespace: fe-pipeline
+    resourceVersion: "3578738"
+    selfLink: /api/v1/namespaces/fe-pipeline/pods/ws-pod-64
+    uid: 3489fa79-1dc4-4646-ab58-c61260d499ad
+  spec:
+    containers:
+    - args:
+      - --home=//fe-pipeline.localhost:8000/app/workspaces
+      - --port=23000
+      - --auth=none
+      - /workspace/test-gitpod
+      env:
+      - name: FE_PIPELINE_WORK_DIR
+        value: /workspace/test-gitpod
+      - name: FE_PIPELINE_GIT_URL
+        value: https://code.choerodon.com.cn/13485/test-gitpod
+      - name: GITPOD_TASKS
+        value: '[{"init":"yarn install && echo abcd","command":"echo abcd2 yarn start\n"}]'
+      - name: FE_PIPELINE_TOKEN
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IjEzNDg1Iiwic3ViIjoxLCJ1c2VySWQiOjEsImlhdCI6MTYxNTUyMDE3NiwiZXhwIjoxNjE1NTI2MTc2fQ.sVR2m3fL4nrAbS2AauOY3PyPPE4rcoRoHWIlTExnOUs
+      image: registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest
+      imagePullPolicy: Always
+      livenessProbe:
+        failureThreshold: 1000
+        httpGet:
+          path: /
+          port: 23000
+          scheme: HTTP
+        initialDelaySeconds: 30
+        periodSeconds: 20
+        successThreshold: 1
+        timeoutSeconds: 1
+      name: web
+      ports:
+      - containerPort: 23000
+        name: web
+        protocol: TCP
+      readinessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /
+          port: 23000
+          scheme: HTTP
+        periodSeconds: 10
+        successThreshold: 1
+        timeoutSeconds: 1
+      resources: {}
+      securityContext:
+        privileged: true
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /workspace
+        name: ws-volume
+        subPath: ws-pod-64
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-jztn8
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    enableServiceLinks: true
+    nodeName: docker-desktop
+    preemptionPolicy: PreemptLowerPriority
+    priority: 0
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: ws-volume
+      persistentVolumeClaim:
+        claimName: fe-pipeline-pvc2
+    - name: default-token-jztn8
+      secret:
+        defaultMode: 420
+        secretName: default-token-jztn8
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-12T03:36:18Z"
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-12T03:37:49Z"
+      message: 'containers with unready status: [web]'
+      reason: ContainersNotReady
+      status: "False"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-12T03:37:49Z"
+      message: 'containers with unready status: [web]'
+      reason: ContainersNotReady
+      status: "False"
+      type: ContainersReady
+    - lastProbeTime: null
+      lastTransitionTime: "2021-03-12T03:36:16Z"
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://b820aefa4877f33645f845ef9769387380cb9a3b621eb2678d8bddc980697519
+      image: codercom/code-server:latest
+      imageID: docker-pullable://codercom/code-server@sha256:f7cafd0d562e97f4993ea08c06ee328cbd91f8dbcc955cd5ce497d8da82d7c38
+      lastState: {}
+      name: web
+      ready: false
+      restartCount: 0
+      started: false
+      state:
+        terminated:
+          containerID: docker://b820aefa4877f33645f845ef9769387380cb9a3b621eb2678d8bddc980697519
+          exitCode: 137
+          finishedAt: "2021-03-12T03:37:48Z"
+          reason: Error
+          startedAt: "2021-03-12T03:36:21Z"
+    hostIP: 192.168.65.4
+    phase: Running
+    podIP: 10.1.2.225
+    podIPs:
+    - ip: 10.1.2.225
+    qosClass: BestEffort
+    startTime: "2021-03-12T03:36:18Z"
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

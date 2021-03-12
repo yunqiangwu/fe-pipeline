@@ -63,7 +63,7 @@ export class WorkspaceService {
     const example = new Workspace();
 
     example.gitUrl = wsData.gitUrl;
-    // example.name = wsData.name;
+    example.isTemp = true;
     example.userId = wsData.userId;
 
     let ws = await this.workspaceRepository.findOne(example);
@@ -72,18 +72,16 @@ export class WorkspaceService {
       // throw new HttpException(`ws: ${example} is not found`, 404);
       ws = await this.workspaceRepository.save(wsData);
     } else {
+      if (ws.state === 'opening' || ws.state === 'pending') {
+        await this.closeWs(ws.id, true);
+      }
       ws = {
         ...ws,
         ...wsData,
         state: 'created',
       } as Workspace;
-
       await this.workspaceRepository.save(ws);
-      if (ws.state === 'opening' || ws.state === 'pending') {
-        await this.stopWs(ws.id);
-      }
     }
-
     return ws;
   }
 
@@ -189,11 +187,12 @@ export class WorkspaceService {
     try {
       let projectDirname  = '';
       let gitpodConfig = ws.gitpodConfig ? JSON.parse(ws.gitpodConfig) : null;
+      const contextToDir = this.getWsdir(podName);
+
       if(ws.gitUrl) {
         if(!isURL(ws.gitUrl)) {
           throw new Error(`${ws.gitUrl} is not correct url!`);
         }
-        const contextToDir = this.getWsdir(podName);
         const existContextDir = existsSync(contextToDir);
         if(ws.state !== "saved" || !existContextDir) {
           if(existContextDir) {
@@ -310,7 +309,21 @@ export class WorkspaceService {
               return true;
             }
           });
+        }
+      }
 
+      if(existsSync(contextToDir)) {
+        projectDirname = ((await promisify(readdir)(contextToDir)) as string[]).find(dirOrFileName => {
+          if(dirOrFileName.startsWith('.')) {
+            return false;
+          }
+          let stat = lstatSync(join(contextToDir, dirOrFileName))
+          if (stat.isDirectory() === true) { 
+            return true;
+          }
+        });
+  
+        if(projectDirname) {
           const gitpodYamlPath = join(contextToDir, projectDirname, '.gitpod.yml');
           if(projectDirname && existsSync(gitpodYamlPath)) {
             const gitpodYmlContent  = readFileSync(gitpodYamlPath).toString();
@@ -318,7 +331,7 @@ export class WorkspaceService {
           }
         }
       }
-  
+
       // throw new HttpException(`${ws.gitUrl}`, 404);
 
       let kubePodRes: any = null;
@@ -362,7 +375,6 @@ export class WorkspaceService {
               "labels": {
                 "fe-pipeline": "ws",
                 "app": "fe-pipeline",
-                "ws-podName": "ws-podName",
                 "ws-pod": podName,
                 "ws-id": workspaceId,
               },
@@ -439,11 +451,11 @@ export class WorkspaceService {
             });
           }
           if (ws.image === 'theia-full') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand'; // "nginx",
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
           } else if (ws.image === 'vscode') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:latest'; // "nginx",
-          } else if (!ws.image) {
-            container.image = ws.image; // "nginx",
+            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
+          } else if (ws.image) {
+            container.image = ws.image;
           }
           if (ws.envJsonData) {
             const env = JSON.parse(ws.envJsonData);
@@ -536,23 +548,6 @@ export class WorkspaceService {
     };
   }
 
-  async stopWs(workspaceId): Promise<any> {
-    const podName = `ws-pod-${workspaceId}`;
-    try {
-      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
-    } catch (e) {
-      console.error(e);
-    }
-    const wsDir = join(getAppHomeDir(), `data/${podName}`);
-    try {
-      if (existsSync(wsDir)) {
-        await emptyDir(wsDir);
-        await rmdir(wsDir);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
 
   async findNodes(options?: any): Promise<any[]> {
     return await this.kubeClient.api.v1.nodes.get(options);
@@ -579,13 +574,25 @@ export class WorkspaceService {
     return wsDir;
   }
 
+  async deletePod(podName: string) {
+    let res: any;
+    try{
+      res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
+    } catch(e) {
+      console.error(e);
+      res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
+    }
+    console.log(res);
+    return res;
+  }
+
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     ws.state = 'deleting';
     await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;
     try {
-      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
+      await this.deletePod(podName);
     } catch (e) {
       console.error(e);
     }
@@ -602,7 +609,7 @@ export class WorkspaceService {
     return { workspaceId };
   }
 
-  async closeWs(workspaceId: number) {
+  async closeWs(workspaceId: number, isEmptyData?: boolean) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     if(!ws)  {
       throw new Error(`ws ${workspaceId} is not exist!`);
@@ -615,20 +622,29 @@ export class WorkspaceService {
     await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;
     try {
-      await this.kubeClient.api.v1.namespace(this.ns).pods(podName).delete({ force: true });
+      await this.deletePod(podName);
     } catch (e) {
       console.error(e);
     }
     ws.state = 'saved';
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
-    // try {
-    //   const wsDir = this.getWsdir(podName);
-    //   if (existsSync(wsDir)) {
-    //     await emptyDir(wsDir);
-    //     await rmdir(wsDir);
-    //   }
+
+    if(isEmptyData) {
+      const wsDir = join(getAppHomeDir(), `data/${podName}`);
+      try {
+        if (existsSync(wsDir)) {
+          await emptyDir(wsDir);
+          await rmdir(wsDir);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     return { workspaceId };
   }
+
+
 
 }

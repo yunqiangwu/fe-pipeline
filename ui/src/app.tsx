@@ -4,7 +4,8 @@ import { notification } from 'choerodon-ui';
 
 notification.config({
     placement: 'bottomRight',
-})
+});
+
 
 // export async function getInitialState() {
 //     const response = await axios.get('/auth/self');

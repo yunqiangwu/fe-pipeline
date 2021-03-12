@@ -48,11 +48,11 @@ export const GitRepoList: FC = () => {
       </p>
       <p>url:</p>
       <textarea cols={180} rows={2}>
-        {`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://github.com/ant-design/ant-design-pro/`}
+        {`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod&image=registry.cn-shanghai.aliyuncs.com/wsh-dev/h-code-base:latest&envJsonData=%7B%22OPTIONS%22%3A%22--port%3D23000%22%7D`}
       </textarea>
       <p>iframe:</p>
       <textarea cols={180} rows={2}>
-        {`<iframe src="${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://github.com/ant-design/ant-design-pro/"  height=\"500\" width=\"500\" />`}
+        {`<iframe src="${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod"  height=\"500\" width=\"500\" />`}
       </textarea>
       <div>
         <h3>参数解释:</h3>
@@ -92,13 +92,13 @@ export const GitRepoList: FC = () => {
             </tr>
             <tr>
               <td>envJsonData</td>
-              <td>环境变量配置对象, JSON.stringify 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
+              <td>环境变量配置对象, JSON.stringify(encodeURIComponent(envObj)) 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
               <td></td>
               <td></td>
             </tr>
             <tr>
               <td>gitpodConfig</td>
-              <td>.gitpod.yml 配置对象, JSON.stringify 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
+              <td>.gitpod.yml 配置对象, JSON.stringify(encodeURIComponent(envObj)) 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
               <td></td>
               <td></td>
             </tr>

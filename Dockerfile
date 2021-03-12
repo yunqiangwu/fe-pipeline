@@ -7,11 +7,11 @@ RUN yarn && yarn run build:prod
 FROM node:15.8.0 as runner
 
 
-# RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-amd64.tar.gz -O kubernetes-client-linux-amd64.tar.gz && \
-#     tar -zxvf kubernetes-client-linux-amd64.tar.gz && \
-#     mv ./kubernetes/client/bin/kubectl /usr/local/bin/kubectl && \
-#     chmod +x /usr/local/bin/kubectl && \
-#     rm -rf /tmp/kubernetes*
+RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-amd64.tar.gz -O kubernetes-client-linux-amd64.tar.gz && \
+    tar -zxvf kubernetes-client-linux-amd64.tar.gz && \
+    mv ./kubernetes/client/bin/kubectl /usr/local/bin/kubectl && \
+    chmod +x /usr/local/bin/kubectl && \
+    rm -rf /tmp/kubernetes*
 
 EXPOSE 3000
 ENV NODE_ENV=production
