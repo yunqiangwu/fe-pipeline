@@ -408,7 +408,7 @@ export class WorkspaceService {
                     }
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
-                  args: [`--home=//${Config.singleInstance().get('hostname')}/app/workspaces`, "--port=23000", "--auth=none", `/workspace/${projectDirname}`],
+                  args: [`--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/app/workspaces`, "--port=23000", "--auth=none", `/workspace/${projectDirname}`],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {

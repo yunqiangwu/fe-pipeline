@@ -5,6 +5,14 @@ set -eu
 # Otherwise the current container UID may not exist in the passwd database.
 eval "$(fixuid -q)"
 
+if [ "$GIT_USER" != "" ]; then
+  git config --global user.name "$GIT_USER"
+fi
+
+if [ "$GIT_EMAIL" != "" ]; then
+  git config --global user.email "$GIT_EMAIL"
+fi
+
 if [ "${DOCKER_USER-}" ] && [ "$DOCKER_USER" != "$USER" ]; then
   echo "$DOCKER_USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers.d/nopasswd > /dev/null
   # Unfortunately we cannot change $HOME as we cannot move any bind mounts
@@ -26,12 +34,5 @@ if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
 fi
 
-if [ "$GIT_USER" != "" ]; then
-  git config --global user.name "$GIT_USER"
-fi
-
-if [ "$GIT_EMAIL" != "" ]; then
-  git config --global user.email "$GIT_EMAIL"
-fi
 
 dumb-init /usr/bin/code-server "$@"
