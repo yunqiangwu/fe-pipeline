@@ -12,24 +12,23 @@ spec:
   selector:
     matchLabels:
       fe-pipeline: proxy
-      {{- include "fe-pipeline.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "fe-pipeline.selectorLabels" . | nindent 8 }}
         fe-pipeline: proxy
     spec:
       volumes:
       - name: config
-        configMap:
-          name: fe-pipeline-proxy-config
+        hostPath:
+          path: /Users/wuyun/workspace/fe-pipeline/test/test-nginx/default.conf
+          type: File
       containers:
       - name: 'proxy'
-        image: 'registry.cn-hangzhou.aliyuncs.com/jajabjbj/openresty:alpine'
+        image: 'openresty/openresty:alpine'
         volumeMounts:
           - mountPath: /etc/nginx/conf.d/default.conf
             name: config
-            subPath: 'default.conf'
+            subPath: ''
         # securityContext:
         #   privileged: true
         ports:

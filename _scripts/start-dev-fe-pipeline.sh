@@ -18,3 +18,7 @@ kubectl -n fe-pipeline exec -ti deploy/dev-fe-pipeline-deployment -- bash
 
 # helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --set service.enabled=true --set hostname=fe-pipeline.localhost --set ingress.enabled=true --set persistence.enabled=true --set persistence.existingClaim=fe-pipeline-pvc 
 # helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml 
+
+# kubectl -n fe-pipeline apply -f test/test-nginx/proxy-deployment.yaml
+
+# kubectl -n fe-pipeline exec -ti deploy/fe-pipeline-proxy -- nginx -s reload

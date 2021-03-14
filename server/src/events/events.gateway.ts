@@ -10,7 +10,7 @@ import { map, takeUntil, filter } from 'rxjs/operators';
 import { Server } from 'ws';
 import { globalSubject } from './events.utils';
 
-@WebSocketGateway(88)
+@WebSocketGateway()
 export class EventsGateway {
   @WebSocketServer()
   server: Server;

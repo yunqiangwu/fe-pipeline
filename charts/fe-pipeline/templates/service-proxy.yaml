@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-manager
+  name: {{ .Release.Name }}-proxy
   labels:
 {{ include "fe-pipeline.labels" . | indent 4 }}
 spec:
@@ -12,10 +12,11 @@ spec:
 {{ toYaml .Values.service.externalIPs | indent 2 }}
 {{- end }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 3000
+    - port: 80
+      targetPort: 80
       protocol: TCP
       name: http
   selector:
-    fe-pipeline: ws-manager
+    fe-pipeline: proxy
+{{ include "fe-pipeline.selectorLabels" . | indent 4 }}
 {{- end }}

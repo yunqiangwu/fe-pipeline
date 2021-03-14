@@ -45,7 +45,7 @@ import { Config } from '../config/config';
 
     WorkspaceModule,
 
-    WsProxyModule,
+    // WsProxyModule,
 
   ],
   controllers: [AppController],

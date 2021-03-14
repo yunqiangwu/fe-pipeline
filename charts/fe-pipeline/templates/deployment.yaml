@@ -4,15 +4,18 @@ metadata:
   name: {{ include "fe-pipeline.fullname" . }}
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
+    fe-pipeline: ws-manager
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "fe-pipeline.selectorLabels" . | nindent 6 }}
+      fe-pipeline: ws-manager
   template:
     metadata:
       labels:
         {{- include "fe-pipeline.selectorLabels" . | nindent 8 }}
+        fe-pipeline: ws-manager
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:

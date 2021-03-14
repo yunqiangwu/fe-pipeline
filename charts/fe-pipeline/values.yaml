@@ -85,12 +85,11 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.org/client-max-body-size: 500m
-    nginx.org/websocket-services: fe-pipeline
+    nginx.org/websocket-services: fe-pipeline-proxy
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
-
 
 authProviders:
   - id: "GitLab"

@@ -30,6 +30,7 @@
 		"pretest": "yarn run compile && yarn run lint",
 		"lint": "eslint src --ext ts",
 		"pkg-vsce": "vsce package",
+		"debug-code-server": "code-server --host=0.0.0.0 --extensions-dir `pwd`/../ --port=8080 --auth=none `pwd`/test-project",
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
