@@ -2,9 +2,9 @@ FROM ubuntu:18.04 as common
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ARG NODE_VERSION=12.18.3
+ARG NODE_VERSION=14.16.0
 ENV NODE_VERSION $NODE_VERSION
-ENV YARN_VERSION 1.22.5
+ENV YARN_VERSION 1.22.10
 
 # Common deps
 RUN apt-get update && \
@@ -106,12 +106,14 @@ ENV strip=$strip
 USER theia
 WORKDIR /home/theia
 ADD package.json ./package.json
+COPY theia-fe-pipeline-extensions.tgz ./theia-fe-pipeline-extensions.tgz
+# RUN mkdir ./theia-fe-pipeline-extensions && tar -zxvf ./theia-fe-pipeline-extensions.tgz -C ./theia-fe-pipeline-extensions --strip-components=1 && rm -rf ./theia-fe-pipeline-extensions.tgz
 
 RUN if [ "$strip" = "true" ]; then \
-yarn --pure-lockfile && \
+yarn --ignore-engines --pure-lockfile && \
     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
     yarn theia download:plugins && \
-    yarn --production && \
+    yarn --ignore-engines --production && \
     yarn autoclean --init && \
     echo *.ts >> .yarnclean && \
     echo *.ts.map >> .yarnclean && \
@@ -119,7 +121,7 @@ yarn --pure-lockfile && \
     yarn autoclean --force && \
     yarn cache clean \
 ;else \
-yarn --cache-folder ./ycache && rm -rf ./ycache && \
+yarn --ignore-engines --cache-folder ./ycache && rm -rf ./ycache && \
      NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && yarn theia download:plugins \
 ;fi
 

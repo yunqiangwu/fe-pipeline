@@ -31,11 +31,11 @@ data:
 
     server {
         listen       80;
-        server_name  fe-pipeline.localhost;
+        server_name  {{ .Values.hostname }};
 
 
         location / {
-            proxy_pass   http://fe-pipeline-manager:3000;
+            proxy_pass   http://{{ .Release.Name }}-manager:3000;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
             

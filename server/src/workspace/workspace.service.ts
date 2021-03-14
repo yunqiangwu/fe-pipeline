@@ -405,7 +405,11 @@ export class WorkspaceService {
                     {
                       name: 'FE_PIPELINE_GIT_URL',
                       value: ws.gitUrl,
-                    }
+                    },
+                    {
+                      name: 'THEIA_CONFIG_DIR',
+                      value: '/workspace/.user-code-data-dir',
+                    },
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   args: [`--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/app/workspaces`, "--port=23000", "--auth=none", `/workspace/${projectDirname}`],

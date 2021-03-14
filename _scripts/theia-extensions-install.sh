@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 
-cd theia-extensions/theia-fe-pipeline-extensions
+cd theia-plugin/theia-fe-pipeline-plugin
 
 mkdir -p ../../fe-pipeline-home/data/theia-extensions/
 
-npm pack && mv ./theia-fe-pipeline-extensions-*.tgz ../../fe-pipeline-home/data/theia-extensions/
+npm run build && mv ./*.theia ../../fe-pipeline-home/data/theia-plugin
 
 cd ../../
