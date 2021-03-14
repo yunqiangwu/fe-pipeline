@@ -2,14 +2,15 @@
 
 set -eu
 
-if [ "$GIT_USER" != "" ]; then
+if [ x"$GIT_USER" != "x" ]; then
   git config --global user.name "$GIT_USER"
 fi
 
-if [ "$GIT_EMAIL" != "" ]; then
+if [ x"$GIT_EMAIL" != "x" ]; then
   git config --global user.email "$GIT_EMAIL"
 fi
 
+sudo chown -R theia:theia /workspace
 
 if [ -d "/fe-pipeline-app/theia-plugin" ]; then
 #   cd /home/theia

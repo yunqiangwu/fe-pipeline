@@ -37,19 +37,22 @@ COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 ENV NVM_DIR /sysapp/nvm
+ENV NVM_NODEJS_ORG_MIRROR http://npm.taobao.org/mirrors/node
 
 RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
 
 RUN . $NVM_DIR/nvm.sh && nvm install 14 && npm i -g yarn
 
+RUN chown -R coder:coder $NVM_DIR && mkdir -p /workspace && chown -R coder:coder /workspace
+
 EXPOSE 8080
 # This way, if someone sets $DOCKER_USER, docker-exec will still work as
 # the uid will remain the same. note: only relevant if -u isn't passed to
 # docker-run.
-# USER 1000
-# ENV USER=coder
+USER coder
 
-# RUN . $NVM_DIR/nvm.sh
+RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >> ~/.bashrc \
+  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
-WORKDIR /root/coder
+WORKDIR /home/coder
 ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]

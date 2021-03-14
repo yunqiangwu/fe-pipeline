@@ -314,8 +314,11 @@ RUN apt-get clean && \
 # Change permissions to make the `yang-language-server` executable.
 RUN chmod +x ./plugins/yangster/extension/server/bin/yang-language-server
 
+RUN mkdir -p /workspace && chown -R theia:theia /workspace
 USER theia
+
 EXPOSE 3000
+
 # Configure Theia
 ENV SHELL=/bin/bash \
     THEIA_DEFAULT_PLUGINS=local-dir:/home/theia/plugins  \

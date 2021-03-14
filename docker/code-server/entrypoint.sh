@@ -5,11 +5,13 @@ set -eu
 # Otherwise the current container UID may not exist in the passwd database.
 eval "$(fixuid -q)"
 
-if [ "$GIT_USER" != "" ]; then
+sudo chown -R coder:coder /workspace
+
+if [ x"$GIT_USER" != "x" ]; then
   git config --global user.name "$GIT_USER"
 fi
 
-if [ "$GIT_EMAIL" != "" ]; then
+if [ x"$GIT_EMAIL" != "x" ]; then
   git config --global user.email "$GIT_EMAIL"
 fi
 
@@ -29,7 +31,7 @@ if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
   for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
     echo todo --install-extension $EXTENSIONS_FILE
-    /usr/bin/code-server --install-extension $EXTENSIONS_FILE --user-data-dir=/workspace/.user-code-data-dir
+    /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir --install-extension $EXTENSIONS_FILE
   done
 
 fi

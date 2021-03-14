@@ -40,6 +40,9 @@ RUN chmod +x /enterpoint.sh
 ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
 COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
+
+# RUN cd /app/fe-pipeline-home/vscode-extensions/ && curl https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ayqy/vsextensions/browser/1.1.0/vspackage
+
 COPY --from=theia-extensions-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
 
 CMD [ "node", "dist/main.js" ]
