@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fe-pipeline-config
+  name: {{ .Release.Name }}-config
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 data:

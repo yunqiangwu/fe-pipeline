@@ -22,7 +22,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: fe-pipeline-proxy-config
+          name: {{ .Release.Name }}-proxy-config
       containers:
       - name: 'proxy'
         image: 'registry.cn-hangzhou.aliyuncs.com/jajabjbj/openresty:alpine'
