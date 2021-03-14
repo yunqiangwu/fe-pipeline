@@ -29,7 +29,7 @@ if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
   for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
     echo todo --install-extension $EXTENSIONS_FILE
-    /usr/bin/code-server --install-extension $EXTENSIONS_FILE
+    /usr/bin/code-server --install-extension $EXTENSIONS_FILE --user-data-dir=/workspace/.user-code-data-dir
   done
 
 fi
