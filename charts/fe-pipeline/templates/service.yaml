@@ -18,4 +18,5 @@ spec:
       name: http
   selector:
     fe-pipeline: ws-manager
+{{ include "fe-pipeline.selectorLabels" . | indent 4 }}
 {{- end }}

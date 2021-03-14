@@ -5,7 +5,7 @@ kind: Deployment
 metadata:
   name: {{ include "fe-pipeline.fullname" . }}-proxy
   labels:
-    app: fe-pipeline-proxy
+    {{- include "fe-pipeline.labels" . | nindent 4 }}
     fe-pipeline: proxy
 spec:
   replicas: 1
