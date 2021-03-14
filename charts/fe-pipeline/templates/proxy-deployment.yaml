@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fe-pipeline-proxy
+  name: {{ include "fe-pipeline.fullname" . }}-proxy
   labels:
     app: fe-pipeline-proxy
     fe-pipeline: proxy
