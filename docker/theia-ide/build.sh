@@ -3,17 +3,12 @@
 
 main() {
 
-  cd extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions
-  rm -rf theia-fe-pipeline-extensions*.tgz
-  yarn pack
-  cp theia-fe-pipeline-extensions*.tgz ../../../docker/theia-ide/theia-fe-pipeline-extensions.tgz
-  cd ../../../
+  # cp -r extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./docker/theia-ide/
 
   # cd "$(dirname "$0")/../.."
   export VERSION=2
-  cd docker/theia-ide
-  docker build -t "registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:$VERSION" -f ./Dockerfile .
-  cd ../../
+  docker build -t "registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:$VERSION" -f ./docker/theia-ide/Dockerfile .
+
 }
 
 main "$@"

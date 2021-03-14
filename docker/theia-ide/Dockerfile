@@ -103,16 +103,18 @@ ARG GITHUB_TOKEN
 ARG strip=false
 ENV strip=$strip
 
-USER theia
 WORKDIR /home/theia
-ADD package.json ./package.json
-COPY theia-fe-pipeline-extensions.tgz ./theia-fe-pipeline-extensions.tgz
-# RUN mkdir ./theia-fe-pipeline-extensions && tar -zxvf ./theia-fe-pipeline-extensions.tgz -C ./theia-fe-pipeline-extensions --strip-components=1 && rm -rf ./theia-fe-pipeline-extensions.tgz
+ADD ./docker/theia-ide/package.json ./package.json
+# ADD ./extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+RUN chown -R theia:theia /home/theia
+
+USER theia
+
+RUN yarn --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/
 
 RUN if [ "$strip" = "true" ]; then \
-yarn --ignore-engines --pure-lockfile && \
-    NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && \
-    yarn theia download:plugins && \
+NODE_OPTIONS="--max_old_space_size=4096" npx theia build && \
+    npx theia download:plugins && \
     yarn --ignore-engines --production && \
     yarn autoclean --init && \
     echo *.ts >> .yarnclean && \
@@ -121,8 +123,7 @@ yarn --ignore-engines --pure-lockfile && \
     yarn autoclean --force && \
     yarn cache clean \
 ;else \
-yarn --ignore-engines --cache-folder ./ycache && rm -rf ./ycache && \
-     NODE_OPTIONS="--max_old_space_size=4096" yarn theia build && yarn theia download:plugins \
+NODE_OPTIONS="--max_old_space_size=4096" npx theia build && npx theia download:plugins \
 ;fi
 
 FROM common
@@ -328,7 +329,7 @@ ENV SHELL=/bin/bash \
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+COPY ./docker/theia-ide/entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 RUN sudo touch /etc/bash.bashrc && sudo sed -i '2i\if [ x"${PATH}" = "x" ]; then export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi\nif [ x"${PATH: -1}" = "x:" ]; then export PATH=${PATH/%:/}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi' /etc/bash.bashrc

@@ -5,7 +5,7 @@ set -eu
 # Otherwise the current container UID may not exist in the passwd database.
 eval "$(fixuid -q)"
 
-sudo chown -R coder:coder /workspace
+# sudo chown -R coder:coder /workspace
 
 if [ x"$GIT_USER" != "x" ]; then
   git config --global user.name "$GIT_USER"

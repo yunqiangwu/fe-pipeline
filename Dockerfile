@@ -8,10 +8,55 @@ WORKDIR /app
 ADD ./extensions/fe-pipeline-extensions/ /app/
 RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
-FROM node:15.8.0 as theia-extensions-builder
+
+FROM node:15.8.0 as theia-plugins-builder
 WORKDIR /app
 ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
 RUN yarn --registry=https://registry.npm.taobao.org/
+
+
+FROM node:15.8.0 as theia-extensions-builder
+## User account
+RUN adduser --disabled-password --gecos '' theia && \
+    adduser theia sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+    
+ARG GITHUB_TOKEN
+
+# # Use "latest" or "next" version for Theia packages
+# ARG version=latest
+
+# Optionally build a striped Theia application with no map file or .ts sources.
+# Makes image ~150MB smaller when enabled
+ARG strip=false
+ENV strip=$strip
+
+WORKDIR /home/theia
+
+ADD extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/
+COPY ./docker/theia-ide/package.json ./package.json
+
+RUN chown -R theia:theia /home/theia
+
+USER theia
+
+RUN yarn add theia-fe-pipeline-extensions@file:./theia-fe-pipeline-extensions --ignore-engines && yarn --ignore-engines --registry=https://registry.npm.taobao.org/
+
+RUN if [ "$strip" = "true" ]; then \
+    NODE_OPTIONS="--max_old_space_size=4096" npx theia build && \
+    npx theia download:plugins && \
+    yarn --ignore-engines --production && \
+    yarn autoclean --init && \
+    echo *.ts >> .yarnclean && \
+    echo *.ts.map >> .yarnclean && \
+    echo *.spec.* >> .yarnclean && \
+    yarn autoclean --force && \
+    yarn cache clean \
+;else \
+NODE_OPTIONS="--max_old_space_size=4096" npx theia build && npx theia download:plugins \
+;fi
+
 
 FROM node:15.8.0 as runner
 
@@ -40,9 +85,7 @@ RUN chmod +x /enterpoint.sh
 ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
 COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
-
-# RUN cd /app/fe-pipeline-home/vscode-extensions/ && curl https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ayqy/vsextensions/browser/1.1.0/vspackage
-
-COPY --from=theia-extensions-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
+COPY --from=theia-plugins-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
+COPY --from=theia-extensions-builder /home/theia/* /app/fe-pipeline-home/theia/
 
 CMD [ "node", "dist/main.js" ]

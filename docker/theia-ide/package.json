@@ -13,7 +13,6 @@
         }
     },
     "dependencies": {
-        "theia-fe-pipeline-extensions": "file:./theia-fe-pipeline-extensions.tgz",
         "@theia/callhierarchy": "latest",
         "@theia/console": "latest",
         "@theia/core": "latest",

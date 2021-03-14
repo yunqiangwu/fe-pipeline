@@ -10,7 +10,7 @@ if [ x"$GIT_EMAIL" != "x" ]; then
   git config --global user.email "$GIT_EMAIL"
 fi
 
-sudo chown -R theia:theia /workspace
+# sudo chown -R theia:theia /workspace
 
 if [ -d "/fe-pipeline-app/theia-plugin" ]; then
 #   cd /home/theia
@@ -30,7 +30,15 @@ if [ -d "/fe-pipeline-app/theia-plugin" ]; then
   done
 fi
 
+if [ -d "/fe-pipeline-app/theia" ]; then
+  if [ -d "/home/theia/src-gen" ]; then
+    if [ x"$THEIA_HOME" = "x" ]; then
+      rm -rf /home/theia/lib /home/theia/src-gen /home/theia/node_modules /home/theia/plugins
+      cp -r /fe-pipeline-app/theia/* /home/theia/
+    fi
+  fi
+fi
 
 # exec node /home/theia/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
 
-dumb-init node /home/theia/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
+dumb-init node ${THEIA_HOME:-/home/theia}/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
