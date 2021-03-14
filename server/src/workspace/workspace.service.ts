@@ -617,9 +617,12 @@ export class WorkspaceService {
       res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
     } catch(e) {
       console.error(e);
-      res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
+      try{
+        res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
+      } catch(e2) {
+        console.error(e2);
+      }
     }
-    console.log(res);
     return res;
   }
 
@@ -681,7 +684,4 @@ export class WorkspaceService {
 
     return { workspaceId };
   }
-
-
-
 }
