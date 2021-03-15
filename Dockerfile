@@ -68,7 +68,6 @@ RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-am
 
 EXPOSE 3000
 ENV NODE_ENV=production
-COPY ./docker/enterpoint.sh /enterpoint.sh
 WORKDIR /app
 ADD ./package.json /app/package.json
 RUN yarn install --production false
@@ -81,6 +80,7 @@ ADD  ./nest-cli.json ./tsconfig.build.json ./tsconfig.json ./tslint.json /app/
 # ADD ./node_modules /app/node_modules
 RUN yarn build
 
+COPY ./docker/enterpoint.sh /enterpoint.sh
 RUN chmod +x /enterpoint.sh
 ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public

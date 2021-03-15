@@ -12,7 +12,7 @@ import { LoginAccountDto } from './dto/login-account.dto';
 import { Config } from '../config/config';
 import { CurrentUser } from '../common/decos';
 import { AuthInfoWithAuthClientToken } from './dto/auth-info-with-auth-client-token';
-import { ThreeAccount } from 'src/users/three-account.entity';
+import { ThreeAccount } from '../users/three-account.entity';
 
 @ApiTags('auth')
 @Controller('api/auth')

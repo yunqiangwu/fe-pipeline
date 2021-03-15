@@ -468,6 +468,12 @@ export class WorkspaceService {
                 value: JSON.stringify(gitpodConfig.tasks),
               });
             }
+            if(gitpodConfig.ports) {
+              container.env.push({
+                name: 'GITPOD_PORTS',
+                value: JSON.stringify(gitpodConfig.ports),
+              });
+            }
           }
           if(currentUser) {
             const token = this.jwtService.sign({ username: currentUser.username, sub: currentUser.userId, userId: currentUser.userId });
@@ -488,6 +494,20 @@ export class WorkspaceService {
           if (ws.image === 'theia-full') {
             // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
+            const theiaHome = this.getWsdir('theia');
+            if(existsSync(theiaHome)) {
+              container.env.push({
+                name: 'THEIA_HOME',
+                value: `/fe-pipeline-app/theia`,
+              });
+              container.volumeMounts.push(
+                {
+                  mountPath: '/fe-pipeline-app/theia',
+                  subPath: 'theia',
+                  name: vol.name
+                },
+              );
+            }
           } else if (ws.image === 'vscode') {
             // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
