@@ -39,6 +39,10 @@ if [ -d "/fe-pipeline-app/theia" ]; then
   fi
 fi
 
+if [ x"$THEIA_HOME" != "x" ]; then
+  cd $THEIA_HOME
+fi
+
 # exec node /home/theia/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
 
 dumb-init node ${THEIA_HOME:-/home/theia}/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
