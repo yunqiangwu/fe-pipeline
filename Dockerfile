@@ -15,7 +15,7 @@ ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
 RUN yarn --registry=https://registry.npm.taobao.org/
 
 
-# FROM node:15.8.0 as theia-extensions-builder
+# FROM node:14-buster as theia-extensions-builder
 # ## User account
 # RUN adduser --disabled-password --gecos '' theia && \
 #     adduser theia sudo && \

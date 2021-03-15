@@ -13,10 +13,10 @@ if [ -d "/app/fe-pipeline-home/theia-plugin" ]; then
   cp /app/fe-pipeline-home/theia-plugin/* /app/fe-pipeline-home/data/theia-plugin/
 fi
 
-if [ -d "/app/fe-pipeline-home/theia" -a ! -d "/app/fe-pipeline-home/data/theia"  ]; then
-  rm -rf /app/fe-pipeline-home/data/theia/
-  mkdir -p /app/fe-pipeline-home/data/theia/
-  cp -r /app/fe-pipeline-home/theia/* /app/fe-pipeline-home/data/theia/
-fi
+# if [ -d "/app/fe-pipeline-home/theia" -a ! -d "/app/fe-pipeline-home/data/theia"  ]; then
+#   rm -rf /app/fe-pipeline-home/data/theia/
+#   mkdir -p /app/fe-pipeline-home/data/theia/
+#   cp -r /app/fe-pipeline-home/theia/* /app/fe-pipeline-home/data/theia/
+# fi
 
 exec "$@"

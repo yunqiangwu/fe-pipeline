@@ -105,12 +105,12 @@ ENV strip=$strip
 
 WORKDIR /home/theia
 ADD ./docker/theia-ide/package.json ./package.json
-# ADD ./extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+ADD extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/
 RUN chown -R theia:theia /home/theia
 
 USER theia
-
-RUN yarn --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/
+RUN yarn add theia-fe-pipeline-extensions@file:./theia-fe-pipeline-extensions --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/
 
 RUN if [ "$strip" = "true" ]; then \
 NODE_OPTIONS="--max_old_space_size=4096" npx theia build && \
