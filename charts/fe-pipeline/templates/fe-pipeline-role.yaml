@@ -6,7 +6,7 @@ kind: Role
 metadata:
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
-  name: pods-reader
+  name: {{ .Release.Name }}-pods-reader
 rules:
 - apiGroups:
   - ""

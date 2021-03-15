@@ -10,6 +10,10 @@ if [ x"$GIT_EMAIL" != "x" ]; then
   git config --global user.email "$GIT_EMAIL"
 fi
 
+if [ ! -d "/workspace/.user-code-data-dir" ]; then
+  sudo chown -R theia:theia /workspace
+fi
+
 # sudo chown -R theia:theia /workspace
 
 if [ -d "/fe-pipeline-app/theia-plugin" ]; then

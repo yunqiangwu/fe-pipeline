@@ -4,7 +4,7 @@
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ .Release.Namespace }}-ns-fe-pipeline-binding
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-ns-fe-pipeline-binding
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 subjects:
@@ -13,5 +13,5 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: {{ .Release.Namespace }}-ns-fe-pipeline
+  name: {{ .Release.Name }}-{{ .Release.Namespace }}-ns-fe-pipeline
   apiGroup: rbac.authorization.k8s.io
