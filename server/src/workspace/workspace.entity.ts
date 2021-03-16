@@ -42,6 +42,9 @@ export class Workspace {
   @Column({ nullable: true })
   isZipUrl: boolean;
 
+  @Column({ nullable: true, length: 200 })
+  password: string;
+
   @Column({ nullable: true, length: 20 })
   hostIp: string;
 

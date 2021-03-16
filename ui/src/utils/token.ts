@@ -1,5 +1,7 @@
 import * as querystring from 'querystring';
 import axios from 'axios';
+import * as crypto from "crypto";
+
 
 export const TOKEN_KEY = '_token';
 
@@ -62,4 +64,9 @@ export async function getTokenFromUrlParam() {
     }
   }
   return null;
+}
+
+
+export const hash = (str: string): string => {
+  return crypto.createHash("sha256").update(str).digest("hex")
 }

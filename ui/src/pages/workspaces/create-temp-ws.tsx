@@ -13,6 +13,7 @@ import styles from './index.less';
 import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
+import { hash } from '@/utils/token';
 
 // import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
@@ -31,6 +32,7 @@ const getPodWsUrl = async (podObj: any) => {
   const podIp = podObj.status.podIP.replace(/\./g, '-');
   let webUiPort = 3000;
   let workDir = '/workspace';
+  let  password = '';
   for(const container of podObj.spec.containers ) {
     if(container.name ===  'web') {
       for(const portObj of container.ports) {
@@ -45,6 +47,12 @@ const getPodWsUrl = async (podObj: any) => {
           break;
         }
       }
+      for(const envObj of container.env) {
+        if(envObj.name === 'PASSWORD') {
+          password = envObj.value;
+          break;
+        }
+      }
       break;
     }
   }
@@ -54,7 +62,12 @@ const getPodWsUrl = async (podObj: any) => {
     host = location.hostname;
   }
 
-  return `http://${webUiPort}-${podIp}.ws.${host}/?folder=${workDir}#${workDir}`;
+  const wsHost = `${webUiPort}-${podIp}.ws.${host}`;
+  const openUrl = `http://${wsHost}/?folder=${workDir}#${workDir}`;
+  const hashPassword = hash(password);
+  document.cookie = `key=${hashPassword}; domain=${ host }; path=/; `;
+
+  return openUrl;
 }
 
 interface WsLoadingPageReactParams {

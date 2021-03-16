@@ -9,37 +9,39 @@ type ShowOptions = {
 	viewColumn: vscode.ViewColumn,
 };
 
-const WS_DIR_FILE = '/workspace/.gitpod/config.json';
-
-const setWsData = (key: string, value: string | null) => {
-	let data = {} as any;
-	if(!existsSync(WS_DIR_FILE)) {
-		if(!existsSync(path.dirname(WS_DIR_FILE))) {
-			mkdirSync(path.dirname(WS_DIR_FILE));
-		}
-	} else {
-		data = require(WS_DIR_FILE);
-	}
-	if(value === null || value === undefined) {
-		delete data[key];
-	} else {
-		data[key] = value;
-	}
-	writeFileSync(WS_DIR_FILE, JSON.stringify(data))
-};
-
-const getWsData = (key: string) =>  {
-	if(existsSync(WS_DIR_FILE)) {
-		let data = require(WS_DIR_FILE);
-		return data[key];
-	} 
-}
-
 let panel: vscode.WebviewPanel | null = null;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+
+
+	const WS_DIR_FILE = path.join(`${(context.storageUri || context.globalStorageUri).authority}`, 'config.json') // '/workspace/.gitpod/config.json';
+
+	const setWsData = (key: string, value: string | null) => {
+		let data = {} as any;
+		if(!existsSync(WS_DIR_FILE)) {
+			if(!existsSync(path.dirname(WS_DIR_FILE))) {
+				mkdirSync(path.dirname(WS_DIR_FILE),{ recursive: true });
+			}
+		} else {
+			data = require(WS_DIR_FILE);
+		}
+		if(value === null || value === undefined) {
+			delete data[key];
+		} else {
+			data[key] = value;
+		}
+		writeFileSync(WS_DIR_FILE, JSON.stringify(data))
+	};
+
+	const getWsData = (key: string) =>  {
+		if(existsSync(WS_DIR_FILE)) {
+			let data = require(WS_DIR_FILE);
+			return data[key];
+		} 
+	}
+
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -128,10 +130,15 @@ export function activate(context: vscode.ExtensionContext) {
 					const portObj = gitpodPorts[portIndex];
 					if(!handled.includes(portIndex as any) && portObj.onOpen !==  'ignore' ) {
 						handled.push(portIndex as any);
-						vscode.commands.executeCommand('simpleBrowser.api.open', `${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${portObj.port}-$1`)}`, {
-							preserveFocus: true,
-							viewColumn: vscode.ViewColumn.Beside,
-						} as ShowOptions);
+						const openUrl = vscode.Uri.parse(`${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${portObj.port}-$1`)}`);
+						if(portObj.type === 'browser') {
+							vscode.env.openExternal(openUrl);
+						} else {
+							vscode.commands.executeCommand('simpleBrowser.api.open', openUrl, {
+								preserveFocus: true,
+								viewColumn: vscode.ViewColumn.Beside,
+							} as ShowOptions);
+						}
 						break;
 					}
 				}
@@ -150,11 +157,12 @@ export function activate(context: vscode.ExtensionContext) {
 				// This is called when the user first selects a link and VS Code
 				// needs to determine which openers are available.
 
-				if (uri.authority.includes('localhost')) {
+				if (uri.authority.includes('localhost')  || uri.authority.includes('127.0.0.1') || uri.authority.includes('0.0.0.0')) {
 					// This opener has default priority for this URI.
 					// This will result in the user being prompted since VS Code always has
 					// its own default opener.
-					return vscode.ExternalUriOpenerPriority.Default;
+				    return vscode.ExternalUriOpenerPriority.Preferred
+					// return vscode.ExternalUriOpenerPriority.Default;
 				}
 
 				// The opener can be used but should not be used by default
@@ -169,10 +177,15 @@ export function activate(context: vscode.ExtensionContext) {
 				if(!port.match(/^\d+$/)) {
 					port = '80';
 				}
-				vscode.commands.executeCommand('simpleBrowser.api.open', `${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${port}-$1`)}`, {
-					preserveFocus: true,
-					viewColumn: vscode.ViewColumn.Beside,
-				} as ShowOptions);
+
+				const newUrl = vscode.Uri.parse(`${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${port}-$1`)}`);
+
+				vscode.env.openExternal(newUrl);
+
+				// vscode.commands.executeCommand('simpleBrowser.api.open', newUrl, {
+				// 	preserveFocus: true,
+				// 	viewColumn: vscode.ViewColumn.Beside,
+				// } as ShowOptions);
 
 				// vscode.commands.executeCommand('vscode.open', resolveUri.toString());
 

@@ -7,4 +7,5 @@ export type IWorkspaces = {
     gitUrl: string;
     state: string;
     podObject: string;
+    password: string;
 };

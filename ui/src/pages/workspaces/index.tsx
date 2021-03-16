@@ -10,6 +10,7 @@ import styles from './index.less';
 import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
+import { hash } from '@/utils/token';
 
 
 const gridStyle = {
@@ -112,7 +113,8 @@ const getPodWsUrl = async (podObj: any) => {
 
   const podIp = podObj.status.podIP.replace(/\./g, '-');
   let webUiPort = 3000;
-  let workDir =  '/workspace'
+  let workDir =  '/workspace';
+  let password = '';
 
   for(const container of podObj.spec.containers ) {
     if(container.name ===  'web') {
@@ -128,6 +130,12 @@ const getPodWsUrl = async (podObj: any) => {
           break;
         }
       }
+      for(const envObj of container.env) {
+        if(envObj.name === 'PASSWORD') {
+          password = envObj.value;
+          break;
+        }
+      }
       break;
     }
   }
@@ -137,37 +145,44 @@ const getPodWsUrl = async (podObj: any) => {
     host = location.hostname;
   }
 
-  // 等待容器激活
-  let isSuccess  = false;
-  let errorCount = 0;
+  const wsHost = `${webUiPort}-${podIp}.ws.${host}`;
+  const openUrl = `http://${wsHost}/?folder=${workDir}#${workDir}`;
+  const hashPassword = hash(password);
+  document.cookie = `key=${hashPassword}; domain=${ host }; path=/; `;
 
-  try {
-    while(isSuccess === false) {
-      let errObj = null;
-      let res: any = null;
-      try{
-        const wsId = podObj.metadata.labels['ws-id'] || podObj.metadata.name.replace(/^(.*)-(\d+)$/, '$2');
-        res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
-      }catch(err) {
-        errObj = err;
-      }
-      if(res && res.status >= 200 && res.status < 400) {
-        isSuccess = true
-      } else {
-        errorCount++;
-        isSuccess = false;
-        await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
-      }
-      if(errorCount >=10 ) {
-        throw errObj;
-      }
-    }
-  } catch(e)  {
-    console.error(e);
-    // return;
-  }
+  return openUrl;
+}
 
-  return `http://${webUiPort}-${podIp}.ws.${host}/?folder=${workDir}#${workDir}`;
+const awaitPodAvailable = async (podObj: any) => {
+   // 等待容器激活
+   let isSuccess  = false;
+   let errorCount = 0;
+
+   try {
+     while(isSuccess === false) {
+       let errObj = null;
+       let res: any = null;
+       try{
+         const wsId = podObj.metadata.labels['ws-id'] || podObj.metadata.name.replace(/^(.*)-(\d+)$/, '$2');
+         res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
+       }catch(err) {
+         errObj = err;
+       }
+       if(res && res.status >= 200 && res.status < 400) {
+         isSuccess = true
+       } else {
+         errorCount++;
+         isSuccess = false;
+         await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
+       }
+       if(errorCount >=10 ) {
+         throw errObj;
+       }
+     }
+   } catch(e)  {
+     console.error(e);
+     // return;
+   }
 }
 
 const windowOpen = async (wsUrl: any) => {
@@ -214,7 +229,10 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
     if(ws.podObject) {
       podJsonObject = JSON.parse(ws.podObject);
+      awaitPodAvailable(podJsonObject);
       const openUrl = await getPodWsUrl(podJsonObject);
+      // const password = hash(ws.password);
+      // document.cookie = `key=${password}; domain=${openUrl?.replace(/(^https?:\/\/)?([^\/]+)\/.*/, '$2') }; path=/`;
       await windowOpen(openUrl);
       return;
     }
@@ -280,7 +298,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
         return;
       } else {
       }
-
+      awaitPodAvailable(podJsonObject);
       const openUrl = await getPodWsUrl(podJsonObject);
       await windowOpen(openUrl);
 
@@ -314,11 +332,11 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
         {ws.name} {ws.state && <span>[{ws.state}]</span>} {<span>({ws.id})</span>}
         </div>
         <div>
-        Context: {ws.gitUrl}
+        Context: {ws.gitUrl} <br/>
+        Password: {ws.password}
         </div>
-        <div className={styles['ws-card-btn-wrap']}>
+        <div>
           <Button onClick={() => {return openWs(ws)}} color={'primary' as any}>打开</Button>
-          {/* { openMessage && <Button onClick={() => {return showOpenMessage(openMessage)}} color={'yellow' as any}>日志</Button> } */}
           <Button onClick={() => {return delWs(ws)}} color={'red' as any}>删除</Button>
         </div>
         { openMessage && <div className={styles['ws-card-log-area']} onClick={() => {return showOpenMessage(openMessage)}}>

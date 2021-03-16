@@ -129,10 +129,17 @@ export class WorkspaceService {
     }
     try {
       return await axios(
-        { url: `http://${realIP}:${realPort}`, headers: { host: `${webUiPort}-${podIp.replace(/\./g, '-')}.ws.${Config.singleInstance().get('hostname')}` }, timeout: 500 } // 
+        { method: 'get', url: `http://${realIP}:${realPort}`, headers: { Host: `${webUiPort}-${podIp.replace(/\./g, '-')}.ws.${Config.singleInstance().get('hostname').replace(/:\d+$/, '')}`.trim() }, timeout: 500 } // 
       ).then(
         r => {
           return ({ status: r.status });
+        },
+        (err) => {
+          if(err.response.status >= 400 && err.response.status < 500) {
+            return Promise.resolve({ status: err.response.status });
+          } else  {
+            return Promise.reject(err);
+          }
         }
       );
     } catch (r) {
@@ -350,6 +357,8 @@ export class WorkspaceService {
 
         ws.state = 'pending';
 
+        ws.password = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1$2$3$4$5');
+
         await this.workspaceRepository.save(ws);
 
         const vol: any = {
@@ -401,6 +410,10 @@ export class WorkspaceService {
                   ],
                   "env": [
                     {
+                      name: 'PASSWORD',
+                      value: ws.password,
+                    },
+                    {
                       name: 'FE_PIPELINE_WORK_DIR',
                       value: join(`/workspace`, projectDirname),
                     },
@@ -415,7 +428,7 @@ export class WorkspaceService {
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
-                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/fed/workspaces`, `--port=${webPort}`, "--auth=none", `/workspace/${projectDirname}`],
+                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/fed/workspaces`, `--port=${webPort}`, "--auth=password", `/workspace/${projectDirname}`],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {

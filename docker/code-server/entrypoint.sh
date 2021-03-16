@@ -1,4 +1,5 @@
 #!/bin/sh
+
 set -eu
 
 # We do this first to ensure sudo works below when renaming the user.
@@ -32,11 +33,18 @@ fi
 if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
   for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
-    echo todo --install-extension $EXTENSIONS_FILE
-    /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir --install-extension $EXTENSIONS_FILE
+    if test -f $EXTENSIONS_FILE; then
+      echo todo --install-extension $EXTENSIONS_FILE
+      /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir --install-extension $EXTENSIONS_FILE
+    fi
   done
 
 fi
 
 
 dumb-init /usr/bin/code-server "$@"
+
+
+if test -f $file; then
+  echo $file 是文件
+fi
