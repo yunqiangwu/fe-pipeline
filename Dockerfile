@@ -16,12 +16,8 @@ RUN yarn --registry=https://registry.npm.taobao.org/
 
 
 # FROM registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2 as theia-extensions-builder
-# ## User account
-# RUN adduser --disabled-password --gecos '' theia && \
-#     adduser theia sudo && \
-#     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-    
-# ARG GITHUB_TOKEN
+
+# USER root
 
 # # # Use "latest" or "next" version for Theia packages
 # # ARG version=latest
@@ -85,6 +81,7 @@ RUN chmod +x /enterpoint.sh
 ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
 COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
+# COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/theia-plugin/
 COPY --from=theia-plugins-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
 # COPY --from=theia-extensions-builder /home/theia /app/fe-pipeline-home/theia
 

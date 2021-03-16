@@ -37,6 +37,9 @@ export class Workspace {
   gitUrl: string;
 
   @Column({ nullable: true })
+  webPort: number;
+
+  @Column({ nullable: true })
   isZipUrl: boolean;
 
   @Column({ nullable: true, length: 20 })

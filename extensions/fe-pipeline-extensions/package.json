@@ -1,6 +1,7 @@
 {
   "name": "fe-pipeline-extensions",
   "publisher": "fe-pipeline",
+  "enableProposedApi": true,
   "repository": "https://code.choerodon.com.cn/hzero-hzero-c7n-hips/fe-pipeline.git",
 	"displayName": "fe-pipeline-extensions",
 	"description": "",
@@ -12,7 +13,8 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:fe-pipeline-extensions.helloWorld"
+        "onCommand:fe-pipeline-extensions.helloWorld",
+        "onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

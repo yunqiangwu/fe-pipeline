@@ -189,7 +189,7 @@ export class WorkspaceService {
       let gitpodConfig = ws.gitpodConfig ? JSON.parse(ws.gitpodConfig) : null;
       const contextToDir = this.getWsdir(podName);
 
-      if(ws.gitUrl) {
+      if(ws.gitUrl  &&  ws.gitUrl !== 'none') {
         if(!isURL(ws.gitUrl)) {
           throw new Error(`${ws.gitUrl} is not correct url!`);
         }
@@ -364,6 +364,8 @@ export class WorkspaceService {
           vol.emptyDir = {};
         }
 
+        const webPort = ws.webPort || 23000;
+
         // docker run -e PASSWORD=password -p 8080:8080 -it --rm --name vscode codercom/code-server:latest
 
         const podConfig = await (async () => {
@@ -393,7 +395,7 @@ export class WorkspaceService {
                   "ports": [
                     {
                       "name": "web",
-                      "containerPort": 23000,
+                      "containerPort": webPort,
                       "protocol": "TCP"
                     }
                   ],
@@ -412,7 +414,8 @@ export class WorkspaceService {
                     },
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
-                  args: [`--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/fed/workspaces`, "--port=23000", "--auth=none", `/workspace/${projectDirname}`],
+                  // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
+                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/fed/workspaces`, `--port=${webPort}`, "--auth=none", `/workspace/${projectDirname}`],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {
@@ -447,13 +450,13 @@ export class WorkspaceService {
                     "periodSeconds": 20,
                     "httpGet": {
                       "path": "/",
-                      "port": 23000
+                      "port": webPort
                     }
                   },
                   "readinessProbe": {
                     "httpGet": {
                       "path": "/",
-                      "port": 23000
+                      "port": webPort
                     }
                   }
                 }
@@ -494,20 +497,20 @@ export class WorkspaceService {
           if (ws.image === 'theia-full') {
             // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
-            const theiaHome = this.getWsdir('theia');
-            if(existsSync(theiaHome)) {
-              container.env.push({
-                name: 'THEIA_HOME',
-                value: `/fe-pipeline-app/theia`,
-              });
-              container.volumeMounts.push(
-                {
-                  mountPath: '/fe-pipeline-app/theia',
-                  subPath: 'theia',
-                  name: vol.name
-                },
-              );
-            }
+            // const theiaHome = this.getWsdir('theia');
+            // if(existsSync(theiaHome)) {
+            //   container.env.push({
+            //     name: 'THEIA_HOME',
+            //     value: `/fe-pipeline-app/theia`,
+            //   });
+            //   container.volumeMounts.push(
+            //     {
+            //       mountPath: '/fe-pipeline-app/theia',
+            //       subPath: 'theia',
+            //       name: vol.name
+            //     },
+            //   );
+            // }
           } else if (ws.image === 'vscode') {
             // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';

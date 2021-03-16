@@ -123,7 +123,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
                isSuccess = false;
                await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
              }
-             if(errorCount >=4 ) {
+             if(errorCount >=10 ) {
                throw errObj;
              }
            }

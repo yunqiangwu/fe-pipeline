@@ -24,3 +24,8 @@ kubectl -n fe-pipeline exec -ti deploy/dev-fe-pipeline-deployment -- bash
 # kubectl -n fe-pipeline exec -ti deploy/fe-pipeline-proxy -- nginx -s reload
 
 # docker run -e GIT_USER=3 -e GIT_EMAIL=a@q.c -p 8080:8080 -v `pwd`/dist:/workspace --rm -ti --name xxx -p 23000:23000 registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2 --port=23000 --auth=none
+
+# sudo kubectl -n nginx-ingress port-forward deploy/nginx-ingress-nginx-ingress 80:80
+
+# kubectl -n fe-pipeline exec -ti deploy/fe-pipeline -- bash
+

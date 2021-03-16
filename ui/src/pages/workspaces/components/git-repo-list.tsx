@@ -68,7 +68,7 @@ export const GitRepoList: FC = () => {
           <tbody>
             <tr>
               <td>gitUrl</td>
-              <td>克隆地址, git 克隆地址(也可以写一个 zip 压缩包下载地址) </td>
+              <td>克隆地址, git 克隆地址(也可以写一个 zip 压缩包下载地址, 当值为 none 时, 表示不需要 clone 或者 下载) </td>
               <td></td>
               <td>是</td>
             </tr>
@@ -76,6 +76,12 @@ export const GitRepoList: FC = () => {
               <td>image</td>
               <td>镜像地址, 可以参考: <a href="https://github.com/yunqiangwu/theia-apps/blob/master/theia-full-docker/Dockerfile" target="_blank">构建镜像配置文件</a> 构建镜像</td>
               <td>theia-full</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>webPort</td>
+              <td> 默认的在线 web ide 端 port</td>
+              <td>23000</td>
               <td></td>
             </tr>
             <tr>

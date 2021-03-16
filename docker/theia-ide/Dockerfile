@@ -105,10 +105,15 @@ ENV strip=$strip
 
 WORKDIR /home/theia
 ADD ./docker/theia-ide/package.json ./package.json
-# ADD extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
-# RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/
-RUN yarn --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/
-# RUN yarn add theia-fe-pipeline-extensions@file:./theia-fe-pipeline-extensions --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/ && rm -rf ./theia-fe-pipeline-extensions
+
+ADD extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/ && \
+ rm -rf *.tgz && yarn pack && cp *.tgz ../theia-fe-pipeline-extensions.tgz && \
+ cd  .. && rm  -rf ./theia-fe-pipeline-extensions && \
+ yarn add theia-fe-pipeline-extensions@file:./theia-fe-pipeline-extensions.tgz --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/ && \
+ rm -rf ./theia-fe-pipeline-extensions.tgz
+
+# RUN yarn --ignore-engines --pure-lockfile --registry=https://registry.npm.taobao.org/
 
 RUN chown -R theia:theia /home/theia
 

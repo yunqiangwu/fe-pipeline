@@ -158,7 +158,7 @@ const getPodWsUrl = async (podObj: any) => {
         isSuccess = false;
         await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
       }
-      if(errorCount >=4 ) {
+      if(errorCount >=10 ) {
         throw errObj;
       }
     }
