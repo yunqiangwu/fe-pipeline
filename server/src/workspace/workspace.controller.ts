@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, Request, Res, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { WorkspaceService } from './workspace.service';
@@ -7,6 +7,8 @@ import { User } from '../users/users.entity';
 import { CurrentUser } from '../common/decos';
 import { CreateTempWorkspaceDto } from './dto/create-temp-workspace.dto';
 import { CreateTempWorkspaceDtoResp } from './dto/create-temp-workspace-resp.dto';
+import { Response } from 'express';
+import { Config } from 'src/config/config';
 
 
 // import {
@@ -139,8 +141,53 @@ export class WorkspaceController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/ws-is-alive/:workspaceId')
-  isAlive(@Param('workspaceId') workspaceId: number): Promise<any> {
-    return this.workspaceService.isAlive( workspaceId );
+  async isAlive(@Param('workspaceId') workspaceId: number, @Res({ passthrough: true }) response: Response): Promise<any> {
+    let res = {} as any;
+    try{
+      res = await this.workspaceService.isAlive( workspaceId );
+      // response.cookie('key', hashKey, {
+      //   path: '/',
+      //   domain: res.wsHost,
+      // });
+      // response.status(302).redirect(`//${res.wsHost}`);
+      // return;
+      // console.log(`wsHost: ${res.wsHost}`);
+    }catch(e) {
+      console.error(e);
+      throw e;
+    }
+    return {
+      status: res.status,
+      wsHost: res.wsHost,
+    };
   }
 
+  // @UseGuards(AuthGuard('jwt'))
+  @Get('/redirect-ws-url/:workspaceId')
+  async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
+    let res = {} as any;
+    try{
+      res = await this.workspaceService.getRedirectToWsInfo( workspaceId );
+      const host = (_host || '').replace(/:\d+$/, '');
+      // console.log(host, req.url);
+      const configHost = Config.singleInstance().get('hostname').replace(/:\d+$/, '');
+      if(host === configHost) {
+         response.status(302).redirect(`//${res.wsHost}${req.url || '/'}`);
+         return;
+      } else if(host.endsWith(`ws.${configHost}`) ) {
+        response.cookie('key', res.password, {
+          path: '/',
+          domain: res.wsHost,
+        });
+        response.status(302).redirect(`/`);
+        return;
+      }
+      return {};
+      // console.log(`wsHost: ${res.wsHost}`);
+    }catch(e) {
+      console.error(e);
+      throw e;
+    }
+  }
+  
 }

@@ -4,7 +4,6 @@ import { User } from '../users/users.entity';
 import { Workspace } from '../workspace/workspace.entity';
 import { ThreeAccount } from '../users/three-account.entity';
 import { UsersModule } from '../users/users.module';
-import { DevProxyModule } from '../dev-proxy/dev-proxy.module';
 import { WsProxyModule } from '../ws-proxy/ws-proxy.module';
 import { AuthModule } from '../auth/auth.module';
 import { WorkspaceModule } from '../workspace/workspace.module';
@@ -18,15 +17,6 @@ import { join } from 'path';
 import { Config } from '../config/config';
 @Module({
   imports: [
-
-    ...(process.env.NODE_ENV === 'development' ? [
-      // DevProxyModule
-    ] : [
-      // ServeStaticModule.forRoot({
-      //   rootPath: join(Config.singleInstance().get('homeDir'), 'public'),
-      //   renderPath: '/fed',
-      // } as any)
-    ]),
 
     ConfigModule.register({ folder: './config' }),
     TypeOrmModule.forRootAsync({

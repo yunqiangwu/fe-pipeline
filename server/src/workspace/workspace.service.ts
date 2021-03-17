@@ -1,7 +1,8 @@
 import { HttpException, Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import axios from 'axios';
+import fetch from 'node-fetch';
+import * as crypto from "crypto";
 import { Client1_13, ApiRoot } from 'kubernetes-client';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
@@ -54,6 +55,8 @@ export class WorkspaceService {
     wsData.image = wsData.image || 'theia-full';
     if(wsData.gitpodConfig) {
       wsData.gitpodConfig = isString(wsData.gitpodConfig) ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
+    } else {
+      wsData.gitpodConfig = null;
     }
 
     if (wsData.isZipUrl === undefined) {
@@ -72,15 +75,17 @@ export class WorkspaceService {
       // throw new HttpException(`ws: ${example} is not found`, 404);
       ws = await this.workspaceRepository.save(wsData);
     } else {
-      if (ws.state === 'opening' || ws.state === 'pending') {
-        await this.closeWs(ws.id, true);
+      if(ws.gitpodConfig !== wsData.gitpodConfig || wsData.image !== ws.image) {
+        if (ws.state === 'opening' || ws.state === 'pending') {
+          await this.closeWs(ws.id, true);
+        }
+        ws = {
+          ...ws,
+          ...wsData,
+          state: 'created',
+        } as Workspace;
+        await this.workspaceRepository.save(ws);
       }
-      ws = {
-        ...ws,
-        ...wsData,
-        state: 'created',
-      } as Workspace;
-      await this.workspaceRepository.save(ws);
     }
     return ws;
   }
@@ -98,21 +103,36 @@ export class WorkspaceService {
     return ws;
   }
 
-  async isAlive(workspaceId: number): Promise<any> {
-    const podName = `ws-pod-${workspaceId}`;
-    let kubePodRes: any = null;
+  async getRedirectToWsInfo(workspaceId: number): Promise<any>{
+    const ws = await this.workspaceRepository.findOne(workspaceId);
+    // console.log(workspaceId, ws);
+    let podObj;
+    if(ws && ws.podObject) {
+      podObj =  JSON.parse(ws.podObject);
+    } else {
+      throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
+    }
+    // } else {
+    //   const podName = `ws-pod-${workspaceId}`;
+    //   const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
+    //   podObj = kubePodRes.body;
+    // }
 
-    kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
-
-    let podObj = kubePodRes.body;
     let podIp = podObj.status.podIP;
     let webUiPort: any = 3000;
+    let password = '';
 
     for (const container of podObj.spec.containers) {
       if (container.name === 'web') {
         for (const portObj of container.ports) {
           if (portObj.name === 'web') {
             webUiPort = portObj.containerPort;
+            break;
+          }
+        }
+        for(const envObj of container.env) {
+          if(envObj.name === 'PASSWORD') {
+            password = envObj.value;
             break;
           }
         }
@@ -127,25 +147,43 @@ export class WorkspaceService {
     if (process.env.PROXY_BACKEND_PORT) {
       realPort = process.env.PROXY_BACKEND_PORT;
     }
+    const wsHost = `${webUiPort}-${podIp.replace(/\./g, '-')}.ws.${Config.singleInstance().get('hostname').replace(/:\d+$/, '')}`.trim();
+    const hashKey = crypto.createHash("sha256").update(password).digest("hex");
+    return {
+      wsHost, password: hashKey, realIP, realPort
+    };
+  }
+
+  async isAlive(workspaceId: number): Promise<any> {
+    
     try {
-      return await axios(
-        { method: 'get', url: `http://${realIP}:${realPort}`, headers: { Host: `${webUiPort}-${podIp.replace(/\./g, '-')}.ws.${Config.singleInstance().get('hostname').replace(/:\d+$/, '')}`.trim() }, timeout: 500 } // 
+      const { wsHost, password, realIP, realPort } = await this.getRedirectToWsInfo(workspaceId);
+      return await fetch(`http://${realIP}:${realPort}`,
+        { method: 'get', headers: { Host: wsHost} } // 
       ).then(
         r => {
-          return ({ status: r.status });
+          if(r.status >= 200 && r.status < 500) {
+            return ({ status: r.status, wsHost, password });
+          } else {
+            return Promise.reject({ status: r.status, wsHost })
+          }
         },
         (err) => {
-          if(err.response.status >= 400 && err.response.status < 500) {
-            return Promise.resolve({ status: err.response.status });
+          // console.log(err);
+          if(err.response && err.response.status >= 400 && err.response.status < 500) {
+            console.log(err.response.data);
+            const hashKey = crypto.createHash("sha256").update(password).digest("hex");
+            return Promise.resolve({ status: err.response.status, wsHost, password: hashKey });
           } else  {
             return Promise.reject(err);
           }
         }
       );
     } catch (r) {
-      throw new Error(JSON.stringify({ config: r.config, status: r.status, message: r.message }));
+      console.log(r);
+      // return {};
+      throw new Error(JSON.stringify({ status: r.status, message: r.message }));
     }
-
   }
 
   async openWs(workspaceId: number, currentUser?: User): Promise<any> {
@@ -428,7 +466,7 @@ export class WorkspaceService {
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
-                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` ,`--home=//${Config.singleInstance().get('hostname')}/fed/workspaces`, `--port=${webPort}`, "--auth=password", `/workspace/${projectDirname}`],
+                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` , ...(ws.isTemp ? [] : [`--home=//${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), `--port=${webPort}`, "--auth=password", `/workspace/${projectDirname}`],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     {
@@ -717,7 +755,6 @@ export class WorkspaceService {
         console.error(e);
       }
     }
-
     return { workspaceId };
   }
 }

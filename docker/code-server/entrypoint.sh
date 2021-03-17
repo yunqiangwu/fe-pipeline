@@ -6,9 +6,6 @@ set -eu
 # Otherwise the current container UID may not exist in the passwd database.
 eval "$(fixuid -q)"
 
-if [ ! -d "/workspace/.user-code-data-dir" ]; then
-  sudo chown -R coder:coder /workspace
-fi
 
 if [ x"$GIT_USER" != "x" ]; then
   git config --global user.name "$GIT_USER"
@@ -28,6 +25,10 @@ if [ "${DOCKER_USER-}" ] && [ "$DOCKER_USER" != "$USER" ]; then
   USER="$DOCKER_USER"
 
   sudo sed -i "/coder/d" /etc/sudoers.d/nopasswd
+fi
+
+if [ ! -d "/workspace/.user-code-data-dir" ]; then
+  sudo chown -R coder:coder /workspace
 fi
 
 if [ -d "/fe-pipeline-app/vscode-extensions" ]; then

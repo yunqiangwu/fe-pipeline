@@ -25,7 +25,7 @@ import { Config } from '../config/config';
         console.log(`Error: ${ (exception as HttpException ).message} \n ${ (exception as HttpException ).stack}`);
       }
 
-      if(status === 404 && ( request.url.startsWith('/fed') || request.url === '/' )) {
+      if(status === 404 && ( request.url.startsWith((Config.singleInstance().get('fe-path') || '/fed/').replace(/\/$/, '')) || request.url === '/' )) {
         const filePath = join( Config.singleInstance().get('homeDir'), 'public/index.html');
         if(existsSync) {
           response.status(200).sendFile(filePath);

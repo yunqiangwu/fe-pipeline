@@ -105,55 +105,8 @@ const ModalContent = ({ modal }: any) => {
   );
 };
 
-const getPodWsUrl = async (podObj: any) => {
 
-  if(!podObj) {
-    return;
-  }
-
-  const podIp = podObj.status.podIP.replace(/\./g, '-');
-  let webUiPort = 3000;
-  let workDir =  '/workspace';
-  let password = '';
-
-  for(const container of podObj.spec.containers ) {
-    if(container.name ===  'web') {
-      for(const portObj of container.ports) {
-        if(portObj.name === 'web') {
-          webUiPort = portObj.containerPort;
-          break;
-        }
-      }
-      for(const envObj of container.env) {
-        if(envObj.name === 'FE_PIPELINE_WORK_DIR') {
-          workDir = envObj.value;
-          break;
-        }
-      }
-      for(const envObj of container.env) {
-        if(envObj.name === 'PASSWORD') {
-          password = envObj.value;
-          break;
-        }
-      }
-      break;
-    }
-  }
-
-  let host = location.host;
-  if (process.env.NODE_ENV === 'development') {
-    host = location.hostname;
-  }
-
-  const wsHost = `${webUiPort}-${podIp}.ws.${host}`;
-  const openUrl = `http://${wsHost}/?folder=${workDir}#${workDir}`;
-  const hashPassword = hash(password);
-  document.cookie = `key=${hashPassword}; domain=${ host }; path=/; `;
-
-  return openUrl;
-}
-
-const awaitPodAvailable = async (podObj: any) => {
+const awaitPodAvailable = async (wsId: any) => {
    // 等待容器激活
    let isSuccess  = false;
    let errorCount = 0;
@@ -163,7 +116,6 @@ const awaitPodAvailable = async (podObj: any) => {
        let errObj = null;
        let res: any = null;
        try{
-         const wsId = podObj.metadata.labels['ws-id'] || podObj.metadata.name.replace(/^(.*)-(\d+)$/, '$2');
          res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
        }catch(err) {
          errObj = err;
@@ -225,15 +177,10 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
   const [openWsRes, openWs] = useAsyncFn(async (ws: IWorkspaces) => {
 
-    let podJsonObject: any = null;
 
-    if(ws.podObject) {
-      podJsonObject = JSON.parse(ws.podObject);
-      awaitPodAvailable(podJsonObject);
-      const openUrl = await getPodWsUrl(podJsonObject);
-      // const password = hash(ws.password);
-      // document.cookie = `key=${password}; domain=${openUrl?.replace(/(^https?:\/\/)?([^\/]+)\/.*/, '$2') }; path=/`;
-      await windowOpen(openUrl);
+    if(ws.podObject && ws.state === "opening") {
+      await awaitPodAvailable(ws.id);
+      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}`);
       return;
     }
 
@@ -275,10 +222,6 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
           if(r.data.message) {
             return r.data.message;
           }
-          if(r.data.pod)  {
-            podJsonObject = r.data.pod;
-            return JSON.stringify(podJsonObject);
-          }
           return 'loading...';
         } );
         if(r.data.type === 'created')  {
@@ -298,9 +241,8 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
         return;
       } else {
       }
-      awaitPodAvailable(podJsonObject);
-      const openUrl = await getPodWsUrl(podJsonObject);
-      await windowOpen(openUrl);
+      await awaitPodAvailable(ws.id);
+      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}`);
 
       if(onChange) {
         await onChange();
@@ -312,18 +254,18 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     }
   }, []);
 
-  const showOpenMessage = useCallback((msg) => {
-    Modal.info({
-      style: {
-        width: 1000,
-      },
-      children: (
-        <pre>
-          {msg}
-        </pre>
-      ),
-    });
-  }, []);
+  // const showOpenMessage = useCallback((msg) => {
+  //   Modal.info({
+  //     style: {
+  //       width: 1000,
+  //     },
+  //     children: (
+  //       <pre>
+  //         {msg}
+  //       </pre>
+  //     ),
+  //   });
+  // }, []);
 
   return (
     <Card.Grid className={styles['ws-card']} style={gridStyle}>
@@ -339,9 +281,10 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
           <Button onClick={() => {return openWs(ws)}} color={'primary' as any}>打开</Button>
           <Button onClick={() => {return delWs(ws)}} color={'red' as any}>删除</Button>
         </div>
-        { openMessage && <div className={styles['ws-card-log-area']} onClick={() => {return showOpenMessage(openMessage)}}>
+        {/* onClick={() => {return showOpenMessage(openMessage)}} */}
+        { openMessage && <div className={styles['ws-card-log-area']}>
           <Spin><pre>{openMessage}</pre></Spin>
-          <span className={styles['ws-card-log-area-show-more-btn']} >查看更多...</span>
+          {/* <span className={styles['ws-card-log-area-show-more-btn']} >查看更多...</span> */}
         </div> }
       </div>
     </Card.Grid>

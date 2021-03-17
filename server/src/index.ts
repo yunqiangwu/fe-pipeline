@@ -66,7 +66,7 @@ export async function startServer(port = 3000) {
   });
 
   (app as any).useStaticAssets(join(Config.singleInstance().get('homeDir'), 'public'),  {
-    prefix: '/fed/',
+    prefix: Config.singleInstance().get('fe-path') || '/fed/',
   });
 
   await app.listen(port, '0.0.0.0');

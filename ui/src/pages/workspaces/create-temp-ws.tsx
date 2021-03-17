@@ -23,53 +23,6 @@ const iframeStyle: CSSProperties = {
  width: "100%",
 };
 
-const getPodWsUrl = async (podObj: any) => {
-
-  if(!podObj) {
-    return;
-  }
-
-  const podIp = podObj.status.podIP.replace(/\./g, '-');
-  let webUiPort = 3000;
-  let workDir = '/workspace';
-  let  password = '';
-  for(const container of podObj.spec.containers ) {
-    if(container.name ===  'web') {
-      for(const portObj of container.ports) {
-        if(portObj.name === 'web') {
-          webUiPort = portObj.containerPort;
-          break;
-        }
-      }
-      for(const envObj of container.env) {
-        if(envObj.name === 'FE_PIPELINE_WORK_DIR') {
-          workDir = envObj.value;
-          break;
-        }
-      }
-      for(const envObj of container.env) {
-        if(envObj.name === 'PASSWORD') {
-          password = envObj.value;
-          break;
-        }
-      }
-      break;
-    }
-  }
-
-  let host = location.host;
-  if (process.env.NODE_ENV === 'development') {
-    host = location.hostname;
-  }
-
-  const wsHost = `${webUiPort}-${podIp}.ws.${host}`;
-  const openUrl = `http://${wsHost}/?folder=${workDir}#${workDir}`;
-  const hashPassword = hash(password);
-  document.cookie = `key=${hashPassword}; domain=${ host }; path=/; `;
-
-  return openUrl;
-}
-
 interface WsLoadingPageReactParams {
   id: string;
 }
@@ -77,8 +30,8 @@ interface WsLoadingPageReactParams {
 const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) => {
 
   const [state, setState] = useState('loading');
-  const [podUrl, setPodUrl] = useState<string>('loading...');
-  const [wsObj, setWsObj] = useState<null | number>(null);
+  // const [podUrl, setPodUrl] = useState<string>('loading...');
+  const [wsObj, setWsObj] = useState<any>(null);
 
   const createTemp = useAsync(async () =>  {
 
@@ -114,7 +67,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
   const [openWsRes, openWs] = useAsyncFn(async (ws: any) => {
 
-    const awaitPodAvailable = async (podObj: any) => {
+    const awaitPodAvailable = async (wsId: string) => {
          // 等待容器激活
          let isSuccess  = false;
          let errorCount = 0;
@@ -124,7 +77,6 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
              let errObj = null;
              let res: any = null;
              try{
-               const wsId = podObj.metadata.labels['ws-id'] || podObj.metadata.name.replace(/^(.*)-(\d+)$/, '$2');
                res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
              }catch(err) {
                errObj = err;
@@ -146,14 +98,9 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
          }
     };
 
-    let podJsonObject: any = null;
-
-    if(ws.state &&  ws.podObject) {
-      podJsonObject = JSON.parse(ws.podObject);
-      await awaitPodAvailable(podJsonObject);
-      const openUrl = await getPodWsUrl(podJsonObject);
+    if(ws.state ===  'opening' &&  ws.podObject) {
+      await awaitPodAvailable(ws.id);
       setState('loaded');
-      setPodUrl(openUrl || '');
       return;
     }
 
@@ -195,10 +142,6 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
           if(r.data.message) {
             return r.data.message;
           }
-          if(r.data.pod)  {
-            podJsonObject = r.data.pod;
-            return `pod being ${podJsonObject.status.phase} ...`;
-          }
           return 'loading...';
         } );
         if(r.data.type === 'created')  {
@@ -218,10 +161,8 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
         return;
       } else {
       }
-      await awaitPodAvailable(podJsonObject);
-      const openUrl = await getPodWsUrl(podJsonObject);
+      await awaitPodAvailable(ws.id);
       setState('loaded');
-      setPodUrl(openUrl || '');
     } finally {
       _ws.unsubscribe();
     }
@@ -231,17 +172,10 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
     if(!wsObj) {
       return;
-    //   const timeId = setTimeout(() => {
-    //     setState('readme');
-    //   }, 200);
-    //   return () => clearTimeout(timeId);
     }
 
     try{
-      // const res = await axios.get(`/workspace/${wsId}`, { fetchTokenFromUrlParam: true, } as any);
-      // setState(JSON.stringify(res.data, null, 2));
       openWs(wsObj);
-
     }catch(e) {
       setState(e.message)
       console.error(e);
@@ -257,8 +191,8 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
     return <div>loading...</div>
   }
 
-  if(state === 'loaded' && podUrl) {
-    return <iframe style={iframeStyle} src={podUrl} />;
+  if(state === 'loaded' && wsObj) {
+    return <iframe style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}`} />;
   }
 
   if(state === 'readme') {

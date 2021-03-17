@@ -2,44 +2,46 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { mkdirSync, writeFileSync, existsSync } from 'fs';
+import * as fs from 'fs';
+const readline = require('readline');
+
 
 type ShowOptions = {
 	preserveFocus?: boolean,
 	viewColumn: vscode.ViewColumn,
 };
 
-let panel: vscode.WebviewPanel | null = null;
+let isBreak = false;
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-
-	const WS_DIR_FILE = path.join(`${(context.storageUri || context.globalStorageUri).authority}`, 'config.json') // '/workspace/.gitpod/config.json';
+	const WS_DIR_FILE = path.join(`${(context?.storageUri?.authority || context.globalStorageUri.authority)}`, 'config.json') // '/workspace/.gitpod/config.json';
 
 	const setWsData = (key: string, value: string | null) => {
 		let data = {} as any;
-		if(!existsSync(WS_DIR_FILE)) {
-			if(!existsSync(path.dirname(WS_DIR_FILE))) {
-				mkdirSync(path.dirname(WS_DIR_FILE),{ recursive: true });
+		if (!fs.existsSync(WS_DIR_FILE)) {
+			if (!fs.existsSync(path.dirname(WS_DIR_FILE))) {
+				fs.mkdirSync(path.dirname(WS_DIR_FILE), { recursive: true });
 			}
 		} else {
 			data = require(WS_DIR_FILE);
 		}
-		if(value === null || value === undefined) {
+		if (value === null || value === undefined) {
 			delete data[key];
 		} else {
 			data[key] = value;
 		}
-		writeFileSync(WS_DIR_FILE, JSON.stringify(data))
+		fs.writeFileSync(WS_DIR_FILE, JSON.stringify(data))
 	};
 
-	const getWsData = (key: string) =>  {
-		if(existsSync(WS_DIR_FILE)) {
+	const getWsData = (key: string) => {
+		if (fs.existsSync(WS_DIR_FILE)) {
 			let data = require(WS_DIR_FILE);
 			return data[key];
-		} 
+		}
 	}
 
 
@@ -48,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "fe-pipeline-extensions" is now active!');
 
 	// // 创建 webview
-	panel = vscode.window.createWebviewPanel(
+	let panel = vscode.window.createWebviewPanel(
 		'catWebview',
 		'Cat Webview',
 		{ viewColumn: vscode.ViewColumn.Beside, preserveFocus: false },
@@ -61,11 +63,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const scriptUri = panel.webview.asWebviewUri(
 		vscode.Uri.file(path.join(context.extensionPath, 'res', 'main.js'))
-	  );
+	);
 
-	panel.onDidDispose(() => {
-		panel = null;
-	});
+	// panel.onDidDispose(() => {
+	// 	panel = null;
+	// });
 
 	panel.dispose();
 
@@ -82,27 +84,27 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const GITPOD_TASKS = process.env.GITPOD_TASKS;
 
-	if(GITPOD_TASKS) {
-		try{
+	if (GITPOD_TASKS) {
+		try {
 
 			const gitpodTask = JSON.parse(GITPOD_TASKS);
 
-			for(const taskIndex in gitpodTask ) {
+			for (const taskIndex in gitpodTask) {
 				const taskObj = gitpodTask[taskIndex];
 				const taskName = `task_${taskIndex}`;
 				const storeKey = `cmd_${taskIndex}`;
 				const isCompleteTask = getWsData(storeKey);
-				if(isCompleteTask) {
+				if (isCompleteTask) {
 					continue;
 				}
 				setWsData(storeKey, 'true',);
 				let ter = vscode.window.terminals.find(item => item.name === taskName);
-				if(!ter) {
+				if (!ter) {
 					ter = vscode.window.createTerminal(taskName);
 					let cmd = 'ls';
-					if(taskObj.init && taskObj.command) {
-						cmd = ` (${ taskObj.init }) && ( ${ taskObj.command })`;
-					} else if(taskObj.command) {
+					if (taskObj.init && taskObj.command) {
+						cmd = ` (${taskObj.init}) && ( ${taskObj.command})`;
+					} else if (taskObj.command) {
 						cmd = taskObj.command;
 					}
 					ter.sendText(cmd, true);
@@ -113,25 +115,62 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			}
 
-		} catch(e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}
 
 	const GITPOD_PORTS = process.env.GITPOD_PORTS;
 
-	if(GITPOD_PORTS) {
-		const gitpodPorts = JSON.parse(GITPOD_PORTS) as any[];
+	if (GITPOD_PORTS) {
 
-		// (async () => {
-			let handled: number[] = [];
-			try{
-				for(const portIndex in gitpodPorts ) {
+		let handled: number[] = [];
+
+
+		async function getTcpFilePorts() {
+
+			const fnNetTCP = "/proc/net/tcp";
+
+
+
+			const ports: number[] = [];
+			const portReg = /^\s*\w+:\s*\w+:(\w+)\s+\w+:\w+\s+0A\s+/;
+
+			const fileStream = fs.createReadStream(fnNetTCP);
+			const rl = readline.createInterface({
+				input: fileStream,
+				crlfDelay: Infinity
+			});
+			// 注意：我们使用 crlfDelay 选项将 input.txt 中的所有 CR LF 实例（'\r\n'）识别为单个换行符。
+			// input.txt 中的每一行在这里将会被连续地用作 `line`。
+			for await (const line of rl) {
+				if (line) {
+					const res = portReg.exec(line);
+					if (res) {
+						ports.push(parseInt(res[1], 16));
+						//   console.log(`Line from file: ${line}`);
+					}
+				}
+			}
+			fileStream.close();
+			return ports;
+		}
+
+		const handleGitpodPorts = (currentOpen: number[]) => {
+			try {
+				const gitpodPorts = JSON.parse(GITPOD_PORTS) as any[];
+				for (const portIndex in gitpodPorts) {
+					if(handled.includes(portIndex as any) ) {
+						continue;
+					}
 					const portObj = gitpodPorts[portIndex];
-					if(!handled.includes(portIndex as any) && portObj.onOpen !==  'ignore' ) {
+					if(!currentOpen.includes(+portObj.port)) {
+						continue;
+					}
+					if (portObj.onOpen !== 'ignore') {
 						handled.push(portIndex as any);
 						const openUrl = vscode.Uri.parse(`${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${portObj.port}-$1`)}`);
-						if(portObj.type === 'browser') {
+						if (portObj.type === 'browser') {
 							vscode.env.openExternal(openUrl);
 						} else {
 							vscode.commands.executeCommand('simpleBrowser.api.open', openUrl, {
@@ -142,10 +181,34 @@ export function activate(context: vscode.ExtensionContext) {
 						break;
 					}
 				}
-			} catch(e) {
+			} catch (e) {
 				console.error(e);
 			}
-		// })();
+		}
+
+		(async () => {
+
+			const fnNetTCP = "/proc/net/tcp";
+
+			if (!fs.existsSync(fnNetTCP)) {
+				return [];
+			}
+
+			while (!isBreak) {
+
+				const currentPorts = await getTcpFilePorts();
+
+				console.log(`currentPorts: ${currentPorts.join(',')}`);
+
+				handleGitpodPorts(currentPorts);
+
+				await new Promise((resolve) => {
+					setTimeout(() => {
+						resolve(null);
+					}, 3000);
+				})
+			}
+		})();
 	}
 
 	context.subscriptions.push(vscode.window.registerExternalUriOpener(
@@ -157,24 +220,24 @@ export function activate(context: vscode.ExtensionContext) {
 				// This is called when the user first selects a link and VS Code
 				// needs to determine which openers are available.
 
-				if (uri.authority.includes('localhost')  || uri.authority.includes('127.0.0.1') || uri.authority.includes('0.0.0.0')) {
+				if (uri.authority.includes('localhost') || uri.authority.includes('127.0.0.1') || uri.authority.includes('0.0.0.0')) {
 					// This opener has default priority for this URI.
 					// This will result in the user being prompted since VS Code always has
 					// its own default opener.
-				    return vscode.ExternalUriOpenerPriority.Preferred
+					return vscode.ExternalUriOpenerPriority.Preferred
 					// return vscode.ExternalUriOpenerPriority.Default;
 				}
 
 				// The opener can be used but should not be used by default
 				return vscode.ExternalUriOpenerPriority.Option;
-				
+
 			},
 			openExternalUri(resolveUri: vscode.Uri) {
 
 				// vscode.open
 				console.log(resolveUri.toString());
 				let port = resolveUri.authority.replace(/^.*:(\d+)/, '$1') as string;
-				if(!port.match(/^\d+$/)) {
+				if (!port.match(/^\d+$/)) {
 					port = '80';
 				}
 
@@ -206,9 +269,9 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 
 		// Display a message box to the user
-        vscode.window.showInformationMessage(`Hello World!`);
+		vscode.window.showInformationMessage(`Hello World! ${WS_DIR_FILE}`);
 
-        // vscode.window.showInformationMessage(`Url! ${scriptUri.scheme}://${scriptUri.authority}`);
+		// vscode.window.showInformationMessage(`Url! ${scriptUri.scheme}://${scriptUri.authority}`);
 
 		// // // 创建 webview
 		// const panel = vscode.window.createWebviewPanel(
@@ -258,9 +321,11 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 
-	if(panel) {
-	  panel.dispose();
-	}
+	isBreak = true;
+
+	// if(panel) {
+	//   panel.dispose();
+	// }
 	// clearAllWsData();
 
- }
+}
