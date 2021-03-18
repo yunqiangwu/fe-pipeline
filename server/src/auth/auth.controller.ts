@@ -23,7 +23,7 @@ export class AuthController {
     private readonly usersService: UsersService,
   ) {}
 
-  // @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('local'))
   @Post('login')
   @ApiResponse({
     status: 200,
@@ -34,8 +34,10 @@ export class AuthController {
     description: 'login user info',
     type: LoginAccountDto,
   })
-  async login(@Body() user: LoginAccountDto) {
-    return this.authService.login(user);
+  async login(@CurrentUser() user: User) {
+    // @Body() user: LoginAccountDto, 
+    return user;
+    // return this.authService.login(user);
   }
 
   @Post('login-with-auth-client-token')

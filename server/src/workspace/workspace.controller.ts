@@ -9,6 +9,7 @@ import { CreateTempWorkspaceDto } from './dto/create-temp-workspace.dto';
 import { CreateTempWorkspaceDtoResp } from './dto/create-temp-workspace-resp.dto';
 import { Response } from 'express';
 import { Config } from 'src/config/config';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 
 // import {
@@ -164,6 +165,7 @@ export class WorkspaceController {
 
   // @UseGuards(AuthGuard('jwt'))
   // @UseGuards(AuthGuard('local'))
+  @UseGuards(JwtAuthGuard)
   @Get('/redirect-ws-url/:workspaceId')
   async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
     let res = {} as any;
@@ -176,10 +178,10 @@ export class WorkspaceController {
          response.status(302).redirect(`//${res.wsHost}${req.url || '/'}`);
          return;
       } else if(host.endsWith(`ws.${configHost}`) ) {
-        // response.cookie('key', res.password, {
-        //   path: '/',
-        //   domain: res.wsHost,
-        // });
+        response.cookie('key', res.password, {
+          path: '/',
+          domain: res.wsHost,
+        });
         response.status(302).redirect(`/`);
         return;
       }

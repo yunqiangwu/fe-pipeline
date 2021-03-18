@@ -10,7 +10,7 @@ import styles from './index.less';
 import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
-import { hash } from '@/utils/token';
+import { getToken, hash } from '@/utils/token';
 
 
 const gridStyle = {
@@ -180,7 +180,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
     if(ws.podObject && ws.state === "opening") {
       await awaitPodAvailable(ws.id);
-      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}`);
+      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}?access_token=${getToken()}`);
       return;
     }
 
@@ -242,7 +242,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       } else {
       }
       await awaitPodAvailable(ws.id);
-      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}`);
+      await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}?access_token=${getToken()}`);
 
       if(onChange) {
         await onChange();

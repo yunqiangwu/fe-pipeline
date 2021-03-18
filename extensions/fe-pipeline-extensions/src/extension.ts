@@ -126,12 +126,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 		let handled: number[] = [];
 
-
 		async function getTcpFilePorts() {
 
 			const fnNetTCP = "/proc/net/tcp";
-
-
 
 			const ports: number[] = [];
 			const portReg = /^\s*\w+:\s*\w+:(\w+)\s+\w+:\w+\s+0A\s+/;
@@ -198,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 				const currentPorts = await getTcpFilePorts();
 
-				console.log(`currentPorts: ${currentPorts.join(',')}`);
+				// console.log(`currentPorts: ${currentPorts.join(',')}`);
 
 				handleGitpodPorts(currentPorts);
 

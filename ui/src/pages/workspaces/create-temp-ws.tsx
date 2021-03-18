@@ -13,7 +13,7 @@ import styles from './index.less';
 import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
-import { hash } from '@/utils/token';
+import { getToken, hash } from '@/utils/token';
 
 // import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
@@ -192,7 +192,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
   }
 
   if(state === 'loaded' && wsObj) {
-    return <iframe style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}`} />;
+    return <iframe style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}?access_token=${getToken()}`} />;
   }
 
   if(state === 'readme') {
