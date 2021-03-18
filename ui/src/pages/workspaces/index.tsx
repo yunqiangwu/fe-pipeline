@@ -11,6 +11,7 @@ import { IWorkspaces } from './types';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
 import { getToken, hash } from '@/utils/token';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
 
 
 const gridStyle = {
@@ -18,11 +19,7 @@ const gridStyle = {
   textAlign: 'left' as any,
 };
 
-const cardBodyStyle = {
-  minHeight: '72vh',
-};
-
-const wrapCardStyle = { width: '100%'};
+const wrapCardStyle = { width: '100%' };
 
 const ModalContent = ({ modal }: any) => {
 
@@ -67,7 +64,7 @@ const ModalContent = ({ modal }: any) => {
 
   modal.handleOk(async () => {
     if (await formDS.validate()) {
-      try{
+      try {
         const data = formDS.toData()[0]
         const res = await axios.post('/workspace', [data]);
         notification.success({
@@ -75,7 +72,7 @@ const ModalContent = ({ modal }: any) => {
           description: '', // JSON.stringify(res.data,null,2)
         });
         return true;
-      }catch(e) {
+      } catch (e) {
         console.error(e);
         notification.error({
           message: '创建失败',
@@ -107,39 +104,39 @@ const ModalContent = ({ modal }: any) => {
 
 
 const awaitPodAvailable = async (wsId: any) => {
-   // 等待容器激活
-   let isSuccess  = false;
-   let errorCount = 0;
+  // 等待容器激活
+  let isSuccess = false;
+  let errorCount = 0;
 
-   try {
-     while(isSuccess === false) {
-       let errObj = null;
-       let res: any = null;
-       try{
-         res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
-       }catch(err) {
-         errObj = err;
-       }
-       if(res && res.status >= 200 && res.status < 400) {
-         isSuccess = true
-       } else {
-         errorCount++;
-         isSuccess = false;
-         await new Promise((resolve) => { setTimeout(() => resolve(null), 1500)});
-       }
-       if(errorCount >=10 ) {
-         throw errObj;
-       }
-     }
-   } catch(e)  {
-     console.error(e);
-     // return;
-   }
+  try {
+    while (isSuccess === false) {
+      let errObj = null;
+      let res: any = null;
+      try {
+        res = await axios.get(`/workspace/ws-is-alive/${wsId}`);
+      } catch (err) {
+        errObj = err;
+      }
+      if (res && res.status >= 200 && res.status < 400) {
+        isSuccess = true
+      } else {
+        errorCount++;
+        isSuccess = false;
+        await new Promise((resolve) => { setTimeout(() => resolve(null), 1500) });
+      }
+      if (errorCount >= 10) {
+        throw errObj;
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    // return;
+  }
 }
 
 const windowOpen = async (wsUrl: any) => {
 
-  if(!wsUrl) {
+  if (!wsUrl) {
     return;
   }
 
@@ -156,21 +153,21 @@ const windowOpen = async (wsUrl: any) => {
   }, 0);
 }
 
-const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) => {
+const WSCardGrid = ({ ws, onChange }: { ws: IWorkspaces, onChange: Function }) => {
 
   const [delWsRes, delWs] = useAsyncFn(async (ws: IWorkspaces) => {
     // await (new Promise(resolve=> setTimeout(resolve, 1000)));
-    try{
-      const res = await axios.delete(`/workspace/${ws.id}`,  { showError: true } as any);
+    try {
+      const res = await axios.delete(`/workspace/${ws.id}`, { showError: true } as any);
       notification.success({
         message: '删除成功',
         description: '',
       });
-      if(onChange) {
+      if (onChange) {
         await onChange();
       }
       return true;
-    }catch(e) {}
+    } catch (e) { }
   }, []);
 
   const [openMessage, setOpenMessage] = useState<string>('');
@@ -178,7 +175,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
   const [openWsRes, openWs] = useAsyncFn(async (ws: IWorkspaces) => {
 
 
-    if(ws.podObject && ws.state === "opening") {
+    if (ws.podObject && ws.state === "opening") {
       await awaitPodAvailable(ws.id);
       await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}?access_token=${getToken()}`);
       return;
@@ -187,7 +184,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     // setOpenMessage('\"正在创建 pod ...\"');
     // await (new Promise(resolve=> setTimeout(resolve, 1000)));
     let _ws: any;
-    try{
+    try {
 
       let wsUrl;
       if (process.env.API_WEBSOCKET) {
@@ -218,13 +215,13 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       const example = _ws.pipe(takeUntil(timer$));
 
       example.subscribe((r: any) => {
-        setOpenMessage( (state) => {
-          if(r.data.message) {
+        setOpenMessage((state) => {
+          if (r.data.message) {
             return r.data.message;
           }
           return 'loading...';
-        } );
-        if(r.data.type === 'created')  {
+        });
+        if (r.data.type === 'created') {
           break$.complete();
         }
       });
@@ -233,7 +230,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
 
       await break$.toPromise();
 
-      if(isTimeout) {
+      if (isTimeout) {
         notification.error({
           message: '操作超时',
           description: '',
@@ -244,7 +241,7 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
       await awaitPodAvailable(ws.id);
       await windowOpen(`${axios.defaults.baseURL}workspace/redirect-ws-url/${ws.id}?access_token=${getToken()}`);
 
-      if(onChange) {
+      if (onChange) {
         await onChange();
       }
 
@@ -271,28 +268,28 @@ const WSCardGrid = ({ ws, onChange }: {ws: IWorkspaces, onChange: Function  }) =
     <Card.Grid className={styles['ws-card']} style={gridStyle}>
       <div className={styles['ws-card-inner']}>
         <div>
-        {ws.name} {ws.state && <span>[{ws.state}]</span>} {<span>({ws.id})</span>}
+          {ws.name} {ws.state && <span>[{ws.state}]</span>} {<span>({ws.id})</span>}
         </div>
         <div>
-        Context: {ws.gitUrl} <br/>
+          Context: {ws.gitUrl} <br />
         Password: {ws.password}
         </div>
         <div>
-          <Button onClick={() => {return openWs(ws)}} color={'primary' as any}>打开</Button>
-          <Button onClick={() => {return delWs(ws)}} color={'red' as any}>删除</Button>
+          <Button onClick={() => { return openWs(ws) }} color={'primary' as any}>打开</Button>
+          <Button onClick={() => { return delWs(ws) }} color={'red' as any}>删除</Button>
         </div>
         {/* onClick={() => {return showOpenMessage(openMessage)}} */}
-        { openMessage && <div className={styles['ws-card-log-area']}>
+        {openMessage && <div className={styles['ws-card-log-area']}>
           <Spin><pre>{openMessage}</pre></Spin>
           {/* <span className={styles['ws-card-log-area-show-more-btn']} >查看更多...</span> */}
-        </div> }
+        </div>}
       </div>
     </Card.Grid>
   );
 }
 
 const WorkSpaces: React.FC<any> = () => {
-  const [state, fetch] = useAsyncFn(async ():Promise<IWorkspaces[]> => {
+  const [state, fetch] = useAsyncFn(async (): Promise<IWorkspaces[]> => {
     const response = await axios.get('/workspace');
     return response.data as IWorkspaces[];
   }, []);
@@ -314,27 +311,29 @@ const WorkSpaces: React.FC<any> = () => {
   }, []);
 
   return (
-      <Card
-        bordered={false}
-        loading={state.loading}
-        title={<h1 className={styles.title}>工作空间</h1>}
-        extra={<Button onClick={fetch} >刷新</Button>}
-        style={wrapCardStyle}
-        actions={state.error && [<Alert type="error" message={JSON.stringify(state.error.message, null, 2)} />]}
-        bodyStyle={cardBodyStyle}
-      >
-        {state.value && state.value.map(ws => {
-          return (<WSCardGrid key={`k_${ws.id}`} onChange={fetch} ws ={ws} />);
-        })}
-        <Card.Grid key="add-new-ws-card" className={`${styles['add-new-ws-card']} ${styles['ws-card']}`} style={gridStyle}>
-          <div style={{ height: '100%' }} onClick={newWs}>
-            <Icon type="add_box-o" title="创建工作空间" />
-            <span className={styles['inner-text']}>创建工作空间</span>
-          </div>
-        </Card.Grid>
-        {/* <pre>{JSON.stringify(state.value, null, 2)}</pre> */}
-      </Card>
+    <PageHeaderWrapper
+
+      // bordered={false}
+      // loading={state.loading}
+      // title={<h1 className={styles.title}>工作空间</h1>}
+      extra={<Button onClick={fetch} >刷新</Button>}
+      style={wrapCardStyle}
+      extraContent={state.error && [<Alert type="error" message={JSON.stringify(state.error.message, null, 2)} />]}
+    // bodyStyle={cardBodyStyle}
+    >
+      {state.value && state.value.map(ws => {
+        return (<WSCardGrid key={`k_${ws.id}`} onChange={fetch} ws={ws} />);
+      })}
+      <Card.Grid key="add-new-ws-card" className={`${styles['add-new-ws-card']} ${styles['ws-card']}`} style={gridStyle}>
+        <div style={{ height: '100%' }} onClick={newWs}>
+          <Icon type="add_box-o" title="创建工作空间" />
+          <span className={styles['inner-text']}>创建工作空间</span>
+        </div>
+      </Card.Grid>
+      {/* <pre>{JSON.stringify(state.value, null, 2)}</pre> */}
+    </PageHeaderWrapper>
   );
+
 }
 
 export default WorkSpaces;

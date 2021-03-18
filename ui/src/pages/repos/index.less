@@ -1,0 +1,85 @@
+
+.normal {
+}
+
+.title {
+  // background: rgb(121, 242, 157);
+  font-weight: bold;
+}
+
+
+.ws-card {
+  height: 140px;
+  line-height: 20px;
+
+
+  .ws-card-inner {
+
+    overflow: hidden;
+
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .ws-card-log-area {
+
+
+      border: .5px solid rgba(128, 128, 128, 0.061);
+      margin-top: 16px;
+
+      pre {
+        overflow: hidden;
+        margin-bottom: 0;
+      }
+
+      .ws-card-log-area-show-more-btn {
+          color: blue;
+      }
+
+    }
+
+
+
+    .ws-card-btn-wrap {
+      opacity: 0.09;
+      display: none;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      top: 0;
+      justify-content: flex-end;
+      transition: opacity 0.2s;
+      align-items: center;
+
+      // .ws-card-remove-btn {
+      //   position: absolute;
+      //   right: 0;
+      //   bottom: 0;
+      // }
+    }
+
+  }
+
+
+
+  &:hover {
+    .ws-card-btn-wrap {
+      opacity: 1;
+      display: flex;
+    }
+
+    .ws-card-inner {
+      overflow: visible;
+    }
+
+  }
+}
+
+.add-new-ws-card {
+  line-height: 48px;
+  background-color: #80808030;
+  .inner-text {
+    transform: translateY(2px);
+    display: inline-block;
+  }
+}

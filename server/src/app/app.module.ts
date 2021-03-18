@@ -15,6 +15,7 @@ import { ConfigModule } from '../config/config.module';
 import { join } from 'path';
 // import { ServeStaticModule } from '@nestjs/serve-static';
 import { Config } from '../config/config';
+import { ReposModule } from 'src/repos/repos.module';
 @Module({
   imports: [
 
@@ -34,6 +35,8 @@ import { Config } from '../config/config';
     EventsModule,
 
     WorkspaceModule,
+
+    ReposModule,
 
     // WsProxyModule,
 
