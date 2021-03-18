@@ -31,11 +31,6 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     mkdir -p /etc/fixuid && \
     printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
-# COPY release-packages/code-server*.deb /tmp/
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb -o /tmp/code-server-install.deb
-COPY ./entrypoint.sh /usr/bin/entrypoint.sh
-RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
-
 ENV NVM_DIR /sysapp/nvm
 ENV NVM_NODEJS_ORG_MIRROR http://npm.taobao.org/mirrors/node
 
@@ -43,7 +38,14 @@ RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v
 
 RUN . $NVM_DIR/nvm.sh && nvm install 14 && npm i -g yarn
 
-RUN chown -R coder:coder $NVM_DIR && mkdir -p /workspace && chown -R coder:coder /workspace
+# COPY release-packages/code-server*.deb /tmp/
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb -o /tmp/code-server-install.deb
+RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
+
+RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
+
+RUN mkdir -p /workspace && chown -R coder:coder /workspace
+COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 
 EXPOSE 8080
 # This way, if someone sets $DOCKER_USER, docker-exec will still work as
@@ -51,8 +53,10 @@ EXPOSE 8080
 # docker-run.
 USER coder
 
+RUN sudo chown -R coder:coder $NVM_DIR
+
 RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >> ~/.bashrc \
   echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
-WORKDIR /home/coder
+WORKDIR /workspace
 ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]

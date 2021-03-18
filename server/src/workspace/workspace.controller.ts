@@ -163,6 +163,7 @@ export class WorkspaceController {
   }
 
   // @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('local'))
   @Get('/redirect-ws-url/:workspaceId')
   async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
     let res = {} as any;
@@ -175,10 +176,10 @@ export class WorkspaceController {
          response.status(302).redirect(`//${res.wsHost}${req.url || '/'}`);
          return;
       } else if(host.endsWith(`ws.${configHost}`) ) {
-        response.cookie('key', res.password, {
-          path: '/',
-          domain: res.wsHost,
-        });
+        // response.cookie('key', res.password, {
+        //   path: '/',
+        //   domain: res.wsHost,
+        // });
         response.status(302).redirect(`/`);
         return;
       }

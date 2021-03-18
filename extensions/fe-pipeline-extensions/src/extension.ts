@@ -18,7 +18,7 @@ let isBreak = false;
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const WS_DIR_FILE = path.join(`${(context?.storageUri?.authority || context.globalStorageUri.authority)}`, 'config.json') // '/workspace/.gitpod/config.json';
+	const WS_DIR_FILE = path.join(`${(context?.storageUri?.authority || `/workspace/.gitpod`)}`, 'config.json') // '/workspace/.gitpod/config.json';
 
 	const setWsData = (key: string, value: string | null) => {
 		let data = {} as any;
