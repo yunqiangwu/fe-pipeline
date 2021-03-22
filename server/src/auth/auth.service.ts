@@ -23,6 +23,22 @@ export class AuthService {
     // throw new Error('Method not implemented.');
   }
 
+  async getOtherAccountBindToken(userId: number, authClientId: string) {
+    const res = await this.usersService.threeAccountRepository.findOne({ authClientId, user: { userId, } });
+    if(res) {
+      const authProviders = (Config.singleInstance().get('authProviders')) as any[];
+      const authProviderItem = authProviders.find(item => item.id  ===  authClientId);
+      return {
+        accessToken: res.accessToken,
+        protocol: authProviderItem.protocol,
+        host: authProviderItem.host,
+        authClientId,
+      };
+    } else {
+      throw new HttpException(`not account for userId: ${userId}, authClientId: ${authClientId}`, 401);
+    }
+  }
+
   constructor(
     public readonly usersService: UsersService,
     public readonly jwtService: JwtService

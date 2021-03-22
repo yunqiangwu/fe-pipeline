@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Request, UseGuards, Headers, HttpException, HttpStatus, Body } from '@nestjs/common';
+import { Controller, Get, Post, Request, UseGuards, Headers, HttpException, HttpStatus, Body, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import * as querystring from 'querystring';
 import { AuthService } from './auth.service';
-import { ApiOAuth2, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOAuth2, ApiBody, ApiResponse, ApiTags, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { omit } from 'lodash';
 import { UsersService } from '../users/users.service';
@@ -84,7 +84,7 @@ export class AuthController {
   }
 
     /**
-   * 第三方账号绑定
+   * 获取第三方账号绑定信息
    */
     @UseGuards(AuthGuard('jwt'))
     @ApiOAuth2([])
@@ -99,6 +99,31 @@ export class AuthController {
         return this.authService.getOtherAccountBind(user.userId);
       }catch(e) {
         return e;
+      }
+    }
+
+   /**
+   * 第三方账号绑定
+   */
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOAuth2([])
+    @Get('other-account-bind-token')
+    @ApiQuery({
+      name: 'authClientId',
+      type: String,
+    })
+    @ApiResponse({
+      status: 200,
+      description: 'ThreeAccount info list',
+      // type: String,
+    })
+    async getOtherAccountBindToken(@CurrentUser() user: User, @Query('authClientId') authClientId: string) {
+      try{
+        const token = await this.authService.getOtherAccountBindToken(user.userId, authClientId);
+        return token;
+      }catch(e) {
+        e.autoAuthClientId = authClientId;
+        throw e;
       }
     }
 

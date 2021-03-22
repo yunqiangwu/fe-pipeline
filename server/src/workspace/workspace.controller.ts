@@ -26,7 +26,6 @@ export class WorkspaceController {
   constructor(
     private readonly workspaceService: WorkspaceService,
   ) {}
-
   @UseGuards(AuthGuard('jwt'))
   @Get()
   @ApiParam({

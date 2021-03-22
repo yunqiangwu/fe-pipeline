@@ -14,7 +14,6 @@ if(!(axios as any)._IS_CONFIGED) {
     }
   }
   axios.interceptors.request.use((config) => {
-
     const token = getToken();
     if(token) {
       return {
@@ -51,6 +50,9 @@ if(!(axios as any)._IS_CONFIGED) {
     let err = null;
     if(error?.response?.data?.message) {
       err = new Error(error?.response?.data?.message);
+      if(error?.response?.data?.autoAuthClientId) {
+        (err as any).autoAuthClientId = error?.response?.data?.autoAuthClientId;
+      }
     }  else  {
       err = error;
     }
@@ -64,24 +66,26 @@ if(!(axios as any)._IS_CONFIGED) {
     }
 
     if(
+      // axios.defaults.baseURL && (error.config.url as string).startsWith(axios.defaults.baseURL) &&
       // (!(error.config as any).fetchTokenFromUrlParam)
       // &&
+      (!error.config.notRedirectLogin) &&
       ((error as any).response.status === 401 &&
       !window.location.pathname.includes(`${(window as any).routerBase || '/'}login`))
       ) {
         let gotoUrl = (`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}login?redirect_uri=${encodeURIComponent(window.location.href)}`);
-        if(window.location.pathname === '/' || window.location.pathname === (window as any).routerBase ) {
-          if(error?.response?.data?.autoAuthClientId) {
-            (window as any).autoAuthClientId = error?.response?.data?.autoAuthClientId;
-          }
+        if(error?.response?.data?.autoAuthClientId) {
+          (window as any).autoAuthClientId = error?.response?.data?.autoAuthClientId;
           const clientId = (window as any).autoAuthClientId || 'GitLab';
           gotoUrl = `${gotoUrl}&autoAuthClientId=${clientId}`;
+        } else if((window as any).autoAuthClientId) {
+          gotoUrl = `${gotoUrl}&autoAuthClientId=${(window as any).autoAuthClientId}`;
         }
         console.log(gotoUrl);
         window.location.href = gotoUrl;
     }
 
-    throw err;
+    return Promise.reject( err );
   });
 
   (axios as any)._IS_CONFIGED = true;
