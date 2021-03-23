@@ -117,14 +117,18 @@ export class WorkspaceService {
     let podObj;
     if(ws && ws.podObject) {
       podObj =  JSON.parse(ws.podObject);
-    } else {
-      throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
-    }
     // } else {
-    //   const podName = `ws-pod-${workspaceId}`;
-    //   const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
-    //   podObj = kubePodRes.body;
+    //   throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
     // }
+    } else {
+      const podName = `ws-pod-${workspaceId}`;
+      const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
+      podObj = kubePodRes.body;
+      if(ws && podObj) {
+        ws.podObject = JSON.stringify(podObj);
+        await this.workspaceRepository.save(ws);
+      }
+    }
 
     let podIp = podObj.status.podIP;
     let webUiPort: any = 3000;
