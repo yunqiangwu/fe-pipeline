@@ -50,7 +50,7 @@ export class WorkspaceService {
 
   async createTempWorkspace(wsData: Workspace): Promise<Workspace> {
 
-    wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
+    // wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
     wsData.isTemp = true;
     wsData.image = wsData.image || 'vscode';
     if(wsData.gitpodConfig) {
@@ -69,6 +69,11 @@ export class WorkspaceService {
     example.isTemp = true;
     example.image = wsData.image;
     example.userId = wsData.userId;
+    if(wsData.name) {
+      example.name = wsData.name;
+    } else {
+      wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
+    }
 
     let ws = await this.workspaceRepository.findOne(example);
 
@@ -78,7 +83,9 @@ export class WorkspaceService {
     } else {
       if(ws.gitpodConfig !== wsData.gitpodConfig || wsData.image !== ws.image) {
         if (ws.state === 'opening' || ws.state === 'pending') {
-          await this.closeWs(ws.id, true);
+          if((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData)) {
+            await this.closeWs(ws.id, true);
+          }
         }
         ws = {
           ...ws,
@@ -160,7 +167,7 @@ export class WorkspaceService {
     try {
       const { wsHost, password, realIP, realPort } = await this.getRedirectToWsInfo(workspaceId);
       return await fetch(`http://${realIP}:${realPort}`,
-        { method: 'get', headers: { Host: wsHost} } // 
+        { method: 'get', headers: { Host: wsHost}, timeout: 3000 } // 
       ).then(
         r => {
           if(r.status >= 200 && r.status < 500) {

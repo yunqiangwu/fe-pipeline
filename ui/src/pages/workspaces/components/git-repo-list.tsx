@@ -98,13 +98,13 @@ export const GitRepoList: FC = () => {
             </tr>
             <tr>
               <td>envJsonData</td>
-              <td>环境变量配置对象, JSON.stringify(encodeURIComponent(envObj)) 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
+              <td>环境变量配置对象, encodeURIComponent(JSON.stringify(envObj)) 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
               <td></td>
               <td></td>
             </tr>
             <tr>
               <td>gitpodConfig</td>
-              <td>.gitpod.yml 配置对象, JSON.stringify(encodeURIComponent(envObj)) 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
+              <td>.gitpod.yml 配置对象, encodeURIComponent(JSON.stringify(envObj)) 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
               <td></td>
               <td></td>
             </tr>

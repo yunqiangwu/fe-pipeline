@@ -4,6 +4,7 @@ RUN apt-get update \
  && apt-get install -y \
     curl \
     dumb-init \
+    unzip \
     htop \
     locales \
     man \
