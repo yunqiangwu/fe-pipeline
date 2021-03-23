@@ -703,25 +703,32 @@ export class WorkspaceService {
       res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
     } catch(e) {
       console.error(e);
-      try{
-        res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
-      } catch(e2) {
-        console.error(e2);
-      }
+      throw e;
+      // try{
+      //   res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
+      // } catch(e2) {
+      //   console.error(e2);
+      // }
     }
     return res;
   }
 
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
+    if(ws.state === 'deleting') {
+      return;
+    }
+
     ws.state = 'deleting';
+    
     await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;
-    try {
+    try{
       await this.deletePod(podName);
-    } catch (e) {
+    }catch(e)  {
       console.error(e);
     }
+
     try {
       const wsDir = this.getWsdir(podName);
       if (existsSync(wsDir)) {
