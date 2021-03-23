@@ -181,6 +181,7 @@ export class WorkspaceController {
           path: '/',
           domain: res.wsHost,
           sameSite: 'none',
+          secure: true,
         });
         response.status(302).redirect(`/`);
         return;
