@@ -151,6 +151,10 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
       const res = await axios.post(`/workspace/open-ws/${ws.id}`, {}, { showError: true } as any);
 
+      if(res.data.podObject) {
+        break$.complete();
+      }
+
       await break$.toPromise();
 
       if(isTimeout) {
