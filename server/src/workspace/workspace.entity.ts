@@ -25,7 +25,7 @@ export class Workspace {
   image: string;
 
   @Column({ nullable: true, length: 200 })
-  state: 'pending' | 'opening' | 'saved' | 'created' | 'error' | 'deleting';
+  state: 'pending' | 'opening' | 'saving' | 'saved' | 'created' | 'error' | 'deleting';
 
   @Column({ nullable: true, length: 1200 })
   podObject: string;

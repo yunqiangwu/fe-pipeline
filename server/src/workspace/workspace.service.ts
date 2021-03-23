@@ -54,9 +54,14 @@ export class WorkspaceService {
     wsData.isTemp = true;
     wsData.image = wsData.image || 'vscode';
     if(wsData.gitpodConfig) {
-      wsData.gitpodConfig = isString(wsData.gitpodConfig) ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
+      wsData.gitpodConfig = typeof wsData.gitpodConfig === 'string' ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
     } else {
       wsData.gitpodConfig = null;
+    }
+    if(wsData.envJsonData) {
+      wsData.envJsonData = typeof wsData.envJsonData === 'string' ? wsData.envJsonData: JSON.stringify(wsData.envJsonData);
+    } else {
+      wsData.envJsonData = null;
     }
 
     if (wsData.isZipUrl === undefined) {
@@ -81,11 +86,9 @@ export class WorkspaceService {
       // throw new HttpException(`ws: ${example} is not found`, 404);
       ws = await this.workspaceRepository.save(wsData);
     } else {
-      if(ws.gitpodConfig !== wsData.gitpodConfig || wsData.image !== ws.image) {
+      if((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData) || wsData.image !== ws.image) {
         if (ws.state === 'opening' || ws.state === 'pending') {
-          if((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData)) {
-            await this.closeWs(ws.id, true);
-          }
+          await this.closeWs(ws.id, true);
         }
         ws = {
           ...ws,
@@ -210,21 +213,36 @@ export class WorkspaceService {
       throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
     }
 
-    if (ws.state === 'pending') {
-      return {
-        data: workspaceId,
-      };
-    }
+    // if (ws.state === 'pending') {
+    //   return {
+    //     data: workspaceId,
+    //   };
+    // }
 
     const podName = `ws-pod-${workspaceId}`;
 
-    if (ws.state === 'opening') {
+    if (ws.state === 'opening' ||  ws.state === 'pending') {
       try {
         const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
-        if (!ws.podObject) {
+        const lastState = ws.state;
+        const type = kubePodRes.body.status.phase === 'Running' ? 'created' : 'creating';
+        if(type === 'created') {
+          ws.state = 'opening';
+        }
+        if (lastState !== ws.state) {
           ws.podObject = JSON.stringify(kubePodRes.body);
           await this.workspaceRepository.save(ws);
         }
+        globalSubject.next(
+          {
+            wsId: workspaceId,
+            data: {
+              type,
+              pod: kubePodRes.body,
+              workspaceId,
+            },
+          }
+        );
         return {
           data: workspaceId,
           podObject: kubePodRes.body, // JSON.stringify(kubePodRes.body),
@@ -387,6 +405,18 @@ export class WorkspaceService {
             gitpodConfig = yaml.parse(gitpodYmlContent);
           }
         }
+      }
+      if(!projectDirname) {
+        if(ws.envJsonData) {
+          console.log(ws.envJsonData);
+          const obj = JSON.parse(ws.envJsonData)
+          projectDirname  = obj.PROJECT_DIR_NAME;
+        }
+        if(!projectDirname) {
+          projectDirname  = 'project';
+        }
+        const projectDir = join(contextToDir, projectDirname);
+        mkdirpSync(projectDir)
       }
 
       // throw new HttpException(`${ws.gitUrl}`, 404);
@@ -608,7 +638,7 @@ export class WorkspaceService {
         );
 
         // @ts-ignore
-        const kubePodResStream = await this.kubeClient.api.v1.watch.namespace(this.ns).pods(podName).getObjectStream();
+        const kubePodResStream = await this.kubeClient.api.v1.watch.namespace(this.ns).pod(podName).getObjectStream();
         // const jsonStream = new JSONStream();
         // kubePodResStream.pipe(jsonStream);
         kubePodResStream.on('data', object => {
@@ -699,17 +729,57 @@ export class WorkspaceService {
 
   async deletePod(podName: string) {
     let res: any;
+
     try{
-      res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
+      let pod = await this.kubeClient.api.v1.namespace(this.ns).pod(podName);
+  
+      pod.delete({ force: true, gracePeriod: 0 }).then((d) => {
+        res = d;
+      });
+      let count =  0;
+      while(count++ < 100) {
+        try{
+         await this.kubeClient.api.v1.namespace(this.ns).pod(podName).get({});
+        } catch(err) {
+          console.error(err);
+          break;
+        }
+        await new Promise(resolve => {
+          setTimeout(() => resolve(null), 2000);
+        });
+      }
     } catch(e) {
       console.error(e);
-      throw e;
-      // try{
-      //   res = await this.kubeClient.api.v1.namespace(this.ns).pod(podName).delete({ force: true, gracePeriod: 0 });
-      // } catch(e2) {
-      //   console.error(e2);
-      // }
+      return res;
     }
+    // res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
+    // const stream = pod.getStream();
+    // res = await 
+    // await new Promise(resolve => {
+    //   pod.delete({ force: true, gracePeriod: 0 }).then((d) => {
+    //     res = d;
+    //   });
+    //   // setTimeout(() => resolve(null), 50000);
+    //   stream.on('data', (data: any) => {
+    //     console.log('data: ', data && data.toString());
+    //     // resolve(null);
+    //   });
+    //   stream.on('end', (data: any) => {
+    //     console.error('end', data);
+    //     resolve(null);
+    //   });
+    //   stream.on('error', (err) => {
+    //     console.error('error', err);
+    //     resolve(null);
+    //   });
+    // });
+
+    // await new Promise(resolve => {
+    //   setTimeout(() => resolve(null), 1000);
+    // });
+
+    // stream.destroy();
+
     return res;
   }
 
@@ -750,7 +820,7 @@ export class WorkspaceService {
     if((ws).state !== "opening") {
       throw new Error(`ws ${workspaceId} state ${ws.state} is not correct!`);
     }
-    ws.state = 'saved';
+    ws.state = 'saving';
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
     const podName = `ws-pod-${workspaceId}`;

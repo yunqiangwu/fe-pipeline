@@ -44,8 +44,3 @@ fi
 
 
 dumb-init /usr/bin/code-server "$@"
-
-
-if test -f $file; then
-  echo $file 是文件
-fi
