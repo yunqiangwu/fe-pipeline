@@ -109,7 +109,7 @@ export const Repos: React.FC<any> = () => {
         command: ({record}) => {
           const url = record.get('http_url_to_repo');
           return [
-            <a target="_blank" href={`//fe-pipeline.localhost:8000/?gitUrl=${url}`} >创建工作空间</a>,
+            <a target="_blank" href={`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=${url}`} >创建工作空间</a>,
           ]
         },
         width: 200,
