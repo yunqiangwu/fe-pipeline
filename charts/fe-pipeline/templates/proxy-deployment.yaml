@@ -1,9 +1,11 @@
+{{- $fullName := include "fe-pipeline.fullname" . -}}
+
 # openresty/openresty:alpine
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fe-pipeline.fullname" . }}-proxy
+  name: {{ $fullName }}-proxy
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
     fe-pipeline: proxy
@@ -22,7 +24,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ .Release.Name }}-proxy-config
+          name: {{ $fullName }}-proxy-config
       containers:
       - name: 'proxy'
         image: 'registry.cn-hangzhou.aliyuncs.com/jajabjbj/openresty:alpine'

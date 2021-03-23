@@ -52,7 +52,7 @@ export class WorkspaceService {
 
     wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
     wsData.isTemp = true;
-    wsData.image = wsData.image || 'theia-full';
+    wsData.image = wsData.image || 'vscode';
     if(wsData.gitpodConfig) {
       wsData.gitpodConfig = isString(wsData.gitpodConfig) ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
     } else {
@@ -67,6 +67,7 @@ export class WorkspaceService {
 
     example.gitUrl = wsData.gitUrl;
     example.isTemp = true;
+    example.image = wsData.image;
     example.userId = wsData.userId;
 
     let ws = await this.workspaceRepository.findOne(example);

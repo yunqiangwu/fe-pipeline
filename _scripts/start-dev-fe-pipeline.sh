@@ -29,3 +29,4 @@ kubectl -n fe-pipeline exec -ti deploy/dev-fe-pipeline-deployment -- bash
 
 # kubectl -n fe-pipeline exec -ti deploy/fe-pipeline -- bash
 
+# helm -n fe-pipeline template --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml > deployChart.yaml

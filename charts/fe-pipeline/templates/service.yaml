@@ -1,8 +1,11 @@
 {{- if .Values.service.enabled }}
+
+{{- $fullName := include "fe-pipeline.fullname" . -}}
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-manager
+  name: {{ $fullName }}-manager
   labels:
 {{ include "fe-pipeline.labels" . | indent 4 }}
 spec:

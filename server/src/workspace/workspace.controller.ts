@@ -180,6 +180,7 @@ export class WorkspaceController {
         response.cookie('key', res.password, {
           path: '/',
           domain: res.wsHost,
+          sameSite: 'none',
         });
         response.status(302).redirect(`/`);
         return;

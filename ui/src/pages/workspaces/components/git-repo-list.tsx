@@ -75,7 +75,7 @@ export const GitRepoList: FC = () => {
             <tr>
               <td>image</td>
               <td>镜像地址, 可以参考: <a href="https://github.com/yunqiangwu/theia-apps/blob/master/theia-full-docker/Dockerfile" target="_blank">构建镜像配置文件</a> 构建镜像</td>
-              <td>theia-full</td>
+              <td>vscode</td>
               <td></td>
             </tr>
             <tr>

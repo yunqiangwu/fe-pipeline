@@ -1,11 +1,12 @@
+{{- $fullName := include "fe-pipeline.fullname" . -}}
+
 # Copyright (c) 2020 Gitpod GmbH. All rights reserved.
 # Licensed under the MIT License. See License-MIT.txt in the project root for license information.
-
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-config
+  name: {{ $fullName }}-config
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 data:

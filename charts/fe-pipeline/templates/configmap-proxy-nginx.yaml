@@ -1,11 +1,12 @@
+{{- $fullName := include "fe-pipeline.fullname" . -}} 
+
 # Copyright (c) 2020 Gitpod GmbH. All rights reserved.
 # Licensed under the MIT License. See License-MIT.txt in the project root for license information.
-
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-proxy-config
+  name: {{ $fullName }}-proxy-config
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 data:
@@ -35,7 +36,7 @@ data:
 
 
         location / {
-            proxy_pass   http://{{ .Release.Name }}-manager:3000;
+            proxy_pass   http://{{ $fullName }}-manager:3000;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
             
@@ -55,7 +56,7 @@ data:
         server_name  ~^(\d+)-(\d+)-(\d+)-(\d+)-(\d+)\.ws\.*;
 
         location /api/workspace/redirect-ws-url/ {
-            proxy_pass   http://{{ .Release.Name }}-manager:3000;
+            proxy_pass   http://{{ $fullName }}-manager:3000;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
             

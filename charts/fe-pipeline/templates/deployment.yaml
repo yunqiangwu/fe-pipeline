@@ -1,7 +1,9 @@
+{{- $fullName := include "fe-pipeline.fullname" . -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "fe-pipeline.fullname" . }}
+  name: {{ $fullName }}
   labels:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
     fe-pipeline: ws-manager
@@ -34,7 +36,7 @@ spec:
         {{- end }}
       - name: config
         configMap:
-          name: {{ .Release.Name }}-config
+          name: {{ $fullName }}-config
       containers:
         - name: {{ .Chart.Name }}
           env:

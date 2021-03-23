@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline
-  # tag: latest
+  # tag: 1.16.0
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
