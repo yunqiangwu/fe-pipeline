@@ -61,7 +61,7 @@ RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >
 
 RUN . $NVM_DIR/nvm.sh && \
   npm i -g coral-cli && \
-  cd /workspace && \
+  cd /home/coder && \
   coral create coral-demo && \
   cd coral-demo && \
   rm -rf templates/Demo && \
