@@ -87,16 +87,20 @@ export class WorkspaceService {
     } else {
       if((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData) || wsData.image !== ws.image) {
         if (ws.state === 'opening' || ws.state === 'pending') {
-          await this.closeWs(ws.id, true);
+          this.closeWs(ws.id, true);
         }
         ws = {
           ...ws,
           ...wsData,
           state: 'created',
+          podObject: null,
         } as Workspace;
         await this.workspaceRepository.save(ws);
       }
     }
+    // const shouldDeleteTempWsList = await this.workspaceRepository.find({
+    // });
+    // console.log(shouldDeleteTempWsList);
     return ws;
   }
 
@@ -123,7 +127,10 @@ export class WorkspaceService {
     //   throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
     // }
     } else {
-      const podName = `ws-pod-${workspaceId}`;
+      if(!ws) {
+        throw new HttpException(`ws: ${workspaceId} is not found`, 404);;
+      }
+      const podName = await this.getPodName(ws);
       const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
       podObj = kubePodRes.body;
       if(ws && podObj) {
@@ -200,6 +207,14 @@ export class WorkspaceService {
     }
   }
 
+  async getPodName(ws: Workspace) {
+    return `ws-pod-${ws.id}-${ws.currentPodId || 1}`;
+  }
+
+  async getWsDirName(ws: Workspace) {
+    return `ws-pod-${ws.id}`;
+  }
+
   async openWs(workspaceId: number, currentUser?: User): Promise<any> {
 
     if (!workspaceId) {
@@ -218,7 +233,8 @@ export class WorkspaceService {
     //   };
     // }
 
-    const podName = `ws-pod-${workspaceId}`;
+    let podName = await this.getPodName(ws);
+    const wsDirName = await this.getWsDirName(ws);
 
     if (ws.state === 'opening' ||  ws.state === 'pending') {
       try {
@@ -261,7 +277,7 @@ export class WorkspaceService {
     try {
       let projectDirname  = '';
       let gitpodConfig = ws.gitpodConfig ? JSON.parse(ws.gitpodConfig) : null;
-      const contextToDir = this.getWsdir(podName);
+      const contextToDir = await this.getWsdir(ws);
 
       if(ws.gitUrl  &&  ws.gitUrl !== 'none') {
         if(!isURL(ws.gitUrl)) {
@@ -437,6 +453,14 @@ export class WorkspaceService {
         ws.state = 'pending';
 
         ws.password = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1$2$3$4$5');
+        if(!ws.currentPodId) {
+          ws.currentPodId = 1;
+        } else {
+          ws.currentPodId = ws.currentPodId + 1;
+        }
+        ws.startTimestamp = new Date().getTime();
+        
+        podName = await this.getPodName(ws);
 
         await this.workspaceRepository.save(ws);
 
@@ -512,7 +536,7 @@ export class WorkspaceService {
                   volumeMounts: [
                     {
                       mountPath: '/workspace',
-                      subPath: podName,
+                      subPath: wsDirName,
                       name: vol.name
                     },
                     {
@@ -721,8 +745,8 @@ export class WorkspaceService {
     return await this.workspaceRepository.delete(workspace);
   }
 
-  getWsdir(podName: string) {
-    const wsDir = join(getAppHomeDir(), `data/${podName}`);
+  async getWsdir(ws: Workspace) {
+    const wsDir = join(getAppHomeDir(), `data/${await this.getWsDirName(ws)}`);
     return wsDir;
   }
 
@@ -730,53 +754,19 @@ export class WorkspaceService {
     let res: any;
 
     try{
-      let pod = await this.kubeClient.api.v1.namespace(this.ns).pod(podName);
-  
-      pod.delete({ force: true, gracePeriod: 0 }).then((d) => {
-        res = d;
-      });
+      const pod = this.kubeClient.api.v1.namespace(this.ns).pod(podName);
+      await pod.get({});
+      res = await pod.delete({ force: true, gracePeriod: 0 });
       let count =  0;
       while(count++ < 100) {
-        try{
-         await this.kubeClient.api.v1.namespace(this.ns).pod(podName).get({});
-        } catch(err) {
-          console.error(err);
-          break;
-        }
+        await pod.get({});
         await new Promise(resolve => {
           setTimeout(() => resolve(null), 2000);
         });
       }
     } catch(e) {
-      return res;
+      throw e;
     }
-    // res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
-    // const stream = pod.getStream();
-    // res = await 
-    // await new Promise(resolve => {
-    //   pod.delete({ force: true, gracePeriod: 0 }).then((d) => {
-    //     res = d;
-    //   });
-    //   // setTimeout(() => resolve(null), 50000);
-    //   stream.on('data', (data: any) => {
-    //     console.log('data: ', data && data.toString());
-    //     // resolve(null);
-    //   });
-    //   stream.on('end', (data: any) => {
-    //     console.error('end', data);
-    //     resolve(null);
-    //   });
-    //   stream.on('error', (err) => {
-    //     console.error('error', err);
-    //     resolve(null);
-    //   });
-    // });
-
-    // await new Promise(resolve => {
-    //   setTimeout(() => resolve(null), 1000);
-    // });
-
-    // stream.destroy();
 
     return res;
   }
@@ -791,22 +781,23 @@ export class WorkspaceService {
     ws.state = 'deleting';
     
     await this.workspaceRepository.save(ws);
-    const podName = `ws-pod-${workspaceId}`;
+    const podName = await this.getPodName(ws);
+
     try{
       await this.deletePod(podName);
     }catch(e)  {
       console.error(e);
     }
 
-    // try {
-    //   const wsDir = this.getWsdir(podName);
-    //   if (existsSync(wsDir)) {
-    //     await emptyDir(wsDir);
-    //     await rmdir(wsDir);
-    //   }
-    // } catch (e) {
-    //   console.error(e);
-    // }
+    try {
+      const wsDir = await this.getWsdir(ws);
+      if (existsSync(wsDir)) {
+        await emptyDir(wsDir);
+        await rmdir(wsDir);
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
     await this.workspaceRepository.delete(workspaceId);
     return { workspaceId };
@@ -823,7 +814,7 @@ export class WorkspaceService {
     ws.state = 'saving';
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
-    const podName = `ws-pod-${workspaceId}`;
+    const podName = await this.getPodName(ws);
     try {
       await this.deletePod(podName);
     } catch (e) {
