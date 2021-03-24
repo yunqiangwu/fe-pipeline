@@ -9,6 +9,12 @@ export class Workspace {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'int', default: 0 })
+  currentPodId: number;
+
+  @Column({ type: 'int', default: 0 })
+  startTimestamp: number;
+
   @ApiProperty({ required: false, example: 1, description: '关联用户id' })
   @Column({ type: 'int' })
   userId: number;
