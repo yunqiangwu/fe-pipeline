@@ -28,6 +28,10 @@ const OtherLogin = () => {
 
   let location = useLocation();
 
+  const isAtIframe = React.useMemo(() => {
+    return window !== window.parent;
+  }, []);
+
   const autoAuthClientId = React.useMemo(() => {
     const pa = new URLSearchParams(location.search);
     const current_redirect_uri = pa.get('redirect_uri');
@@ -41,6 +45,39 @@ const OtherLogin = () => {
     const response = await axios.get('/auth/oauth-config');
     return response.data;
   });
+
+  React.useEffect(() => {
+
+    const lis = function(event: MessageEvent) {
+      // console.log('message', event);
+      if(event.data === 'fe-pipeline-loginer') {
+        const current_redirect_uri = localStorage.getItem('current_redirect_uri');
+        if (current_redirect_uri) {
+          localStorage.removeItem('current_redirect_uri');
+          window.location.href = current_redirect_uri;
+          // let gotoUrl = current_redirect_uri;
+          // if (gotoUrl.includes('?')) {
+          //   gotoUrl = `${gotoUrl}&`;
+          // } else {
+          //   gotoUrl = `${gotoUrl}?`;
+          // }
+          // gotoUrl = `${gotoUrl}access_token=${access_token}`;
+          // if (gotoUrl.startsWith('http')) {
+          //   return;
+          // } else {
+          //   props.history.replace(gotoUrl);
+          // }
+        }
+      }
+    };
+
+    window.addEventListener('message', lis);
+
+    return () => {
+      window.removeEventListener('message', lis);
+    };
+
+  }, []);
 
   if(authConfigs.loading) {
     return <div style={{margin: "0 auto"}}><Spin /></div>
@@ -69,44 +106,41 @@ const OtherLogin = () => {
               authUrl = `${authConfig.oauth.authUrl}${authConfig.oauth.authUrl.includes('?') ? '&' : '?'}redirect_uri=${redirect_uri}`
             }
 
-            if(autoAuthClientId === authConfig.id) {
-              setTimeout(() => {
-                window.location.href = authUrl;
-              }, 0)
+            if(isAtIframe) {
+              const doLogin = () => {
+                console.log(authUrl);
+                const win = window.open(authUrl,'fe-pipeline-loginer', 'width=400,height=400');
+              }
+              if(autoAuthClientId === authConfig.id) {
+                setTimeout(() => {
+                  doLogin();
+                }, 0)
+              }
+              return (
+                <div className={styles['other-login-col']} key={`k_${index}`}>
+                  <div onClick={doLogin} className={styles['other-login-item']}>
+                    <div style={{height: 40, width: 40}} />
+                    <span className={styles['other-login-item-desc']}>{authConfig.id}</span>
+                  </div>
+                </div>
+              );
+            } else {
+              if(autoAuthClientId === authConfig.id) {
+                setTimeout(() => {
+                  window.location.href = authUrl;
+                }, 0)
+              }
+              return (
+                <div className={styles['other-login-col']} key={`k_${index}`}>
+                  <a href={authUrl} className={styles['other-login-item']}>
+                    <div style={{height: 40, width: 40}} />
+                    <span className={styles['other-login-item-desc']}>{authConfig.id}</span>
+                  </a>
+                </div>
+              );
             }
-
-            return (
-              <div className={styles['other-login-col']} key={`k_${index}`}>
-                <a href={authUrl} className={styles['other-login-item']}>
-                  <div style={{height: 40, width: 40}} />
-                  {/* <img src={require('./assets/choerodon_logo.svg')} alt="choerodon" className={styles['other-login-item-img']} /> */}
-                  <span className={styles['other-login-item-desc']}>{authConfig.id}</span>
-                </a>
-              </div>
-            );
-            // return <div key={`k_${index}`}>
-            //   {index}
-            // </div>
           })
         }
-        {/* <Col span={8}>
-          <div onClick={() => otherLoginHandle('choerodon')} className={styles['other-login-item']}>
-            <img src={require('./assets/choerodon_logo.svg')} alt="choerodon" className={styles['other-login-item-img']} />
-            <span className={styles['other-login-item-desc']}>Choerodon</span>
-          </div>
-        </Col>
-        <Col span={8}>
-          <div onClick={() => otherLoginHandle('open-hand')} className={styles['other-login-item']}>
-            <img src={require('./assets/open-hand-logo2.png')} alt="open-hand" className={styles['other-login-item-img']} />
-            <span className={styles['other-login-item-desc']}>汉得开发平台</span>
-          </div>
-        </Col>
-        <Col span={8}>
-          <div onClick={() => otherLoginHandle('github')} className={styles['other-login-item']}>
-            <img src={require('./assets/gitlab-logo.svg')} alt="github" className={styles['other-login-item-img']} />
-            <span className={styles['other-login-item-desc']}>Github</span>
-          </div>
-        </Col> */}
       </div>
     </div>
   );

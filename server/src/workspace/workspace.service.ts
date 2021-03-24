@@ -25,6 +25,7 @@ const extract = require('extract-zip');
 @Injectable()
 export class WorkspaceService {
 
+
   private kubeClient = new Client1_13({});
   private ns: string = 'fe-pipeline';
 
@@ -70,6 +71,7 @@ export class WorkspaceService {
 
     example.gitUrl = wsData.gitUrl;
     example.isTemp = true;
+    example.destroy = false;
     example.image = wsData.image;
     example.userId = wsData.userId;
     if (wsData.name) {
@@ -81,7 +83,6 @@ export class WorkspaceService {
     let ws = await this.workspaceRepository.findOne(example);
 
     if (!ws) {
-      // throw new HttpException(`ws: ${example} is not found`, 404);
       ws = await this.workspaceRepository.save(wsData);
     } else {
       if ((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData) || wsData.image !== ws.image) {
@@ -97,9 +98,26 @@ export class WorkspaceService {
         await this.workspaceRepository.save(ws);
       }
     }
-    // const shouldDeleteTempWsList = await this.workspaceRepository.find({
-    // });
-    // console.log(shouldDeleteTempWsList);
+
+    setTimeout(async () => {
+      const shouldDeleteTempWsList = await this.workspaceRepository.createQueryBuilder('workspace')
+      .where("workspace.isTemp = 1")
+      .andWhere("workspace.startTimestamp is not NULL")
+      .andWhere("workspace.userId = :userId", { userId: wsData.userId })
+      .orderBy({
+        "workspace.startTimestamp": "DESC",
+      })
+      .skip(3)
+      // .limit(100)
+      .getMany();
+      shouldDeleteTempWsList.forEach((item) => {
+        if(item.state !== 'deleting') {
+          this.deleteById(item.id);
+        }
+      });
+      // console.log(shouldDeleteTempWsList);
+    }, 100);
+
     return ws;
   }
 
@@ -114,6 +132,31 @@ export class WorkspaceService {
       throw new HttpException(`ws: ${ws.id} is not get`, 403);;
     }
     return ws;
+  }
+
+  async query(args, user: User): Promise<Workspace[]> {
+    if(!user) {
+      return [];
+    }
+    // const wsList = await this.workspaceRepository.find(args);
+    const wsList = await this.workspaceRepository.createQueryBuilder('workspace')
+      // .where("workspace.id = :id", { id: 18 })
+      // .where("workspace.userId = :userId", { userId: user.userId })
+      .where("workspace.startTimestamp is not NULL")
+      .andWhere("workspace.isTemp = 1")
+      .orderBy({
+        // "workspace.startTimestamp": "DESC",
+        "workspace.startTimestamp": "ASC",
+      })
+      .getSql();
+      // .skip(2)
+      // .getMany();
+
+    console.log(wsList);
+
+    return [];
+
+    // return wsList.map(item => { return { ...item, podObject: null } });
   }
 
   async getRedirectToWsInfo(workspaceId: number): Promise<any> {
@@ -761,6 +804,7 @@ export class WorkspaceService {
     }
 
     ws.state = 'deleting';
+    ws.destroy = true;
 
     await this.workspaceRepository.save(ws);
     const podName = await this.getPodName(ws);

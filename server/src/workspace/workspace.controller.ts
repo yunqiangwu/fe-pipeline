@@ -26,6 +26,7 @@ export class WorkspaceController {
   constructor(
     private readonly workspaceService: WorkspaceService,
   ) {}
+
   @UseGuards(AuthGuard('jwt'))
   @Get()
   @ApiParam({
@@ -39,6 +40,21 @@ export class WorkspaceController {
   })
   async findAll(@CurrentUser() user: User): Promise<Workspace[]> {
     return this.workspaceService.findAllByCurrentUser(user.userId);
+  }
+
+  // @UseGuards(AuthGuard('jwt'))
+  @Post('/query')
+  @ApiBody({
+    // name: 'workspace',
+    type: Object,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The found record',
+    type: [Workspace],
+  })
+  async query(@Request() req, @CurrentUser() user: User): Promise<Workspace[]> {
+    return this.workspaceService.query(req.body, user);
   }
 
   @UseGuards(AuthGuard('jwt'))

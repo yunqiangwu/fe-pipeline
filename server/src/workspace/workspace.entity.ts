@@ -48,6 +48,9 @@ export class Workspace {
   @Column({ nullable: true })
   isZipUrl: boolean;
 
+  @Column({ nullable: true, default: false })
+  destroy: boolean;
+
   @Column({ nullable: true, length: 200 })
   password: string;
 
