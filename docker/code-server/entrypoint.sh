@@ -31,6 +31,10 @@ if [ ! -d "/workspace/.user-code-data-dir" ]; then
   sudo chown -R coder:coder /workspace
 fi
 
+if [ x"$FE_PIPELINE_WORK_DIR" != "x" ] && [ ! -d "$FE_PIPELINE_WORK_DIR" ]; then
+  mkdir -p $FE_PIPELINE_WORK_DIR
+fi
+
 if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
   for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do

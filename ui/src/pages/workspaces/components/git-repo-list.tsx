@@ -1,6 +1,7 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import styles from './style.less';
 
 export const GitRepoList: FC = () => {
 
@@ -56,7 +57,7 @@ export const GitRepoList: FC = () => {
       </textarea>
       <div>
         <h3>参数解释:</h3>
-        <table style={{ border: '1px solid gray'}} >
+        <table className={styles['var-table']} >
           <thead>
             <tr>
               <th>  参数名称  </th>
@@ -98,12 +99,12 @@ export const GitRepoList: FC = () => {
             </tr>
             <tr>
               <td>envJsonData</td>
-              <td>环境变量配置对象, encodeURIComponent(JSON.stringify(envObj)) 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`} </td>
+              <td>环境变量配置对象, encodeURIComponent(JSON.stringify(envObj)) 之后的字符串, 值示例: {`'{"ENV_NAME_1": "value1"}'`}, <br/>特殊境变量名: FE_PIPELINE_WORK_DIR: 设置工作目录 </td>
               <td></td>
               <td></td>
             </tr>
             <tr>
-              <td>gitpodConfig</td>
+              <td>gitpodConfig &nbsp;&nbsp;&nbsp; </td>
               <td>.gitpod.yml 配置对象, encodeURIComponent(JSON.stringify(envObj)) 之后的对象, 值示例: {`'{"tasks": [{ "init": "yarn install", "command": "yarn start" }]}'`} </td>
               <td></td>
               <td></td>

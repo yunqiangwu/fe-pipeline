@@ -18,7 +18,6 @@ import { promisify } from 'util';
 import { URL } from "url";
 import { unlinkSync, lstatSync } from 'fs';
 import { isURL } from 'class-validator';
-import { isString } from 'lodash';
 import { JwtService } from '@nestjs/jwt';
 
 const extract = require('extract-zip');
@@ -52,13 +51,13 @@ export class WorkspaceService {
 
     wsData.isTemp = true;
     wsData.image = wsData.image || 'vscode';
-    if(wsData.gitpodConfig) {
-      wsData.gitpodConfig = typeof wsData.gitpodConfig === 'string' ? wsData.gitpodConfig: JSON.stringify(wsData.gitpodConfig);
+    if (wsData.gitpodConfig) {
+      wsData.gitpodConfig = typeof wsData.gitpodConfig === 'string' ? wsData.gitpodConfig : JSON.stringify(wsData.gitpodConfig);
     } else {
       wsData.gitpodConfig = null;
     }
-    if(wsData.envJsonData) {
-      wsData.envJsonData = typeof wsData.envJsonData === 'string' ? wsData.envJsonData: JSON.stringify(wsData.envJsonData);
+    if (wsData.envJsonData) {
+      wsData.envJsonData = typeof wsData.envJsonData === 'string' ? wsData.envJsonData : JSON.stringify(wsData.envJsonData);
     } else {
       wsData.envJsonData = null;
     }
@@ -73,7 +72,7 @@ export class WorkspaceService {
     example.isTemp = true;
     example.image = wsData.image;
     example.userId = wsData.userId;
-    if(wsData.name) {
+    if (wsData.name) {
       example.name = wsData.name;
     } else {
       wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
@@ -85,7 +84,7 @@ export class WorkspaceService {
       // throw new HttpException(`ws: ${example} is not found`, 404);
       ws = await this.workspaceRepository.save(wsData);
     } else {
-      if((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData) || wsData.image !== ws.image) {
+      if ((wsData.gitpodConfig && ws.gitpodConfig !== wsData.gitpodConfig) || (wsData.envJsonData && ws.envJsonData !== wsData.envJsonData) || wsData.image !== ws.image) {
         if (ws.state === 'opening' || ws.state === 'pending') {
           this.closeWs(ws.id, true);
         }
@@ -117,23 +116,20 @@ export class WorkspaceService {
     return ws;
   }
 
-  async getRedirectToWsInfo(workspaceId: number): Promise<any>{
+  async getRedirectToWsInfo(workspaceId: number): Promise<any> {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     // console.log(workspaceId, ws);
     let podObj;
-    if(ws && ws.podObject) {
-      podObj =  JSON.parse(ws.podObject);
-    // } else {
-    //   throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
-    // }
+    if (ws && ws.podObject) {
+      podObj = JSON.parse(ws.podObject);
     } else {
-      if(!ws) {
+      if (!ws) {
         throw new HttpException(`ws: ${workspaceId} is not found`, 404);;
       }
       const podName = await this.getPodName(ws);
       const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
       podObj = kubePodRes.body;
-      if(ws && podObj) {
+      if (ws && podObj) {
         ws.podObject = JSON.stringify(podObj);
         await this.workspaceRepository.save(ws);
       }
@@ -151,8 +147,8 @@ export class WorkspaceService {
             break;
           }
         }
-        for(const envObj of container.env) {
-          if(envObj.name === 'PASSWORD') {
+        for (const envObj of container.env) {
+          if (envObj.name === 'PASSWORD') {
             password = envObj.value;
             break;
           }
@@ -176,14 +172,14 @@ export class WorkspaceService {
   }
 
   async isAlive(workspaceId: number): Promise<any> {
-    
+
     try {
       const { wsHost, password, realIP, realPort } = await this.getRedirectToWsInfo(workspaceId);
       return await fetch(`http://${realIP}:${realPort}`,
-        { method: 'get', headers: { Host: wsHost}, timeout: 3000 } // 
+        { method: 'get', headers: { Host: wsHost }, timeout: 3000 } // 
       ).then(
         r => {
-          if(r.status >= 200 && r.status < 500) {
+          if (r.status >= 200 && r.status < 500) {
             return ({ status: r.status, wsHost, password });
           } else {
             return Promise.reject({ status: r.status, wsHost })
@@ -191,11 +187,11 @@ export class WorkspaceService {
         },
         (err) => {
           // console.log(err);
-          if(err.response && err.response.status >= 400 && err.response.status < 500) {
+          if (err.response && err.response.status >= 400 && err.response.status < 500) {
             console.log(err.response.data);
             const hashKey = crypto.createHash("sha256").update(password).digest("hex");
             return Promise.resolve({ status: err.response.status, wsHost, password: hashKey });
-          } else  {
+          } else {
             return Promise.reject(err);
           }
         }
@@ -236,12 +232,12 @@ export class WorkspaceService {
     let podName = await this.getPodName(ws);
     const wsDirName = await this.getWsDirName(ws);
 
-    if (ws.state === 'opening' ||  ws.state === 'pending') {
+    if (ws.state === 'opening' || ws.state === 'pending') {
       try {
         const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
         const lastState = ws.state;
         const type = kubePodRes.body.status.phase === 'Running' ? 'created' : 'creating';
-        if(type === 'created') {
+        if (type === 'created') {
           ws.state = 'opening';
         }
         if (lastState !== ws.state) {
@@ -275,166 +271,170 @@ export class WorkspaceService {
     }
 
     try {
-      let projectDirname  = '';
+      let projectDirname = '';
       let gitpodConfig = ws.gitpodConfig ? JSON.parse(ws.gitpodConfig) : null;
       const contextToDir = await this.getWsdir(ws);
 
-      if(ws.gitUrl  &&  ws.gitUrl !== 'none') {
-        if(!isURL(ws.gitUrl)) {
-          throw new Error(`${ws.gitUrl} is not correct url!`);
-        }
-        const existContextDir = existsSync(contextToDir);
-        if(ws.state !== "saved" || !existContextDir) {
-          if(existContextDir) {
-            emptyDirSync(contextToDir);
-          } else {
-            mkdirpSync(contextToDir)
+      if(ws.gitUrl !== 'none') {
+        if (ws.gitUrl) {
+          if (!isURL(ws.gitUrl)) {
+            throw new Error(`${ws.gitUrl} is not correct url!`);
           }
-          if (ws.isZipUrl) {
-            const zipUrl = ws.gitUrl;
-  
-            let token = '';
-  
-            const url = new URL(zipUrl);
-  
-            const ta = await this.usersService.threeAccountRepository.findOne({
-              authHost: url.host,
-              user: {
-                userId: ws.userId,
-              }
-            });
-            if(ta) {
-              token = ta.accessToken;
-            }
-  
-            globalSubject.next(
-              {
-                wsId: workspaceId,
-                data: {
-                  type: 'download-zip-file',
-                  message: `正在下载代码... ${zipUrl}`,
-                  workspaceId,
-                },
-              }
-            );
-            const tempFileName = `/tmp/ws-pod-download-zip-${ws.id}.zip`
-            try {
-              await promisify(exec)(`curl --location --request GET ${token ? `--header 'Authorization: Bearer ${token}'` : ''} -o ${tempFileName} '${zipUrl}'`);
-            }catch(e) {
-              console.error(e);
-              throw new HttpException(`下载文件 ${zipUrl} 失败!`, 403);
-            }
-            globalSubject.next(
-              {
-                wsId: workspaceId,
-                data: {
-                  type: 'unzip',
-                  message: `正在解压代码... ${zipUrl}`,
-                  workspaceId,
-                },
-              }
-            );
-            try {
-              await extract(tempFileName, { dir: contextToDir });
-              unlinkSync(tempFileName);
-              // await promisify(exec)(`unzip -O ${tempFileName}  ${zipUrl}`);
-            }catch(e) {
-              console.error(e);
-              throw new HttpException(`解压文件失败 ${zipUrl} 失败!`, 403);
-            }
-          } else {
-            const repoObj = await this.contextParser.parseURL(ws.gitUrl);
-            const ta = await this.usersService.threeAccountRepository.findOne({
-              authHost: repoObj.host,
-              user: {
-                userId: ws.userId,
-              }
-            });
-    
-            const config = Config.singleInstance();
-            if (ta) {
-              const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
-              try {
-                globalSubject.next(
-                  {
-                    wsId: workspaceId,
-                    data: {
-                      type: 'clone',
-                      message: '正在克隆代码...',
-                      workspaceId,
-                    },
-                  }
-                );
-                await promisify(exec)(`cd ${contextToDir} \n git clone ${cloneUrl}`);
-              }catch(e) {
-                console.error(e);
-                throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
-              }
-              console.log(`clone dir ${cloneUrl}`);
+          const existContextDir = existsSync(contextToDir);
+          if (ws.state !== "saved" || !existContextDir) {
+            if (existContextDir) {
+              emptyDirSync(contextToDir);
             } else {
-              const err = new HttpException({
-                message: '需要获取 git 权限',
-                // autoAuthClientId: 'Github'
-              }, 401);
-              const authProviders = config.get('authProviders');
-              const authItem = authProviders.find(item => item.host === repoObj.host);
-              (err as any).autoAuthClientId = authItem.id || 'Github';
-              throw err;
+              mkdirpSync(contextToDir)
             }
-            // if(1===1) { // todo 存工作空间文件 
-            //   const err = new HttpException({
-            //     message: '需要获取 git 权限',
-            //     // autoAuthClientId: 'Github'
-            //   }, 401);
-            //   (err as any).autoAuthClientId = 'Github';
-            //   throw err;
-            // }
+            if (ws.isZipUrl) {
+              const zipUrl = ws.gitUrl;
+  
+              let token = '';
+  
+              const url = new URL(zipUrl);
+  
+              const ta = await this.usersService.threeAccountRepository.findOne({
+                authHost: url.host,
+                user: {
+                  userId: ws.userId,
+                }
+              });
+              if (ta) {
+                token = ta.accessToken;
+              }
+  
+              globalSubject.next(
+                {
+                  wsId: workspaceId,
+                  data: {
+                    type: 'download-zip-file',
+                    message: `正在下载代码... ${zipUrl}`,
+                    workspaceId,
+                  },
+                }
+              );
+              const tempFileName = `/tmp/ws-pod-download-zip-${ws.id}.zip`
+              try {
+                await promisify(exec)(`curl --location --request GET ${token ? `--header 'Authorization: Bearer ${token}'` : ''} -o ${tempFileName} '${zipUrl}'`);
+              } catch (e) {
+                console.error(e);
+                throw new HttpException(`下载文件 ${zipUrl} 失败!`, 403);
+              }
+              globalSubject.next(
+                {
+                  wsId: workspaceId,
+                  data: {
+                    type: 'unzip',
+                    message: `正在解压代码... ${zipUrl}`,
+                    workspaceId,
+                  },
+                }
+              );
+              try {
+                await extract(tempFileName, { dir: contextToDir });
+                unlinkSync(tempFileName);
+                // await promisify(exec)(`unzip -O ${tempFileName}  ${zipUrl}`);
+              } catch (e) {
+                console.error(e);
+                throw new HttpException(`解压文件失败 ${zipUrl} 失败!`, 403);
+              }
+            } else {
+              const repoObj = await this.contextParser.parseURL(ws.gitUrl);
+              const ta = await this.usersService.threeAccountRepository.findOne({
+                authHost: repoObj.host,
+                user: {
+                  userId: ws.userId,
+                }
+              });
+  
+              const config = Config.singleInstance();
+              if (ta) {
+                const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
+                try {
+                  globalSubject.next(
+                    {
+                      wsId: workspaceId,
+                      data: {
+                        type: 'clone',
+                        message: '正在克隆代码...',
+                        workspaceId,
+                      },
+                    }
+                  );
+                  await promisify(exec)(`cd ${contextToDir} \n git clone ${cloneUrl}`);
+                } catch (e) {
+                  console.error(e);
+                  throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
+                }
+                console.log(`clone dir ${cloneUrl}`);
+              } else {
+                const err = new HttpException({
+                  message: '需要获取 git 权限',
+                  // autoAuthClientId: 'Github'
+                }, 401);
+                const authProviders = config.get('authProviders');
+                const authItem = authProviders.find(item => item.host === repoObj.host);
+                (err as any).autoAuthClientId = authItem.id || 'Github';
+                throw err;
+              }
+              // if(1===1) { // todo 存工作空间文件 
+              //   const err = new HttpException({
+              //     message: '需要获取 git 权限',
+              //     // autoAuthClientId: 'Github'
+              //   }, 401);
+              //   (err as any).autoAuthClientId = 'Github';
+              //   throw err;
+              // }
+            }
+            projectDirname = ((await promisify(readdir)(contextToDir)) as string[]).find(dirOrFileName => {
+              if (dirOrFileName.startsWith('.')) {
+                return false;
+              }
+              let stat = lstatSync(join(contextToDir, dirOrFileName))
+              if (stat.isDirectory() === true) {
+                return true;
+              }
+            });
           }
+        }
+  
+        if (existsSync(contextToDir)) {
           projectDirname = ((await promisify(readdir)(contextToDir)) as string[]).find(dirOrFileName => {
-            if(dirOrFileName.startsWith('.')) {
+            if (dirOrFileName.startsWith('.')) {
               return false;
             }
             let stat = lstatSync(join(contextToDir, dirOrFileName))
-            if (stat.isDirectory() === true) { 
+            if (stat.isDirectory() === true) {
               return true;
             }
           });
-        }
-      }
-
-      if(existsSync(contextToDir)) {
-        projectDirname = ((await promisify(readdir)(contextToDir)) as string[]).find(dirOrFileName => {
-          if(dirOrFileName.startsWith('.')) {
-            return false;
-          }
-          let stat = lstatSync(join(contextToDir, dirOrFileName))
-          if (stat.isDirectory() === true) { 
-            return true;
-          }
-        });
   
-        if(projectDirname) {
-          const gitpodYamlPath = join(contextToDir, projectDirname, '.gitpod.yml');
-          if(projectDirname && existsSync(gitpodYamlPath)) {
-            const gitpodYmlContent  = readFileSync(gitpodYamlPath).toString();
-            gitpodConfig = yaml.parse(gitpodYmlContent);
+          if (projectDirname) {
+            const gitpodYamlPath = join(contextToDir, projectDirname, '.gitpod.yml');
+            if (projectDirname && existsSync(gitpodYamlPath)) {
+              const gitpodYmlContent = readFileSync(gitpodYamlPath).toString();
+              gitpodConfig = yaml.parse(gitpodYmlContent);
+            }
           }
         }
-      }
-      if(!projectDirname) {
-        if(ws.envJsonData) {
-          console.log(ws.envJsonData);
-          const obj = JSON.parse(ws.envJsonData)
-          projectDirname  = obj.PROJECT_DIR_NAME;
+        if (!projectDirname) {
+          if (ws.envJsonData) {
+            console.log(ws.envJsonData);
+            const obj = JSON.parse(ws.envJsonData)
+            projectDirname = obj.PROJECT_DIR_NAME;
+          }
+          if (!projectDirname) {
+            projectDirname = 'project';
+          }
+          const projectDir = join(contextToDir, projectDirname);
+          mkdirpSync(projectDir)
         }
-        if(!projectDirname) {
-          projectDirname  = 'project';
-        }
-        const projectDir = join(contextToDir, projectDirname);
-        mkdirpSync(projectDir)
       }
 
-      // throw new HttpException(`${ws.gitUrl}`, 404);
+      const envObj = ws.envJsonData ? JSON.parse(ws.envJsonData) : null;
+
+      const FE_PIPELINE_WORK_DIR = (envObj && envObj.FE_PIPELINE_WORK_DIR) ? envObj.FE_PIPELINE_WORK_DIR : join(`/workspace`, projectDirname || 'project');
 
       let kubePodRes: any = null;
 
@@ -452,14 +452,14 @@ export class WorkspaceService {
 
         ws.state = 'pending';
 
-        ws.password = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1$2$3$4$5');
-        if(!ws.currentPodId) {
+        ws.password = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2, 8))).padEnd(32, '0').substr(0, 32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1$2$3$4$5');
+        if (!ws.currentPodId) {
           ws.currentPodId = 1;
         } else {
           ws.currentPodId = ws.currentPodId + 1;
         }
         ws.startTimestamp = new Date().getTime();
-        
+
         podName = await this.getPodName(ws);
 
         await this.workspaceRepository.save(ws);
@@ -518,7 +518,7 @@ export class WorkspaceService {
                     },
                     {
                       name: 'FE_PIPELINE_WORK_DIR',
-                      value: join(`/workspace`, projectDirname),
+                      value: FE_PIPELINE_WORK_DIR,
                     },
                     {
                       name: 'FE_PIPELINE_GIT_URL',
@@ -531,14 +531,16 @@ export class WorkspaceService {
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
-                  args: [ `--user-data-dir=/workspace/.user-code-data-dir` , ...(ws.isTemp ? [] : [`--home=//${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), `--port=${webPort}`, "--auth=password", `/workspace/${projectDirname}`],
+                  args: [`--user-data-dir=/workspace/.user-code-data-dir`, ...(ws.isTemp ? [] : [`--home=//${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), `--port=${webPort}`, "--auth=password", FE_PIPELINE_WORK_DIR],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
-                    {
-                      mountPath: '/workspace',
-                      subPath: wsDirName,
-                      name: vol.name
-                    },
+                    ...(ws.gitUrl === 'none' ? [] : [
+                      {
+                        mountPath: '/workspace',
+                        subPath: wsDirName,
+                        name: vol.name
+                      },
+                    ]),
                     {
                       mountPath: '/fe-pipeline-app/vscode-extensions',
                       subPath: 'vscode-extensions',
@@ -549,16 +551,6 @@ export class WorkspaceService {
                       subPath: 'theia-plugin',
                       name: vol.name
                     },
-                    // {
-                    //   mountPath: '/home/theia/.theia/extensions/vscode-fe-pipeline-extension',
-                    //   subPath: 'fe-pipeline-extension/vscode-extensions/vscode-fe-pipeline-extension',
-                    //   name: vol.name
-                    // },
-                    // {
-                    //   mountPath: '/fe-pipeline-app/theia-extensions/theia-fe-pipeline-extension',
-                    //   subPath: 'fe-pipeline-extension/theia-extensions/theia-fe-pipeline-extension',
-                    //   name: vol.name
-                    // },
                   ],
                   "livenessProbe": {
                     "initialDelaySeconds": 30,
@@ -580,21 +572,21 @@ export class WorkspaceService {
             }
           };
           const container = resultConfig.spec.containers[0];
-          if(gitpodConfig) {
-            if(gitpodConfig.tasks) {
+          if (gitpodConfig) {
+            if (gitpodConfig.tasks) {
               container.env.push({
                 name: 'GITPOD_TASKS',
                 value: JSON.stringify(gitpodConfig.tasks),
               });
             }
-            if(gitpodConfig.ports) {
+            if (gitpodConfig.ports) {
               container.env.push({
                 name: 'GITPOD_PORTS',
                 value: JSON.stringify(gitpodConfig.ports),
               });
             }
           }
-          if(currentUser) {
+          if (currentUser) {
             const token = this.jwtService.sign({ username: currentUser.username, sub: currentUser.userId, userId: currentUser.userId });
             // const user = await this.usersService.findOne(currentUser.username);
             container.env.push({
@@ -611,24 +603,8 @@ export class WorkspaceService {
             });
           }
           if (ws.image === 'theia-full') {
-            // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
-            // const theiaHome = this.getWsdir('theia');
-            // if(existsSync(theiaHome)) {
-            //   container.env.push({
-            //     name: 'THEIA_HOME',
-            //     value: `/fe-pipeline-app/theia`,
-            //   });
-            //   container.volumeMounts.push(
-            //     {
-            //       mountPath: '/fe-pipeline-app/theia',
-            //       subPath: 'theia',
-            //       name: vol.name
-            //     },
-            //   );
-            // }
           } else if (ws.image === 'vscode') {
-            // container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:dev-hand';
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
           } else if (ws.image) {
             container.image = ws.image;
@@ -636,10 +612,16 @@ export class WorkspaceService {
           if (ws.envJsonData) {
             const env = JSON.parse(ws.envJsonData);
             for (const key in env) {
-              container.env.push({
-                name: key.toLocaleUpperCase(),
-                value: env[key],
-              });
+              const envName = key.toLocaleUpperCase();
+              const existEnvObj = container.env.find(item => item.name === envName);
+              if (existEnvObj) {
+                existEnvObj.value = env[key];
+              } else {
+                container.env.push({
+                  name: envName,
+                  value: env[key],
+                });
+              }
             }
           }
           return resultConfig;
@@ -753,18 +735,18 @@ export class WorkspaceService {
   async deletePod(podName: string) {
     let res: any;
 
-    try{
+    try {
       const pod = this.kubeClient.api.v1.namespace(this.ns).pod(podName);
       await pod.get({});
       res = await pod.delete({ force: true, gracePeriod: 0 });
-      let count =  0;
-      while(count++ < 100) {
+      let count = 0;
+      while (count++ < 100) {
         await pod.get({});
         await new Promise(resolve => {
           setTimeout(() => resolve(null), 2000);
         });
       }
-    } catch(e) {
+    } catch (e) {
       throw e;
     }
 
@@ -773,30 +755,32 @@ export class WorkspaceService {
 
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
-    if(ws.state === 'deleting') {
+    if (ws.state === 'deleting') {
       await this.workspaceRepository.delete(workspaceId);
       return { workspaceId };
     }
 
     ws.state = 'deleting';
-    
+
     await this.workspaceRepository.save(ws);
     const podName = await this.getPodName(ws);
 
-    try{
+    try {
       await this.deletePod(podName);
-    }catch(e)  {
+    } catch (e) {
       console.error(e);
     }
 
-    try {
-      const wsDir = await this.getWsdir(ws);
-      if (existsSync(wsDir)) {
-        await emptyDir(wsDir);
-        await rmdir(wsDir);
+    if(ws.gitUrl !== 'none') {
+      try {
+        const wsDir = await this.getWsdir(ws);
+        if (existsSync(wsDir)) {
+          await emptyDir(wsDir);
+          await rmdir(wsDir);
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
     }
 
     await this.workspaceRepository.delete(workspaceId);
@@ -805,10 +789,10 @@ export class WorkspaceService {
 
   async closeWs(workspaceId: number, isEmptyData?: boolean) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
-    if(!ws)  {
+    if (!ws) {
       throw new Error(`ws ${workspaceId} is not exist!`);
     }
-    if((ws).state !== "opening") {
+    if ((ws).state !== "opening") {
       throw new Error(`ws ${workspaceId} state ${ws.state} is not correct!`);
     }
     ws.state = 'saving';
@@ -824,7 +808,7 @@ export class WorkspaceService {
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
 
-    if(isEmptyData) {
+    if (isEmptyData) {
       const wsDir = join(getAppHomeDir(), `data/${podName}`);
       try {
         if (existsSync(wsDir)) {
