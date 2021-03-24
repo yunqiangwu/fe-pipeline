@@ -50,7 +50,6 @@ export class WorkspaceService {
 
   async createTempWorkspace(wsData: Workspace): Promise<Workspace> {
 
-    // wsData.name = wsData.name || `ws-pod-temp-` + Date.now();
     wsData.isTemp = true;
     wsData.image = wsData.image || 'vscode';
     if(wsData.gitpodConfig) {
@@ -749,7 +748,6 @@ export class WorkspaceService {
         });
       }
     } catch(e) {
-      console.error(e);
       return res;
     }
     // res = await promisify(exec)(`kubectl -n ${this.ns} delete po ${podName} --force`);
@@ -786,7 +784,8 @@ export class WorkspaceService {
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     if(ws.state === 'deleting') {
-      return;
+      await this.workspaceRepository.delete(workspaceId);
+      return { workspaceId };
     }
 
     ws.state = 'deleting';
@@ -799,15 +798,16 @@ export class WorkspaceService {
       console.error(e);
     }
 
-    try {
-      const wsDir = this.getWsdir(podName);
-      if (existsSync(wsDir)) {
-        await emptyDir(wsDir);
-        await rmdir(wsDir);
-      }
-    } catch (e) {
-      console.error(e);
-    }
+    // try {
+    //   const wsDir = this.getWsdir(podName);
+    //   if (existsSync(wsDir)) {
+    //     await emptyDir(wsDir);
+    //     await rmdir(wsDir);
+    //   }
+    // } catch (e) {
+    //   console.error(e);
+    // }
+
     await this.workspaceRepository.delete(workspaceId);
     return { workspaceId };
   }
