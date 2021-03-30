@@ -40,7 +40,7 @@ RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v
 RUN . $NVM_DIR/nvm.sh && nvm install 14 && npm i -g yarn
 
 # COPY release-packages/code-server*.deb /tmp/
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.1/code-server_3.9.1_amd64.deb -o /tmp/code-server-install.deb
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.2/code-server_3.9.2_amd64.deb -o /tmp/code-server-install.deb
 RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons

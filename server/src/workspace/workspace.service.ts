@@ -574,7 +574,8 @@ export class WorkspaceService {
                   ],
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
-                  args: [`--user-data-dir=/workspace/.user-code-data-dir`, ...(ws.isTemp ? [] : [`--home=//${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), `--port=${webPort}`, "--auth=password", FE_PIPELINE_WORK_DIR],
+                  // ...(ws.isTemp ? [] : [`--home //${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), 
+                  args: [`--user-data-dir=/workspace/.user-code-data-dir`, `--port=${webPort}`, "--auth=password", FE_PIPELINE_WORK_DIR],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     ...(ws.gitUrl === 'none' ? [] : [
@@ -649,6 +650,7 @@ export class WorkspaceService {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
           } else if (ws.image === 'vscode') {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
+            container.args.push('--disable-update-check');
           } else if (ws.image) {
             container.image = ws.image;
           }
