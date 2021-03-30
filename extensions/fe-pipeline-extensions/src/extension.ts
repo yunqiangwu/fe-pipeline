@@ -16,7 +16,7 @@ let isBreak = false;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 
 	const WS_DIR_FILE = path.join(`${(context?.storageUri?.authority || `/workspace/.gitpod`)}`, 'config.json') // '/workspace/.gitpod/config.json';
 
@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
-	const scriptUri = panel.webview.asWebviewUri(
+	const scriptUri = await panel.webview.asWebviewUri(
 		vscode.Uri.file(path.join(context.extensionPath, 'res', 'main.js'))
 	);
 
@@ -69,8 +69,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// 	panel = null;
 	// });
 
-	panel.dispose();
-
+	setTimeout(() => {
+		panel.dispose();
+	}, 0)
 
 	// 在你的内容中引用它
 	// panel.webview.html = `<!DOCTYPE html>
