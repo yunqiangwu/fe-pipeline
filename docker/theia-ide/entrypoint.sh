@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -e
 
 if [ x"$GIT_USER" != "x" ]; then
   git config --global user.name "$GIT_USER"

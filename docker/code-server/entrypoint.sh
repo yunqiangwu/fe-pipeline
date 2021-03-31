@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -eu
+set -e
 
 # We do this first to ensure sudo works below when renaming the user.
 # Otherwise the current container UID may not exist in the passwd database.
