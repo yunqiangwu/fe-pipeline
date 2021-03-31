@@ -69,7 +69,7 @@ export class AuthService {
 
       if(loginType === 'open-hand') {
 
-        const response = await axios.get("https://gateway.open.hand-china.com/iam/hzero/v1/users/self", {
+        const response = await axios.get(`${authConfigItem.protocol}://${authConfigItem.host}/iam/hzero/v1/users/self`, {
           "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -124,7 +124,7 @@ export class AuthService {
       } 
       if(loginType === 'Choerodon') {
   
-        const response = await axios.get("https://api.choerodon.com.cn/iam/choerodon/v1/users/self", {
+        const response = await axios.get(`${authConfigItem.protocol}://${authConfigItem.host}/iam/choerodon/v1/users/self`, {
           "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -195,7 +195,7 @@ export class AuthService {
       if(loginType === 'GitHub') {
         const oauthConfig = authConfigItem;
   
-        const gitResponse = await axios.post("https://github.com/login/oauth/access_token", {
+        const gitResponse = await axios.post(`${authConfigItem.protocol}://${authConfigItem.host}/login/oauth/access_token`, {
           client_id: oauthConfig.oauth.clientId,
           client_secret: oauthConfig.oauth.clientSecret,
           code: code,
@@ -454,7 +454,7 @@ export class AuthService {
 
       if(loginType === 'open-hand') {
 
-        const response = await axios.get("https://gateway.open.hand-china.com/iam/hzero/v1/users/self", {
+        const response = await axios.get(`${authConfigItem.protocol}://${authConfigItem.host}/iam/hzero/v1/users/self`, {
           "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -472,7 +472,7 @@ export class AuthService {
       } 
       if(loginType === 'Choerodon') {
   
-        const response = await axios.get("https://api.choerodon.com.cn/iam/choerodon/v1/users/self", {
+        const response = await axios.get(`${authConfigItem.protocol}://${authConfigItem.host}/iam/choerodon/v1/users/self`, {
           "headers": {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",

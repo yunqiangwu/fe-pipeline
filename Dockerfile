@@ -3,17 +3,15 @@ WORKDIR /app
 ADD ./ui/ /app/
 RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run build:prod
 
-FROM node:15.8.0 as vscode-extensions-builder
-WORKDIR /app
-ADD ./extensions/fe-pipeline-extensions/ /app/
-RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+# FROM node:15.8.0 as vscode-extensions-builder
+# WORKDIR /app
+# ADD ./docker/code-server/fe-pipeline-extensions/ /app/
+# RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
-
-FROM node:15.8.0 as theia-plugins-builder
-WORKDIR /app
-ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
-RUN yarn --registry=https://registry.npm.taobao.org/
-
+# FROM node:15.8.0 as theia-plugins-builder
+# WORKDIR /app
+# ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
+# RUN yarn --registry=https://registry.npm.taobao.org/
 
 # FROM registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2 as theia-extensions-builder
 
@@ -80,9 +78,9 @@ COPY ./docker/enterpoint.sh /enterpoint.sh
 RUN chmod +x /enterpoint.sh
 ENTRYPOINT ["/enterpoint.sh"]
 COPY --from=builder /app/dist /app/fe-pipeline-home/public
-COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
+# COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/vscode-extensions/
 # COPY --from=vscode-extensions-builder /app/*.vsix /app/fe-pipeline-home/theia-plugin/
-COPY --from=theia-plugins-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
+# COPY --from=theia-plugins-builder /app/*.theia /app/fe-pipeline-home/theia-plugin/
 # COPY --from=theia-extensions-builder /home/theia /app/fe-pipeline-home/theia
 
 CMD [ "node", "dist/main.js" ]

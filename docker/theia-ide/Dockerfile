@@ -106,7 +106,7 @@ ENV strip=$strip
 WORKDIR /home/theia
 ADD ./docker/theia-ide/package.json ./package.json
 
-ADD extensions/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+ADD ./docker/theia-ide/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
 RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/ && \
  rm -rf *.tgz && yarn pack && cp *.tgz ../theia-fe-pipeline-extensions.tgz && \
  cd  .. && rm  -rf ./theia-fe-pipeline-extensions && \

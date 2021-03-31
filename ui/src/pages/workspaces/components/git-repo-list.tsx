@@ -87,7 +87,7 @@ export const GitRepoList: FC = () => {
             </tr>
             <tr>
               <td>clientId</td>
-              <td> 提供自动登录和认证配置, token 来源, 可选值: open-hand \  Choerodon \ GitHub GitLab  </td>
+              <td> 提供自动登录和认证配置, token 来源, 可选值: open-hand \  Choerodon \ GitHub \ GitLab  </td>
               <td>open-hand</td>
               <td></td>
             </tr>

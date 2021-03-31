@@ -133,7 +133,7 @@ const OtherLogin = () => {
               return (
                 <div className={styles['other-login-col']} key={`k_${index}`}>
                   <a href={authUrl} className={styles['other-login-item']}>
-                    <div style={{height: 40, width: 40}} />
+                    {/* <div style={{height: 40, width: 40}} /> */}
                     <span className={styles['other-login-item-desc']}>{authConfig.id}</span>
                   </a>
                 </div>

@@ -49,4 +49,4 @@ fi
 
 # exec node /home/theia/src-gen/backend/main.js --plugins=local-dir:/fe-pipeline-app/theia-plugin /home/project --hostname=0.0.0.0 $@
 
-dumb-init node /home/theia/src-gen/backend/main.js --user-data-dir=/workspace/.user-code-data-dir --plugins=local-dir:/fe-pipeline-app/theia-plugin --hostname=0.0.0.0 $@
+dumb-init node /home/theia/src-gen/backend/main.js --user-data-dir=/workspace/.user-code-data-dir --hostname=0.0.0.0 $@

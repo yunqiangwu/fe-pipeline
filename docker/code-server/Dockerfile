@@ -2,7 +2,12 @@
 
 
 
-FROM registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 as theia-plugins-container
+# FROM registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 as vscode-extensions-builder
+
+FROM node:15.8.0 as vscode-extensions-builder
+WORKDIR /app
+ADD ./fe-pipeline-extensions/ /app/
+RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
 FROM debian:10
 
@@ -51,7 +56,7 @@ RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
 
-COPY --from=theia-plugins-container /app/fe-pipeline-home/vscode-extensions/*.vsix /workspace/extension/
+COPY --from=vscode-extensions-builder /app/*.vsix /workspace/extension/
 
 COPY ./install-extension.sh /workspace/install-vscode-extension.sh
 

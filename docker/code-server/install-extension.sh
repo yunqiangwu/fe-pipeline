@@ -8,4 +8,6 @@ for EXTENSIONS_FILE in /workspace/extension/*.vsix; do
   /usr/bin/code-server --extensions-dir=/usr/lib/code-server/lib/vscode/extensions --install-extension $EXTENSIONS_FILE
 done
 
+rm -rf /workspace/extension
+
 fi
