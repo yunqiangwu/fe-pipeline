@@ -1,9 +1,3 @@
-
-
-
-
-# FROM registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 as vscode-extensions-builder
-
 FROM node:15.8.0 as vscode-extensions-builder
 WORKDIR /app
 ADD ./fe-pipeline-extensions/ /app/
