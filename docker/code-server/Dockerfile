@@ -1,3 +1,9 @@
+
+
+
+
+FROM registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 as theia-plugins-container
+
 FROM debian:10
 
 RUN apt-get update \
@@ -45,14 +51,23 @@ RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
 
-RUN mkdir -p /workspace && chown -R coder:coder /workspace
+COPY --from=theia-plugins-container /app/fe-pipeline-home/vscode-extensions/*.vsix /workspace/extension/
+
+COPY ./install-extension.sh /workspace/install-vscode-extension.sh
+
+RUN . /workspace/install-vscode-extension.sh && rm -rf /workspace/install-vscode-extension.sh
+
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+
+USER coder
+
+RUN sudo chown -R coder:coder /workspace
 
 EXPOSE 8080
 # This way, if someone sets $DOCKER_USER, docker-exec will still work as
 # the uid will remain the same. note: only relevant if -u isn't passed to
 # docker-run.
-USER coder
+# USER coder
 
 RUN sudo chown -R coder:coder $NVM_DIR
 
@@ -60,4 +75,4 @@ RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >
   echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
 WORKDIR /workspace
-ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]
+ENTRYPOINT ["/usr/bin/entrypoint.sh", "--user-data-dir=/workspace/.user-code-data-dir", "--bind-addr", "0.0.0.0:8080", "."]
