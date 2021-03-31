@@ -10,12 +10,13 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--enable-proposed-api=fe-pipeline.fe-pipeline-extensions"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			// "preLaunchTask": "${defaultBuildTask}"
 		},
 		{
 			"name": "Extension Tests",
@@ -28,7 +29,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/test/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			// "preLaunchTask": "${defaultBuildTask}"
 		}
 	]
 }
