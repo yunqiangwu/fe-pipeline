@@ -1,7 +1,7 @@
 #!/bin/sh
 
-set -eu
-echo 开始执行
+set -e
+
 # We do this first to ensure sudo works below when renaming the user.
 # Otherwise the current container UID may not exist in the passwd database.
 eval "$(fixuid -q)"
