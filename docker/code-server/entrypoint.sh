@@ -35,16 +35,15 @@ if [ x"$FE_PIPELINE_WORK_DIR" != "x" ] && [ ! -d "$FE_PIPELINE_WORK_DIR" ]; then
   mkdir -p $FE_PIPELINE_WORK_DIR
 fi
 
-if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
+# if [ -d "/fe-pipeline-app/vscode-extensions" ]; then
 
-  for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
-    if test -f $EXTENSIONS_FILE; then
-      echo todo --install-extension $EXTENSIONS_FILE
-      /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir --install-extension $EXTENSIONS_FILE
-    fi
-  done
+#   for EXTENSIONS_FILE in /fe-pipeline-app/vscode-extensions/*.vsix; do
+#     if test -f $EXTENSIONS_FILE; then
+#       echo todo --install-extension $EXTENSIONS_FILE
+#       /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir --install-extension $EXTENSIONS_FILE
+#     fi
+#   done
 
-fi
-
+# fi
 
 dumb-init /usr/bin/code-server "$@"

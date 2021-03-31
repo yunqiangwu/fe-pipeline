@@ -575,7 +575,7 @@ export class WorkspaceService {
                   // command: [ "node", "/home/theia/src-gen/backend/main.js", "--hostname=0.0.0.0" ],
                   // `--enable-proposed-api=fe-pipeline.fe-pipeline-extensions`,
                   // ...(ws.isTemp ? [] : [`--home //${Config.singleInstance().get('hostname')}${Config.singleInstance().get('fe-path')}app/workspaces`]), 
-                  args: [`--user-data-dir=/workspace/.user-code-data-dir`, `--port=${webPort}`, "--auth=password", FE_PIPELINE_WORK_DIR],
+                  args: [`--port=${webPort}`, "--auth=password", FE_PIPELINE_WORK_DIR],
                   // command: [ "python3", "-m", "http.server", "3000" ],
                   volumeMounts: [
                     ...(ws.gitUrl === 'none' ? [] : [
@@ -597,7 +597,7 @@ export class WorkspaceService {
                     },
                   ],
                   "livenessProbe": {
-                    "initialDelaySeconds": 30,
+                    "initialDelaySeconds": 20,
                     "failureThreshold": 1000,
                     "periodSeconds": 20,
                     "httpGet": {
