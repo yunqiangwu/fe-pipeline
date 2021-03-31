@@ -59,13 +59,20 @@ RUN sudo chown -R coder:coder $NVM_DIR
 RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >> ~/.bashrc \
   echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
+ENV CORAL_DEV=true
+
+RUN mkdir -p /home/coder/.local/share/code-server/User/ 
+COPY ./defaultVsCodeSetting.json /home/coder/.local/share/code-server/User/settings.json
+
 RUN . $NVM_DIR/nvm.sh && \
   npm i -g coral-cli && \
-  cd /home/coder && \
+  cd /workspace && \
   coral create coral-demo && \
   cd coral-demo && \
   rm -rf templates/Demo && \
-  yarn install
+  yarn install && \
+  yarn cache clean && \
+  npm cache clean --force
 
 WORKDIR /workspace
 ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]

@@ -27,8 +27,10 @@ if [ "${DOCKER_USER-}" ] && [ "$DOCKER_USER" != "$USER" ]; then
   sudo sed -i "/coder/d" /etc/sudoers.d/nopasswd
 fi
 
-if [ ! -d "/workspace/.user-code-data-dir" ]; then
-  sudo chown -R coder:coder /workspace
+if [ "$CORAL_DEV" != "true" ];then
+  if [ ! -d "/workspace/.user-code-data-dir" ]; then
+    sudo chown -R coder:coder /workspace
+  fi
 fi
 
 if [ x"$FE_PIPELINE_WORK_DIR" != "x" ] && [ ! -d "$FE_PIPELINE_WORK_DIR" ]; then
