@@ -61,7 +61,7 @@ RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >
 
 ENV CORAL_DEV=true
 
-RUN chmod 777 /home/coder/.local/share/code-server/User/ && cp defaultVsCodeSetting.json /home/coder/.local/share/code-server/User/settings.json
+RUN mkdir -p /home/coder/.local/share/code-server/User/ && cp defaultVsCodeSetting.json /home/coder/.local/share/code-server/User/settings.json
 
 RUN . $NVM_DIR/nvm.sh && \
   npm i -g coral-cli && \
