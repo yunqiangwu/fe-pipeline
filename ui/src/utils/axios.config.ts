@@ -16,7 +16,10 @@ if(!(axios as any)._IS_CONFIGED) {
   axios.interceptors.request.use((config) => {
     if((config as any).fetchTokenFromUrlParam){
       return (async () => {
-        const _token = await getTokenFromUrlParam();
+        let _token = await getTokenFromUrlParam();
+        if(!_token) {
+          _token = getToken();
+        }
         if(_token) {
           const newConfig = {
             ...config,
