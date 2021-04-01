@@ -57,4 +57,12 @@ authProviders:
       clientId: "hsop-app"
       callBackUrl: "/oauth/oauth/authorize"
 
-
+  - id: corallium-uat
+    host: 192.168.17.180:8080
+    protocol: http
+    type: open-hand
+    oauth:
+      args:
+        response_type: token
+      clientId: localhost
+      callBackUrl: /oauth/oauth/authorize

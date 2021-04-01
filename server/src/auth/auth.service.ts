@@ -572,18 +572,17 @@ export class AuthService {
 
       if(!user) {
         user = await this.usersService.createUser(userInfo as User);
-        await this.usersService.updateOauthBindInfo({
-          user,
-          oauthToken:  clientToken,
-          loginType: authConfigItem.type as ThreePlatformType,
-          authHost: authConfigItem.host,
-          threeAccountUsername: userInfo.username,
-          authClientId: clientId,
-          tokenInfo: { access_token: clientToken, clientId },
-          accountData,
-        });
       }
-
+      await this.usersService.updateOauthBindInfo({
+        user,
+        oauthToken:  clientToken,
+        loginType: authConfigItem.type as ThreePlatformType,
+        authHost: authConfigItem.host,
+        threeAccountUsername: userInfo.username,
+        authClientId: clientId,
+        tokenInfo: { access_token: clientToken, clientId },
+        accountData,
+      });
     } else {
       user  = threeAccountInfo.user;
     }

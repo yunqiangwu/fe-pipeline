@@ -187,6 +187,41 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
   }, [wsObj]);
 
+  useEffect( () => {
+
+    if(window.top === window) {
+      return;
+    }
+
+    const onMessage = (e: any) => {
+      if(!e.data || !e.data.type){
+        return;
+      }
+      if(e.data._isReturnFromVscode){
+        return;
+      }
+
+      const { type, content } = e.data;
+
+      if(type === 'command') {
+
+        console.log(`执行命令: ${content}`);
+        window.top.postMessage({
+          ...e.data,
+          _isReturnFromVscode: true,
+          content: `执行命令: ${content}`,
+        }, '*');
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+
+    return () => {
+      window.removeEventListener('message', onMessage);
+    };
+
+  }, []);
+
   if(state==='error') {
     return <div>{state}</div>
   }

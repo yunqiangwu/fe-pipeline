@@ -14,16 +14,7 @@ if(!(axios as any)._IS_CONFIGED) {
     }
   }
   axios.interceptors.request.use((config) => {
-    const token = getToken();
-    if(token) {
-      return {
-        ...config,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          ...config.headers,
-        }
-      }
-    } else if((config as any).fetchTokenFromUrlParam){
+    if((config as any).fetchTokenFromUrlParam){
       return (async () => {
         const _token = await getTokenFromUrlParam();
         if(_token) {
@@ -38,8 +29,18 @@ if(!(axios as any)._IS_CONFIGED) {
         }
         return config;
       })();
+    } else {
+      const token = getToken();
+      if(token) {
+        return {
+          ...config,
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            ...config.headers,
+          }
+        }
+      }
     }
-
     return config
   });
 
