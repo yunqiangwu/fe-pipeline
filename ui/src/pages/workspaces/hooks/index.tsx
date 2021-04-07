@@ -55,7 +55,7 @@ export const useVscode = (config?: UseVscodeConfig) => {
     const query = `gitUrl=${_gitUrl}&gitpodConfig=${encodeURIComponent(JSON.stringify(_podConfig))}&image=${_image}`;
     // return `http://fe-pipeline.localhost/fed/?${query}`;
     // return `https://fe-pipeline.jajabjbj.top/fed/?${query}`;
-    return `${apiHost || `http://${window.location.host}${(window as any).routerBase || '/'}`}?${query}`;
+    return `${apiHost || `${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}`}?${query}`;
   }, [apiHost]);
 
   const iframeRef = useRef<any>(null);
