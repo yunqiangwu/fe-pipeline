@@ -141,10 +141,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				ter.sendText(_cmd, true);
 				vscode.window.registerTerminalLinkProvider
-
 				await ter.processId;
-				
-
 			});
 
 			console.log('命令监听开启');

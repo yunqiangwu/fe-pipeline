@@ -89,7 +89,7 @@ export const useVscode = (config?: UseVscodeConfig) => {
         if(status === 'success') {
           resolve(e.data);
         } else {
-          reject(e);
+          reject(e.data);
         }
 
       };

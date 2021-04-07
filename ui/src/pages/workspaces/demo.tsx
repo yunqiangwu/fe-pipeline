@@ -33,7 +33,10 @@ function App() {
     return controls.executeShell(commandStr).then((res: any) => {
       setResult(res.content);
     }).catch( (e) => {
-      console.error(e)
+      console.error(e);
+      if(e.content) {
+        setResult(e.content);
+      }
     });
   }, [commandStr])
 
