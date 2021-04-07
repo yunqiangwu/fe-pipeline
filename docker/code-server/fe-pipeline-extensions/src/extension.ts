@@ -140,7 +140,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				});
 
 				ter.sendText(_cmd, true);
-				vscode.window.registerTerminalLinkProvider
 
 				await ter.processId;
 				
