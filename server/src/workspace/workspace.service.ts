@@ -560,6 +560,10 @@ export class WorkspaceService {
                       value: ws.password,
                     },
                     {
+                      name: 'FE_PIPELINE_PASSWORD',
+                      value: ws.password,
+                    },
+                    {
                       name: 'FE_PIPELINE_WORK_DIR',
                       value: FE_PIPELINE_WORK_DIR,
                     },
@@ -701,6 +705,7 @@ export class WorkspaceService {
                 ws = await this.workspaceRepository.findOne(workspaceId);
                 ws.state = 'opening';
                 ws.podObject = JSON.stringify(pod);
+                ws.podIp = pod.status.podIP;
                 await this.workspaceRepository.save(ws);
               })();
             } catch (e) {
@@ -724,6 +729,7 @@ export class WorkspaceService {
           ws = await this.workspaceRepository.findOne(workspaceId);
           ws.state = 'opening';
           ws.podObject = JSON.stringify(kubePodRes.body);
+          ws.podIp = kubePodRes.body.status.podIP;
           await this.workspaceRepository.save(ws);
         }
         globalSubject.next(
@@ -852,6 +858,7 @@ export class WorkspaceService {
     }
     ws.state = 'saved';
     ws.podObject = null;
+    ws.podIp = null;
     await this.workspaceRepository.save(ws);
 
     if (isEmptyData) {

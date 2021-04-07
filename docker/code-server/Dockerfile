@@ -1,7 +1,7 @@
 FROM node:15.8.0 as vscode-extensions-builder
 WORKDIR /app
 ADD ./fe-pipeline-extensions/ /app/
-RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+RUN echo ccc && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
 FROM debian:10
 
@@ -74,4 +74,6 @@ RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >
   echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
 WORKDIR /workspace
-ENTRYPOINT ["/usr/bin/entrypoint.sh", "--user-data-dir=/workspace/.user-code-data-dir", "--bind-addr", "0.0.0.0:8080", "."]
+# ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]
+

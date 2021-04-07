@@ -36,6 +36,9 @@ export class Workspace {
   @Column({ nullable: true, length: 1200 })
   podObject: string;
 
+  @Column({ nullable: true, length: 20 })
+  podIp: string;
+
   @Column({ nullable: true, length: 500 })
   errorMsg: string;
 

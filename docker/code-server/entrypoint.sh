@@ -48,4 +48,4 @@ fi
 
 # fi
 
-dumb-init /usr/bin/code-server "$@"
+dumb-init /usr/bin/code-server --user-data-dir=/workspace/.user-code-data-dir $@

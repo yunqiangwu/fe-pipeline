@@ -202,7 +202,9 @@ export class WorkspaceController {
         response.status(302).redirect(`/`);
         return;
       }
-      return {};
+      return {
+        message: 'host not correct!',
+      };
       // console.log(`wsHost: ${res.wsHost}`);
     }catch(e) {
       console.error(e);

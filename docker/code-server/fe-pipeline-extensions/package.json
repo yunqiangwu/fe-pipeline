@@ -1,8 +1,8 @@
 {
-  "name": "fe-pipeline-extensions",
-  "publisher": "fe-pipeline",
-  "enableProposedApi": true,
-  "repository": "https://code.choerodon.com.cn/hzero-hzero-c7n-hips/fe-pipeline.git",
+	"name": "fe-pipeline-extensions",
+	"publisher": "fe-pipeline",
+	"enableProposedApi": true,
+	"repository": "https://code.choerodon.com.cn/hzero-hzero-c7n-hips/fe-pipeline.git",
 	"displayName": "fe-pipeline-extensions",
 	"description": "",
 	"version": "0.0.1",
@@ -13,8 +13,8 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:fe-pipeline-extensions.helloWorld",
-        "onStartupFinished"
+		"onCommand:fe-pipeline-extensions.helloWorld",
+		"onStartupFinished"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -36,17 +36,20 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.53.0",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
-		"eslint": "^7.19.0",
+		"@types/vscode": "^1.53.0",
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
+		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.2.1",
-		"vsce":"^1.87.0",
 		"typescript": "^4.1.3",
+		"vsce": "^1.87.0",
 		"vscode-test": "^1.5.0"
+	},
+	"dependencies": {
+		"socket.io": "^4.0.1"
 	}
 }

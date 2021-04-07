@@ -6,6 +6,10 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"type": "docker",
+		},
+		
+		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
@@ -13,6 +17,10 @@
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--enable-proposed-api=fe-pipeline.fe-pipeline-extensions"
 			],
+			"env": {
+				"FE_PIPELINE_DEBUG": "true",
+				"FE_PIPELINE_PASSWORD": "672bcc5408cf5178a5805af9c29f05dd",
+			},
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],

@@ -1,4 +1,5 @@
 import * as querystring from 'querystring';
+import io, { Socket } from 'socket.io-client';
 import { RouteComponentProps } from 'react-router-dom';
 import { useAsync, useAsyncFn, useLocation } from 'react-use';
 import { GitRepoList } from './components/git-repo-list';
@@ -99,8 +100,20 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
     };
 
     if(ws.state ===  'opening' &&  ws.podObject) {
-      await awaitPodAvailable(ws.id);
-      setState('loaded');
+      // await awaitPodAvailable(ws.id);
+      setState((state) => {
+
+        if(state !== 'loaded') {
+          window.top.postMessage({
+            type: 'loaded',
+            _isReturnFromVscode: true,
+          }, '*');
+        }
+
+        return 'loaded';
+      });
+
+
       return;
     }
 
@@ -166,7 +179,25 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       } else {
       }
       await awaitPodAvailable(ws.id);
-      setState('loaded');
+
+      const wsRes = await axios.get(`/workspace/${ws.id}`);
+      setWsObj(wsRes.data);
+      // window.top.postMessage({
+      //   type: 'loaded',
+      //   _isReturnFromVscode: true,
+      // }, '*');
+      // setState('loaded');
+      setState((state) => {
+
+        if(state !== 'loaded') {
+          window.top.postMessage({
+            type: 'loaded',
+            _isReturnFromVscode: true,
+          }, '*');
+        }
+
+        return 'loaded';
+      });
     } finally {
       _ws.unsubscribe();
     }
@@ -193,7 +224,14 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       return;
     }
 
-    const onMessage = (e: any) => {
+    if(!wsObj) {
+      return;
+    }
+
+    let closeWss: any = null;
+    let socket: Socket | null = null;
+
+    const onMessage = async (e: any) => {
       if(!e.data || !e.data.type){
         return;
       }
@@ -206,21 +244,76 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       if(type === 'command') {
 
         console.log(`执行命令: ${content}`);
-        window.top.postMessage({
+
+        let wssUrl;
+
+        if(process.env.NODE_ENV === 'development') {
+          wssUrl = 'ws://127.0.0.1:23010';
+        }  else {
+          wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${`${23010}-${`${wsObj.podIp || (JSON.parse(wsObj?.podObject))?.status?.podIP}`.replace(/\./g, '-')}.ws.${ window.location.host.replace(/:\d+$/, '')}`.trim()}/`;
+        }
+
+        if(!socket) {
+          socket = io(wssUrl, {path: '/api', extraHeaders: { password: wsObj.password }});
+        }
+
+        closeWss = () => {
+          if(!socket) {
+            return;
+          }
+          socket.disconnect();
+          socket.close();
+          socket = null;
+          closeWss = null;
+        };
+
+        const _randNum = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1-$2-$3-$4-$5');
+
+        let timeId: any = setTimeout(() => {
+          if(socket) {
+            closeWss();
+            window.top.postMessage({
+              ...e.data,
+              _isReturnFromVscode: true,
+              failed: true,
+              content: 'timeout',
+            }, '*');
+          }
+        }, 3000);
+
+        socket.on("message", (data) => {
+          if(data._randNum!== _randNum ) {
+            return;
+          }
+          clearTimeout(timeId);
+          timeId = null;
+          // console.log('receive message:',data); // prints { x: "42", EIO: "4", transport: "polling" }
+          window.top.postMessage({
+            ...e.data,
+            ...data,
+            _isReturnFromVscode: true,
+          }, '*');
+          closeWss();
+        });
+
+        socket.send({
           ...e.data,
-          _isReturnFromVscode: true,
-          content: `执行命令: ${content}`,
-        }, '*');
+          _randNum,
+        });
+
       }
     };
 
     window.addEventListener('message', onMessage);
 
     return () => {
+      if(closeWss) {
+        closeWss();
+      }
       window.removeEventListener('message', onMessage);
     };
 
-  }, []);
+  }, [wsObj]);
 
   if(state==='error') {
     return <div>{state}</div>
@@ -231,7 +324,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
   }
 
   if(state === 'loaded' && wsObj) {
-    return <iframe style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}?access_token=${getToken()}`} />;
+    return <iframe allow="clipboard-read; clipboard-write" sandbox="allow-top-navigation allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms" style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}?access_token=${getToken()}`} />;
   }
 
   if(state === 'readme') {

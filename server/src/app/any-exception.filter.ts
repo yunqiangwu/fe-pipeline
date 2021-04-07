@@ -28,7 +28,8 @@ import { Config } from '../config/config';
       if(status === 404 && ( request.url.startsWith((Config.singleInstance().get('fe-path') || '/fed/').replace(/\/$/, '')) || request.url === '/' )) {
         const filePath = join( Config.singleInstance().get('homeDir'), 'public/index.html');
         if(existsSync) {
-          response.status(200).sendFile(filePath);
+          response.
+          status(200).sendFile(filePath);
           return;
         }
       }

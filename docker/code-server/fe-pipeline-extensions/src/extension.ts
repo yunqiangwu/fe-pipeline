@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { WebSocketService } from './websocket-services';
 const readline = require('readline');
 
 
@@ -13,6 +14,7 @@ type ShowOptions = {
 
 let isBreak = false;
 
+let wss: WebSocketService|null;
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -44,7 +46,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "fe-pipeline-extensions" is now active!');
@@ -61,7 +62,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	);
 
-	const scriptUri = await panel.webview.asWebviewUri(
+	const scriptUri = panel.webview.asWebviewUri(
 		vscode.Uri.file(path.join(context.extensionPath, 'res', 'main.js'))
 	);
 
@@ -71,7 +72,84 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	setTimeout(() => {
 		panel.dispose();
-	}, 0)
+	}, 0);
+
+
+	(() => {
+		const terName = '__system';
+
+		setTimeout(() => {
+			const wssPort = 23010;
+			wss = new WebSocketService(wssPort);
+
+			wss.on('message', async ({
+				args,
+				client, // socketIO.Socket<DefaultEventsMap, DefaultEventsMap>
+			}) => {
+
+				if(!args || !args[0]) {
+					return
+				}
+				const params = args[0];
+				
+				console.log('接收到命令:', params);
+
+				let cmd = params.content;
+				let _cmd = `(${cmd}) ; exit $?`;
+
+				// const taskDef = { type: "shell", command: _cmd, args: [] } as vscode.TaskDefinition;
+				// const folder = vscode.workspace.workspaceFolders![0]; 
+
+
+				// const task = new vscode.Task(
+				// 	taskDef,
+				// 	folder,
+				// 	"my task",
+				// 	"shell", 
+				// 	vscode.ShellExecution,
+				// );
+
+				// const res = await vscode.tasks.executeTask(task);
+
+				// console.log(res);
+
+				// client.send({
+				// 	...params,
+				// 	status: 'success',
+				// 	content: '命令执行成功',
+				// });
+
+				const ter = vscode.window.terminals.find(item => item.name === terName ) || vscode.window.createTerminal(terName);
+				ter.show();
+				vscode.window.onDidCloseTerminal((t) => {
+					if(t.name === terName) {
+						if(t.exitStatus?.code === 0) {
+							client.send({
+								...params,
+								status: 'success',
+								content: '命令执行成功',
+							});
+						} else {
+							client.send({
+								...params,
+								status: 'failed',
+								content: `命令执行失败: ${t.exitStatus?.code}`,
+							});
+						}
+					}
+				});
+
+				ter.sendText(_cmd, true);
+				vscode.window.registerTerminalLinkProvider
+
+				await ter.processId;
+				
+
+			});
+
+			console.log('命令监听开启');
+		}, 0);
+	})();
 
 	// 在你的内容中引用它
 	// panel.webview.html = `<!DOCTYPE html>
@@ -110,9 +188,10 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 					ter.sendText(cmd, true);
 					ter.show();
-					vscode.window.onDidCloseTerminal((t) => {
+					const lis = (t: vscode.Terminal) => {
 						setWsData(storeKey, null);
-					});
+					};
+					vscode.window.onDidCloseTerminal(lis);
 				}
 			}
 
@@ -325,5 +404,10 @@ export function deactivate() {
 	//   panel.dispose();
 	// }
 	// clearAllWsData();
+
+	if(wss) {
+		wss.close();
+		wss = null;
+	}
 
 }
