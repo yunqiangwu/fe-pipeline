@@ -807,7 +807,7 @@ export class WorkspaceService {
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     if (ws.state === 'deleting') {
-      // await this.workspaceRepository.delete(workspaceId);
+      await this.workspaceRepository.delete(workspaceId);
       return { workspaceId };
     }
 
