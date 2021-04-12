@@ -249,7 +249,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
         if(process.env.NODE_ENV === 'develop2ment') {
           wssUrl = 'ws://127.0.0.1:23010';
         }  else {
-          wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${podUrl.replace(/https?\:\/\//, '').replace('23000-','23010-')}/`;
+          wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${podUrl.replace(/https?\:\/\//, '').split('/')[0].replace('23000-','23010-')}/`;
         }
 
         if(!socket) {
@@ -278,7 +278,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
               content: 'timeout',
             }, '*');
           }
-        }, 3000);
+        }, 30000);
 
         socket.on("message", (data) => {
           if(data._randNum!== _randNum ) {
