@@ -97,6 +97,7 @@ export async function activate(context: vscode.ExtensionContext) {
 				console.log('接收到命令:', params);
 
 				let cmd = params.content;
+				let _cmd = `. $NVM_DIR/nvm.sh && ${cmd}`;
 
 				let cmdCwd = '/pwd';
 
@@ -106,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				try{
 					const res: any = await new Promise((resolve, reject) => {
-						exec(cmd, { cwd: cmdCwd }, (err, stdout, stderr) => {
+						exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
 							if(err) {
 								reject(err);
 								return;

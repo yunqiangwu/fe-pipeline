@@ -654,7 +654,7 @@ export class WorkspaceService {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
           } else if (ws.image === 'vscode') {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
-            container.args.push('--disable-update-check');
+            // container.args.push('--disable-update-check');
           } else if (ws.image) {
             container.image = ws.image;
           }

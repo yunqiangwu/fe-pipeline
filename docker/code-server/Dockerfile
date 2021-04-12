@@ -1,7 +1,7 @@
 FROM node:15.8.0 as vscode-extensions-builder
 WORKDIR /app
 ADD ./fe-pipeline-extensions/ /app/
-RUN echo ccc && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+RUN echo 1 && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
 FROM debian:10
 
@@ -45,7 +45,10 @@ RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v
 RUN . $NVM_DIR/nvm.sh && nvm install 14 && npm i -g yarn
 
 # COPY release-packages/code-server*.deb /tmp/
-RUN curl -fL https://github.com/cdr/code-server/releases/download/v3.9.2/code-server_3.9.2_amd64.deb -o /tmp/code-server-install.deb
+
+ARG CODE_SERVER_VERSION=3.9.3
+
+RUN curl -fL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb -o /tmp/code-server-install.deb
 RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
@@ -57,6 +60,9 @@ COPY ./install-extension.sh /workspace/install-vscode-extension.sh
 RUN . /workspace/install-vscode-extension.sh && rm -rf /workspace/install-vscode-extension.sh
 
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
+
+# RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> /etc/profile \
+#   && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> /etc/profile
 
 USER coder
 
@@ -70,8 +76,11 @@ EXPOSE 8080
 
 RUN sudo chown -R coder:coder $NVM_DIR
 
-RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm ' >> ~/.bashrc \
-  echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
+# /etc/profile
+# ~/.bashrc
+
+RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> ~/.bashrc \
+  && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> ~/.bashrc
 
 WORKDIR /workspace
 # ENTRYPOINT ["/usr/bin/entrypoint.sh", "--bind-addr", "0.0.0.0:8080", "."]

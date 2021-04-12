@@ -341,5 +341,4 @@ ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 RUN sudo touch /etc/bash.bashrc && sudo sed -i '2i\if [ x"${PATH}" = "x" ]; then export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi\nif [ x"${PATH: -1}" = "x:" ]; then export PATH=${PATH/%:/}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi' /etc/bash.bashrc
 
-
 # ENTRYPOINT [ "node", "/home/theia/src-gen/backend/main.js", "/home/project", "--hostname=0.0.0.0" ]
