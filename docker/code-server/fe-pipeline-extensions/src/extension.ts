@@ -5,9 +5,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { WebSocketService } from './websocket-services';
 import { exec } from 'child_process';
-import { promisify } from 'util';
 const readline = require('readline');
-
 
 type ShowOptions = {
 	preserveFocus?: boolean,
@@ -18,11 +16,7 @@ let isBreak = false;
 
 let wss: WebSocketService|null;
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export async function activate(context: vscode.ExtensionContext) {
-
-	const WS_DIR_FILE = path.join(`${(context?.storageUri?.authority || `/workspace/.gitpod`)}`, 'config.json') // '/workspace/.gitpod/config.json';
+const WS_DIR_FILE = path.join(`/workspace/.gitpod`, 'config.json') // '/workspace/.gitpod/config.json';
 
 	const setWsData = (key: string, value: string | null) => {
 		let data = {} as any;
@@ -47,6 +41,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			return data[key];
 		}
 	}
+
+// this method is called when your extension is activated
+// your extension is activated the very first time the command is executed
+export async function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
@@ -186,22 +184,32 @@ export async function activate(context: vscode.ExtensionContext) {
 				const taskObj = gitpodTask[taskIndex];
 				const taskName = `task_${taskIndex}`;
 				const storeKey = `cmd_${taskIndex}`;
-				const isCompleteTask = getWsData(storeKey);
-				if (isCompleteTask) {
+				let ter = vscode.window.terminals.find(item => item.name === taskName);
+				if (ter) {
 					continue;
 				}
-				setWsData(storeKey, 'true',);
-				let ter = vscode.window.terminals.find(item => item.name === taskName);
-				if (!ter) {
-					ter = vscode.window.createTerminal(taskName);
+				const runCommand = (isRunInit?: boolean) => {
+					const ter = vscode.window.createTerminal(taskName);
 					let cmd = 'ls';
-					if (taskObj.init && taskObj.command) {
+					if (taskObj.init && taskObj.command && isRunInit) {
 						cmd = ` (${taskObj.init}) && ( ${taskObj.command})`;
 					} else if (taskObj.command) {
 						cmd = taskObj.command;
 					}
 					ter.sendText(cmd, true);
 					ter.show();
+					return ter;
+				};
+				if(!taskObj.noCache) {
+					const isCompleteTask = getWsData(storeKey);
+					if (isCompleteTask) {
+						ter = runCommand();
+						continue;
+					}
+					setWsData(storeKey, 'true',);
+				}
+				ter = runCommand(true);
+				if(!taskObj.noCache) {
 					const lis = (t: vscode.Terminal) => {
 						setWsData(storeKey, null);
 					};
@@ -418,6 +426,19 @@ export function deactivate() {
 	//   panel.dispose();
 	// }
 	// clearAllWsData();
+
+	const GITPOD_TASKS = process.env.GITPOD_TASKS;
+
+	if(GITPOD_TASKS) {
+		const gitpodTask = JSON.parse(GITPOD_TASKS);
+		for (const taskIndex in gitpodTask) {
+			const taskObj = gitpodTask[taskIndex];
+			if(!taskObj.noCache) {
+				const storeKey = `cmd_${taskIndex}`;
+				setWsData(storeKey, null);
+			}
+		}
+	}
 
 	if(wss) {
 		wss.close();
