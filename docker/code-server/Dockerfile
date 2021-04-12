@@ -1,7 +1,7 @@
 FROM node:15.8.0 as vscode-extensions-builder
 WORKDIR /app
 ADD ./fe-pipeline-extensions/ /app/
-RUN echo 1 && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+RUN echo 2 && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
 FROM debian:10
 
@@ -65,6 +65,9 @@ COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 #   && echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> /etc/profile
 
 USER coder
+
+RUN mkdir -p /home/coder/.local/share/code-server/User/
+COPY ./defaultVsCodeSetting.json /home/coder/.local/share/code-server/User/settings.json
 
 RUN sudo chown -R coder:coder /workspace
 
