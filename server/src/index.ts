@@ -8,6 +8,10 @@ import { AppModule } from './app/app.module';
 import { AllExceptionsFilter } from './app/any-exception.filter';
 import { Config } from './config/config';
 import { existsSync, mkdirp } from 'fs-extra';
+import { CorsOptionsCallback } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { Request } from 'express';
+// import { Request } from '@nestjs/common';
+
 
 
 export async function startServer(port = 3000) {
@@ -29,7 +33,18 @@ export async function startServer(port = 3000) {
     }
   }
 
-  const app = await NestFactory.create(AppModule, {cors: true});
+  const app = await NestFactory.create(AppModule, {cors: (req: Request, cb: CorsOptionsCallback) => {
+
+    // const origin = req.hostname;
+
+    // console.log('host:', req.headers );
+
+    cb(null, {
+      // origin: req.headers['origin'] || req.headers['host'] || req.hostname,
+      // origin: 'fe-pipeline.localhost:8000, fe-pipeline.localhost:3000, 23000-10-1-0-98.ws.fe-pipeline.localhost',
+      // origin: origin,
+    });
+  }});
 
   app.useWebSocketAdapter(new WsAdapter(app));
   app.useGlobalFilters(  new AllExceptionsFilter()  );

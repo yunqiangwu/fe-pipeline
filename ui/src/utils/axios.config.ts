@@ -74,7 +74,7 @@ if(!(axios as any)._IS_CONFIGED) {
       // (!(error.config as any).fetchTokenFromUrlParam)
       // &&
       (!error.config.notRedirectLogin) &&
-      ((error as any).response.status === 401 &&
+      ((error as any).response && (error as any).response.status === 401 &&
       !window.location.pathname.includes(`${(window as any).routerBase || '/'}login`))
       ) {
         let gotoUrl = (`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}login?redirect_uri=${encodeURIComponent(window.location.href)}`);

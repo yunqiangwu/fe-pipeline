@@ -1,13 +1,15 @@
-import { Controller, Get, Post, Body, Headers, Delete, Logger, UseGuards, Param, Request, Res, Req } from '@nestjs/common';
+import { Controller, Get, Options, Post, Body, Headers, Delete, Logger, UseGuards, Request as RequestD, Param, Res, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiQuery, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { WorkspaceService } from './workspace.service';
+import * as querystring from 'querystring';
 import { Workspace } from './workspace.entity';
 import { User } from '../users/users.entity';
 import { CurrentUser } from '../common/decos';
 import { CreateTempWorkspaceDto } from './dto/create-temp-workspace.dto';
 import { CreateTempWorkspaceDtoResp } from './dto/create-temp-workspace-resp.dto';
-import { Response } from 'express';
+import { Response, Request } from 'express';
+import * as moment from 'moment';
 import { Config } from 'src/config/config';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
@@ -25,7 +27,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class WorkspaceController {
   constructor(
     private readonly workspaceService: WorkspaceService,
-  ) {}
+  ) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
@@ -53,7 +55,7 @@ export class WorkspaceController {
     description: 'The found record',
     type: [Workspace],
   })
-  async query(@Request() req, @CurrentUser() user: User): Promise<Workspace[]> {
+  async query(@RequestD() req, @CurrentUser() user: User): Promise<Workspace[]> {
     return this.workspaceService.query(req.body, user);
   }
 
@@ -72,7 +74,7 @@ export class WorkspaceController {
   save(@CurrentUser() user: User, @Body() workspaces: Workspace[]): Promise<Workspace[]> {
     Logger.log(`receive Workspaces: ${JSON.stringify(workspaces)}`);
     Logger.log(`current User: ${JSON.stringify(user)}`);
-    
+
     return this.workspaceService.save(workspaces.map(item => {
       return {
         ...item,
@@ -86,7 +88,7 @@ export class WorkspaceController {
   @Delete('/:workspaceId')
   delete(@Param('workspaceId') workspaceId: number): Promise<any> {
     Logger.log(`receive Workspaces id: ${workspaceId}`);
-    return this.workspaceService.deleteById( workspaceId );
+    return this.workspaceService.deleteById(workspaceId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -101,11 +103,11 @@ export class WorkspaceController {
   })
   async createTempWorkspace(@CurrentUser() user: User, @Body() _createTempWorkspaceDto: CreateTempWorkspaceDto): Promise<CreateTempWorkspaceDtoResp> {
 
-    if(!_createTempWorkspaceDto.gitUrl) {
+    if (!_createTempWorkspaceDto.gitUrl) {
       throw new Error(`now gitUrl or zipUrl`);
     }
     const createTempWorkspaceDto = { ..._createTempWorkspaceDto };
-    
+
     createTempWorkspaceDto.userId = user.userId;
 
     // createTempWorkspaceDto.envJsonData = JSON.stringify(_createTempWorkspaceDto);
@@ -128,7 +130,7 @@ export class WorkspaceController {
   })
   get(@Param('workspaceId') workspaceId: number, @CurrentUser() user: User): Promise<Workspace> {
     Logger.log(`receive Workspaces id: ${workspaceId}`);
-    return this.workspaceService.findById( workspaceId, user );
+    return this.workspaceService.findById(workspaceId, user);
   }
 
   @Post('nodes')
@@ -139,28 +141,28 @@ export class WorkspaceController {
   @ApiBody({
     type: Object,
   })
-  getNodes(@Request() req): Promise<any> {
+  getNodes(@RequestD() req): Promise<any> {
     return this.workspaceService.findNodes(req.body);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/open-ws/:workspaceId')
   openWs(@Param('workspaceId') workspaceId: number, @CurrentUser() currentUser: User): Promise<any> {
-    return this.workspaceService.openWs( workspaceId, currentUser );
+    return this.workspaceService.openWs(workspaceId, currentUser);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/close-ws/:workspaceId')
   closeWs(@Param('workspaceId') workspaceId: number): Promise<any> {
-    return this.workspaceService.closeWs( workspaceId );
+    return this.workspaceService.closeWs(workspaceId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/ws-is-alive/:workspaceId')
   async isAlive(@Param('workspaceId') workspaceId: number, @Res({ passthrough: true }) response: Response): Promise<any> {
     let res = {} as any;
-    try{
-      res = await this.workspaceService.isAlive( workspaceId );
+    try {
+      res = await this.workspaceService.isAlive(workspaceId);
       // response.cookie('key', hashKey, {
       //   path: '/',
       //   domain: res.wsHost,
@@ -168,7 +170,7 @@ export class WorkspaceController {
       // response.status(302).redirect(`//${res.wsHost}`);
       // return;
       // console.log(`wsHost: ${res.wsHost}`);
-    }catch(e) {
+    } catch (e) {
       console.error(e);
       throw e;
     }
@@ -178,38 +180,75 @@ export class WorkspaceController {
     };
   }
 
-  // @UseGuards(AuthGuard('jwt'))
-  // @UseGuards(AuthGuard('local'))
+  // @UseGuards(JwtAuthGuard)
+  // @Options('/redirect-ws-url/:workspaceId')
+  // async redirectToWsUrlOption(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
+  //   response.setHeader('Access-Control-Allow-Origin',  _host || '*');
+  //   response.status(204).end();
+  // }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/redirect-ws-url/:workspaceId')
+  async getToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
+    return this.redirectToWsUrl(workspaceId, _host, req, response);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('/redirect-ws-url/:workspaceId')
   async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
     let res = {} as any;
-    try{
-      res = await this.workspaceService.getRedirectToWsInfo( workspaceId );
+    try {
+      res = await this.workspaceService.getRedirectToWsInfo(workspaceId);
       const host = (_host || '').replace(/:\d+$/, '');
       // console.log(host, req.url);
       const configHost = Config.singleInstance().get('hostname').replace(/:\d+$/, '');
-      if(host === configHost) {
-         response.status(302).redirect(`//${res.wsHost}${req.url || '/'}`);
-         return;
-      } else if(host.endsWith(`ws.${configHost}`) ) {
+      // response.setHeader('Access-Control-Allow-Origin', '*');
+      // response.setHeader('a', 'ddd');
+      if (host === configHost) {
+        if (req.method.toLowerCase() === 'post' || req.url.includes('method=post')) {
+          const [ urlPath, urlQuery ] = req.url.split('?');
+          const params = querystring.parse(urlQuery);
+          delete params.method;
+          return {
+            domain: `${res.wsHost}${urlPath || '/'}?${querystring.stringify(params)}`
+          };
+        }
+
+        let redirectUrl = `//${res.wsHost}${req.url || '/'}`;
+
+        if (req.method.toLowerCase() === 'post' && !redirectUrl.includes('method=post')) {
+          if (redirectUrl.includes('?')) {
+            redirectUrl = `${redirectUrl}&method=post`
+          } else {
+            redirectUrl = `${redirectUrl}?method=post`
+          }
+        }
+        response.status(302).redirect(redirectUrl);
+        return;
+      } else if (host.endsWith(`ws.${configHost}`)) {
         response.cookie('key', res.password, {
           path: '/',
           domain: res.wsHost,
           sameSite: 'none',
           secure: true,
+          expires: moment().add(7, 'days').toDate(),
         });
-        response.status(302).redirect(`/`);
+        if (req.method.toLowerCase() === 'post' || req.url.includes('method=post')) {
+          return {
+            domain: res.wsHost
+          };
+        }
+        response.status(302).redirect(`//${res.wsHost}`);
         return;
       }
       return {
         message: 'host not correct!',
+        failed: true,
       };
-      // console.log(`wsHost: ${res.wsHost}`);
-    }catch(e) {
+    } catch (e) {
       console.error(e);
       throw e;
     }
   }
-  
+
 }

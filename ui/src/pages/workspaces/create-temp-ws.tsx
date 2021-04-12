@@ -16,6 +16,8 @@ import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import { ifError } from 'assert';
 import { getToken, hash } from '@/utils/token';
 
+(window as any).axios = axios;
+
 // import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 
 const iframeStyle: CSSProperties = {
@@ -28,10 +30,23 @@ interface WsLoadingPageReactParams {
   id: string;
 }
 
+const getPodUrl = async (wsId: string | number) => {
+  const res = await axios.get(`workspace/redirect-ws-url/${wsId}?method=post&access_token=${getToken()}`, {});
+  console.log('res.data.domain', res.data.domain);
+  return res.data.domain;
+  // const theGetPodUrlApi = `${axios.defaults.baseURL}workspace/redirect-ws-url/${wsId}?method=post&access_token=${getToken()}`;
+
+  // const theGetPodUrlApi = `${axios.defaults.baseURL}workspace/redirect-ws-url/${wsId}?access_token=${getToken()}`;
+
+  // return theGetPodUrlApi;
+
+
+}
+
 const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) => {
 
   const [state, setState] = useState('loading');
-  // const [podUrl, setPodUrl] = useState<string>('loading...');
+  const [podUrl, setPodUrl] = useState<string| null>(null);
   const [wsObj, setWsObj] = useState<any>(null);
 
   const createTemp = useAsync(async () =>  {
@@ -101,18 +116,6 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
     if(ws.state ===  'opening' &&  ws.podObject) {
       // await awaitPodAvailable(ws.id);
-      setState((state) => {
-
-        if(state !== 'loaded') {
-          window.top.postMessage({
-            type: 'loaded',
-            _isReturnFromVscode: true,
-          }, '*');
-        }
-
-        return 'loaded';
-      });
-
 
       return;
     }
@@ -182,35 +185,31 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
       const wsRes = await axios.get(`/workspace/${ws.id}`);
       setWsObj(wsRes.data);
-      // window.top.postMessage({
-      //   type: 'loaded',
-      //   _isReturnFromVscode: true,
-      // }, '*');
-      // setState('loaded');
-      setState((state) => {
-
-        if(state !== 'loaded') {
-          window.top.postMessage({
-            type: 'loaded',
-            _isReturnFromVscode: true,
-          }, '*');
-        }
-
-        return 'loaded';
-      });
     } finally {
       _ws.unsubscribe();
     }
   }, []);
 
-  useEffect( () => {
+  useAsync( async () => {
 
     if(!wsObj) {
       return;
     }
 
     try{
-      openWs(wsObj);
+      await openWs(wsObj);
+      const podUrlObjRes = await getPodUrl(wsObj.id);
+
+      setPodUrl(podUrlObjRes);
+      setState((state) => {
+        if(state !== 'loaded') {
+          window.top.postMessage({
+            type: 'loaded',
+            _isReturnFromVscode: true,
+          }, '*');
+        }
+        return 'loaded';
+      });
     }catch(e) {
       setState(e.message)
       console.error(e);
@@ -224,7 +223,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       return;
     }
 
-    if(!wsObj) {
+    if(!podUrl) {
       return;
     }
 
@@ -247,10 +246,10 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
         let wssUrl;
 
-        if(process.env.NODE_ENV === 'development') {
+        if(process.env.NODE_ENV === 'develop2ment') {
           wssUrl = 'ws://127.0.0.1:23010';
         }  else {
-          wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${`${23010}-${`${wsObj.podIp || (JSON.parse(wsObj?.podObject))?.status?.podIP}`.replace(/\./g, '-')}.ws.${ window.location.host.replace(/:\d+$/, '')}`.trim()}/`;
+          wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${podUrl.replace(/https?\:\/\//, '').replace('23000-','23010-')}/`;
         }
 
         if(!socket) {
@@ -313,7 +312,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
       window.removeEventListener('message', onMessage);
     };
 
-  }, [wsObj]);
+  }, [podUrl]);
 
   if(state==='error') {
     return <div>{state}</div>
@@ -323,8 +322,8 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
     return <div>loading...</div>
   }
 
-  if(state === 'loaded' && wsObj) {
-    return <iframe allow="clipboard-read; clipboard-write" sandbox="allow-top-navigation allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms" style={iframeStyle} src={`${axios.defaults.baseURL}workspace/redirect-ws-url/${wsObj.id}?access_token=${getToken()}`} />;
+  if(state === 'loaded' && podUrl) {
+    return <iframe allow="clipboard-read; clipboard-write" sandbox="allow-top-navigation allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-forms" style={iframeStyle} src={podUrl.startsWith('http') ? podUrl : `${window.location.protocol}//${podUrl}`} />;
   }
 
   if(state === 'readme') {
