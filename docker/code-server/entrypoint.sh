@@ -30,8 +30,12 @@ fi
 # if [ "$CORAL_DEV" != "true" ];then
   if [ ! -d "/workspace/.user-code-data-dir" ]; then
     sudo mkdir -p /workspace/.user-code-data-dir/User
-    sudo chown coder:coder /workspace
-    sudo chown -R coder:coder /workspace/.user-code-data-dir
+    if [ "$FE_PIPELINE_GIT_URL" == "none" ];then
+        sudo chown coder:coder /workspace
+        sudo chown -R coder:coder /workspace/.user-code-data-dir
+      else
+        sudo chown -R coder:coder /workspace
+    fi
     cp /home/coder/.local/share/code-server/User/settings.json /workspace/.user-code-data-dir/User/settings.json
   fi
 # fi

@@ -103,6 +103,8 @@ export async function activate(context: vscode.ExtensionContext) {
 					cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
 				}
 
+				let _stdout, _stderr;
+
 				try{
 					const res: any = await new Promise((resolve, reject) => {
 						exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
@@ -110,6 +112,8 @@ export async function activate(context: vscode.ExtensionContext) {
 								reject(err);
 								return;
 							}
+							_stdout = stdout;
+							_stderr = stderr;
 							resolve({
 								stdout, stderr,
 							});
@@ -121,6 +125,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						...params,
 						status: 'success',
 						content: res.stdout,
+						_stdout, _stderr,
 						...res,
 					});
 				}catch(e) {
@@ -129,6 +134,7 @@ export async function activate(context: vscode.ExtensionContext) {
 						...params,
 						status: 'failed',
 						content: e.message,
+						_stdout, _stderr,
 					});
 				}
 
