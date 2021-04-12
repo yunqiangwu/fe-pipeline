@@ -59,6 +59,12 @@ export default defineConfig({
       // redirect: '/app',
     },
     {
+      path: '/ws-demo-dev',
+      component: '@/pages/workspaces/demo-dev',
+      icon: 'codepen', name: "Demo2",
+      // redirect: '/app',
+    },
+    {
       path: '/app',
       component: '@/layouts',
       routes: [

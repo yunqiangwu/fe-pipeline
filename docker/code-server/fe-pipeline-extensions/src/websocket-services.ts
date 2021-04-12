@@ -55,7 +55,9 @@ export class WebSocketService extends EventEmitter {
     }
 
     close() {
-        this.wss.close();
+        if(this.wss) {
+          this.wss.close();
+        }
     }
 
 }

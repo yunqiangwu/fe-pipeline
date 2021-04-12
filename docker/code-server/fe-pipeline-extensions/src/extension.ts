@@ -4,6 +4,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { WebSocketService } from './websocket-services';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 const readline = require('readline');
 
 
@@ -95,53 +97,67 @@ export async function activate(context: vscode.ExtensionContext) {
 				console.log('接收到命令:', params);
 
 				let cmd = params.content;
-				let _cmd = `(${cmd}) ; exit $?`;
 
-				// const taskDef = { type: "shell", command: _cmd, args: [] } as vscode.TaskDefinition;
-				// const folder = vscode.workspace.workspaceFolders![0]; 
+				let cmdCwd = '/pwd';
 
+				if(vscode?.workspace?.workspaceFolders) {
+					cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
+				}
 
-				// const task = new vscode.Task(
-				// 	taskDef,
-				// 	folder,
-				// 	"my task",
-				// 	"shell", 
-				// 	vscode.ShellExecution,
-				// );
+				try{
+					const res: any = await new Promise((resolve, reject) => {
+						exec(cmd, { cwd: cmdCwd }, (err, stdout, stderr) => {
+							if(err) {
+								reject(err);
+								return;
+							}
+							resolve({
+								stdout, stderr,
+							});
+						});
+					});
 
-				// const res = await vscode.tasks.executeTask(task);
+					// const res = await promisify(exec)(`${cmd}`);
+					client.send({
+						...params,
+						status: 'success',
+						content: res.stdout,
+						...res,
+					});
+				}catch(e) {
+					console.error(e);
+					client.send({
+						...params,
+						status: 'failed',
+						content: e.message,
+					});
+				}
 
-				// console.log(res);
+				// let _cmd = `(${cmd}) ; exit $?`;
 
-				// client.send({
-				// 	...params,
-				// 	status: 'success',
-				// 	content: '命令执行成功',
+				// const ter = vscode.window.terminals.find(item => item.name === terName ) || vscode.window.createTerminal(terName);
+				// ter.show();
+				// vscode.window.onDidCloseTerminal((t) => {
+				// 	if(t.name === terName) {
+				// 		if(t.exitStatus?.code === 0) {
+				// 			client.send({
+				// 				...params,
+				// 				status: 'success',
+				// 				content: '命令执行成功',
+				// 			});
+				// 		} else {
+				// 			client.send({
+				// 				...params,
+				// 				status: 'failed',
+				// 				content: `命令执行失败: ${t.exitStatus?.code}`,
+				// 			});
+				// 		}
+				// 	}
 				// });
 
-				const ter = vscode.window.terminals.find(item => item.name === terName ) || vscode.window.createTerminal(terName);
-				ter.show();
-				vscode.window.onDidCloseTerminal((t) => {
-					if(t.name === terName) {
-						if(t.exitStatus?.code === 0) {
-							client.send({
-								...params,
-								status: 'success',
-								content: '命令执行成功',
-							});
-						} else {
-							client.send({
-								...params,
-								status: 'failed',
-								content: `命令执行失败: ${t.exitStatus?.code}`,
-							});
-						}
-					}
-				});
+				// ter.sendText(_cmd, true);
 
-				ter.sendText(_cmd, true);
-
-				await ter.processId;
+				// await ter.processId;
 			});
 
 			console.log('命令监听开启');
