@@ -95,7 +95,7 @@ export class WorkspaceService {
           state: 'created',
           podObject: null,
         } as Workspace;
-        await this.workspaceRepository.save(ws);
+        ws = await this.workspaceRepository.save(ws);
       }
     }
 
@@ -103,15 +103,15 @@ export class WorkspaceService {
       const shouldDeleteTempWsList = await this.workspaceRepository.createQueryBuilder('workspace')
       .where("workspace.isTemp = 1")
       .andWhere("workspace.startTimestamp is not NULL")
+      .andWhere("workspace.id != :wsId", { wsId: ws.id })
       .andWhere("workspace.userId = :userId", { userId: wsData.userId })
-      .orderBy({
-        "workspace.startTimestamp": "DESC",
-      })
-      .skip(3)
+      .orderBy("workspace.startTimestamp", "DESC")
+      .skip(1)
       // .limit(100)
       .getMany();
       shouldDeleteTempWsList.forEach((item) => {
         if(item.state !== 'deleting') {
+          console.log(`deleting ${ item.name } (${item.id})`);
           this.deleteById(item.id);
         }
       });
@@ -394,6 +394,7 @@ export class WorkspaceService {
               const config = Config.singleInstance();
               if (ta) {
                 const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
+                console.log(`clone dir ${cloneUrl}`);
                 try {
                   globalSubject.next(
                     {
@@ -410,7 +411,6 @@ export class WorkspaceService {
                   console.error(e);
                   throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
                 }
-                console.log(`clone dir ${cloneUrl}`);
               } else {
                 const err = new HttpException({
                   message: '需要获取 git 权限',
@@ -848,6 +848,7 @@ export class WorkspaceService {
       throw new Error(`ws ${workspaceId} state ${ws.state} is not correct!`);
     }
     ws.state = 'saving';
+    ws.startTimestamp = null;
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
     const podName = await this.getPodName(ws);
