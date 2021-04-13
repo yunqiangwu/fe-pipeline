@@ -4,9 +4,11 @@ import { useAsync, useAsyncFn } from 'react-use';
 import {
   useLocation
 } from "react-router-dom";
+import { localStorage } from '../../utils/local-storage';
 import { DEFAULT_GITHUB_CLIENT_ID } from './constants';
 import { Row, Col, Alert } from 'choerodon-ui';
 import { Spin } from 'choerodon-ui/pro/lib';
+
 import styles from './index.less';
 
 

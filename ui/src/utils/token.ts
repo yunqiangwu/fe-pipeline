@@ -1,6 +1,8 @@
 import * as querystring from 'querystring';
 import axios from 'axios';
 import * as crypto from "crypto";
+import { localStorage } from './local-storage';
+
 
 
 export const TOKEN_KEY = '_token';

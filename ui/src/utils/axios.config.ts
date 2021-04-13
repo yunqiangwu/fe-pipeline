@@ -61,7 +61,7 @@ if(!(axios as any)._IS_CONFIGED) {
       err = error;
     }
 
-    if(error.config && error.config.showError) {
+    if(error?.config?.showError) {
       console.error(error);
       notification.error({
         message: '操作失败',
@@ -73,7 +73,7 @@ if(!(axios as any)._IS_CONFIGED) {
       // axios.defaults.baseURL && (error.config.url as string).startsWith(axios.defaults.baseURL) &&
       // (!(error.config as any).fetchTokenFromUrlParam)
       // &&
-      (!error.config.notRedirectLogin) &&
+      (!error?.config?.notRedirectLogin) &&
       ((error as any).response && (error as any).response.status === 401 &&
       !window.location.pathname.includes(`${(window as any).routerBase || '/'}login`))
       ) {

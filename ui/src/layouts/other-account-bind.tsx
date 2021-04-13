@@ -7,7 +7,7 @@ import {
 import styles from './other-account-bind.less';
 import { Row, Col, Alert } from 'choerodon-ui';
 import { Spin } from 'choerodon-ui/pro/lib';
-
+import { localStorage } from '../utils/local-storage';
 
 type AuthConfig = {
   "id": string,
