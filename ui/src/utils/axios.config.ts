@@ -61,7 +61,7 @@ if(!(axios as any)._IS_CONFIGED) {
       err = error;
     }
 
-    if(error.config.showError) {
+    if(error.config && error.config.showError) {
       console.error(error);
       notification.error({
         message: '操作失败',
