@@ -54,7 +54,7 @@ RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
 
 COPY ./code-cli /workspace/code-cli
-RUN . $NVM_DIR/nvm.sh && yarn global add code-cli@/workspace/code-cli --registry=https://registry.npm.taobao.org/  && rm -rf /workspace/code-cli
+RUN . $NVM_DIR/nvm.sh && cd /workspace/code-cli && yarn --registry=https://registry.npm.taobao.org/ && yarn run compile && yarn global add code-cli@/workspace/code-cli --registry=https://registry.npm.taobao.org/  && rm -rf /workspace/code-cli
 
 COPY --from=vscode-extensions-builder /app/*.vsix /workspace/extension/
 
