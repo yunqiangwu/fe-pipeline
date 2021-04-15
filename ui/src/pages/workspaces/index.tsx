@@ -147,10 +147,14 @@ const windowOpen = async (wsUrl: any) => {
   a.href = wsUrl;
   a.target = '_blank';
   document.body.appendChild(a);
-  a.click();
+
   setTimeout(() => {
-    a.remove();
-  }, 0);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+    }, 0);
+  }, 200);
+
 }
 
 const WSCardGrid = ({ ws, onChange }: { ws: IWorkspaces, onChange: Function }) => {
