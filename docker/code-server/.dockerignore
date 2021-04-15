@@ -1,0 +1,13 @@
+node_modules
+ui/node_modules
+dist
+fe-pipeline-home
+.cache
+.git
+/fe-pipeline-home
+
+/dist
+/docker/theia-ide/lib
+/docker/theia-ide/theia-fe-pipeline-extensions/lib
+
+yarn.lock

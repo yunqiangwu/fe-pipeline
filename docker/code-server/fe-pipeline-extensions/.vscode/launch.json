@@ -6,10 +6,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"type": "docker",
-		},
-		
-		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",

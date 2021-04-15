@@ -1,0 +1,43 @@
+{
+	"name": "code-cli",
+	"publisher": "fe-pipeline",
+	"enableProposedApi": true,
+	"repository": "https://code.choerodon.com.cn/hzero-hzero-c7n-hips/fe-pipeline.git",
+	"displayName": "fe-pipeline-extensions-code-cli",
+	"description": "",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.53.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"bin": {
+		"code-cli": "./out/code-cli.js",
+		"code": "./out/code-cli.js"
+	  },
+	"scripts": {
+		"vscode:prepublish": "yarn run compile",
+		"compile": "tsc -p ./",
+		"cli": "ts-node ./src/code-cli.ts",
+		"watch": "tsc -watch -p ./",
+		"pretest": "yarn run compile && yarn run lint",
+		"lint": "eslint src --ext ts"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.3",
+		"@types/mocha": "^8.0.4",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.53.0",
+		"@typescript-eslint/eslint-plugin": "^4.14.1",
+		"@typescript-eslint/parser": "^4.14.1",
+		"eslint": "^7.19.0",
+		"glob": "^7.1.6",
+		"mocha": "^8.2.1",
+		"ts-node": "^9.1.1",
+		"typescript": "^4.1.3"
+	},
+	"dependencies": {
+		"socket.io-client": "^4.0.1"
+	}
+}

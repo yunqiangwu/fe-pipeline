@@ -35,10 +35,9 @@ export class WebSocketService extends EventEmitter {
                 });
                 setTimeout( () => {
                     client.disconnect();
-                }, 2000);
+                }, 10);
                 return;
             }
-
             client.on('message', (...args) => {
                 // console.log('message:', args);
                 this.emit('message', {
@@ -46,9 +45,6 @@ export class WebSocketService extends EventEmitter {
                     client,
                 });
             });
-            // client.send('eventxx', {
-            //     aa: 3
-            // });
         });
         io.listen(this.listenPort);
         this.wss = io;

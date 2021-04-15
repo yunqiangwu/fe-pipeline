@@ -12,6 +12,86 @@ type ShowOptions = {
 	viewColumn: vscode.ViewColumn,
 };
 
+type IWsMessage = {
+
+	content: string;
+
+}
+
+const runCommand = async (params: IWsMessage) => {
+	let cmd = params.content;
+	let _cmd = `. $NVM_DIR/nvm.sh && ${cmd}`;
+
+	let cmdCwd = '/tmp';
+
+	if(vscode?.workspace?.workspaceFolders) {
+		cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
+	}
+
+	let _stdout, _stderr;
+
+	try{
+		const res: any = await new Promise((resolve, reject) => {
+			exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
+				if(err) {
+					reject(err);
+					return;
+				}
+				_stdout = stdout;
+				_stderr = stderr;
+				resolve({
+					stdout, stderr,
+				});
+			});
+		});
+		return {
+			...res,
+			content: res.stdout,
+		};
+	}catch(e) {
+		console.error(e);
+		throw ({
+			...e,
+			// content: e.message,
+			_stdout, _stderr,
+		});
+
+	}
+}
+
+const openFile = async (params: IWsMessage ) => {
+
+	let filePath = params.content;
+
+	console.log(`打开文件: ${filePath}`);
+
+	let cmdCwd = '/tmp';
+
+	if(!fs.existsSync(filePath)) {
+
+		if(vscode?.workspace?.workspaceFolders) {
+			cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
+		}
+	
+		filePath = path.join(cmdCwd, filePath);
+		
+	}
+
+	if(!fs.existsSync(filePath)) {
+		throw new Error(`${cmdCwd} 中不存在 ${params.content}`);
+	}
+
+	const doc = await vscode.workspace.openTextDocument(filePath);
+	const res = await vscode.window.showTextDocument(doc);
+	
+	// const res: any = await vscode.commands.executeCommand('vscode.open', filePath);
+
+	return {
+		// ...res,
+		content: `文件 ${filePath} 打开成功`,
+	};
+};
+
 let isBreak = false;
 
 let wss: WebSocketService|null;
@@ -94,75 +174,35 @@ export async function activate(context: vscode.ExtensionContext) {
 				
 				console.log('接收到命令:', params);
 
-				let cmd = params.content;
-				let _cmd = `. $NVM_DIR/nvm.sh && ${cmd}`;
-
-				let cmdCwd = '/pwd';
-
-				if(vscode?.workspace?.workspaceFolders) {
-					cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
-				}
-
-				let _stdout, _stderr;
-
 				try{
-					const res: any = await new Promise((resolve, reject) => {
-						exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
-							if(err) {
-								reject(err);
-								return;
-							}
-							_stdout = stdout;
-							_stderr = stderr;
-							resolve({
-								stdout, stderr,
-							});
-						});
-					});
+					const {type} = params;
 
-					// const res = await promisify(exec)(`${cmd}`);
+					let res;
+
+					if(type === 'command') {
+						res = await runCommand(params);
+					}
+
+					if(type === 'open') {
+						res = await openFile(params);
+					}
+
 					client.send({
-						...params,
 						status: 'success',
-						content: res.stdout,
-						_stdout, _stderr,
+						...params,
 						...res,
 					});
-				}catch(e) {
-					console.error(e);
+
+				}catch(er) {
+
 					client.send({
-						...params,
 						status: 'failed',
-						content: e.message,
-						_stdout, _stderr,
+						...params,
+						content: er.message,
 					});
+
 				}
 
-				// let _cmd = `(${cmd}) ; exit $?`;
-
-				// const ter = vscode.window.terminals.find(item => item.name === terName ) || vscode.window.createTerminal(terName);
-				// ter.show();
-				// vscode.window.onDidCloseTerminal((t) => {
-				// 	if(t.name === terName) {
-				// 		if(t.exitStatus?.code === 0) {
-				// 			client.send({
-				// 				...params,
-				// 				status: 'success',
-				// 				content: '命令执行成功',
-				// 			});
-				// 		} else {
-				// 			client.send({
-				// 				...params,
-				// 				status: 'failed',
-				// 				content: `命令执行失败: ${t.exitStatus?.code}`,
-				// 			});
-				// 		}
-				// 	}
-				// });
-
-				// ter.sendText(_cmd, true);
-
-				// await ter.processId;
 			});
 
 			console.log('命令监听开启');

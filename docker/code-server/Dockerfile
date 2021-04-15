@@ -53,6 +53,9 @@ RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
 RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
 
+COPY ./code-cli /workspace/code-cli
+RUN . $NVM_DIR/nvm.sh && yarn global add code-cli@/workspace/code-cli --registry=https://registry.npm.taobao.org/  && rm -rf /workspace/code-cli
+
 COPY --from=vscode-extensions-builder /app/*.vsix /workspace/extension/
 
 COPY ./install-extension.sh /workspace/install-vscode-extension.sh
@@ -77,7 +80,8 @@ EXPOSE 8080
 # docker-run.
 # USER coder
 
-RUN sudo chown -R coder:coder $NVM_DIR
+# RUN sudo chown -R coder:coder $NVM_DIR
+RUN sudo chmod -R 777 $NVM_DIR
 
 # /etc/profile
 # ~/.bashrc
