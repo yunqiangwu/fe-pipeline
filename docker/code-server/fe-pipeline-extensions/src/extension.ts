@@ -65,20 +65,25 @@ const openFile = async (params: IWsMessage ) => {
 
 	console.log(`打开文件: ${filePath}`);
 
-	let cmdCwd = '/tmp';
+	let workSpaceCwd = '/tmp';
 
 	if(!fs.existsSync(filePath)) {
 
-		if(vscode?.workspace?.workspaceFolders) {
-			cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
-		}
-	
-		filePath = path.join(cmdCwd, filePath);
+		filePath = path.join(process.cwd(), params.content);
+
+		if(!fs.existsSync(filePath)) {
+
+			if(vscode?.workspace?.workspaceFolders) {
+				workSpaceCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
+			}
 		
-	}
+			filePath = path.join(workSpaceCwd, filePath);
 
-	if(!fs.existsSync(filePath)) {
-		throw new Error(`${cmdCwd} 中不存在 ${params.content}`);
+			if(!fs.existsSync(filePath)) {
+				throw new Error(`${workSpaceCwd} 中不存在 ${params.content}`);
+			}
+			
+		}
 	}
 
 	const doc = await vscode.workspace.openTextDocument(filePath);
