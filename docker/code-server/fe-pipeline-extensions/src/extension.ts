@@ -77,7 +77,7 @@ const openFile = async (params: IWsMessage ) => {
 				workSpaceCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
 			}
 		
-			filePath = path.join(workSpaceCwd, filePath);
+			filePath = path.join(workSpaceCwd, params.content);
 
 			if(!fs.existsSync(filePath)) {
 				throw new Error(`${workSpaceCwd} 中不存在 ${params.content}`);
