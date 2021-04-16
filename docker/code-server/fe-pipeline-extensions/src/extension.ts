@@ -28,31 +28,40 @@ const runCommand = async (params: IWsMessage) => {
 		cmdCwd = vscode?.workspace?.workspaceFolders[0].uri.path;
 	}
 
-	let _stdout, _stderr;
+	let _stdout = '', _stderr = '';
 
 	try{
 		const res: any = await new Promise((resolve, reject) => {
-			exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
+			const p = exec(_cmd, { cwd: cmdCwd, env: process.env, shell: 'bash' }, (err, stdout, stderr) => {
 				if(err) {
 					reject(err);
 					return;
 				}
-				_stdout = stdout;
-				_stderr = stderr;
+				// _stdout = stdout;
+				// _stderr = stderr;
 				resolve({
 					stdout, stderr,
 				});
 			});
+			p.stdout?.on('data', (chunk) => {
+				_stdout  += chunk.toString();
+			});
+			p.stderr?.on('data', (chunk) => {
+				_stderr  += chunk.toString();
+			});
+			// p.stdout?.on('end', (chunk) => {
+			// 	_stdout  += chunk.toString();
+			// });
 		});
 		return {
 			...res,
 			content: res.stdout,
 		};
 	}catch(e) {
-		console.error(e);
+		// console.error(e);
 		throw ({
-			...e,
-			// content: e.message,
+			// ...e,
+			message: _stderr || e.message,
 			_stdout, _stderr,
 		});
 
@@ -199,13 +208,13 @@ export async function activate(context: vscode.ExtensionContext) {
 					});
 
 				}catch(er) {
-
+					console.log('xx::asd', er)
 					client.send({
 						status: 'failed',
 						...params,
+						...er,
 						content: er.message,
 					});
-
 				}
 
 			});

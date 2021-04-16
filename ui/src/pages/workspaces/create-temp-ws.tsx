@@ -246,7 +246,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
         let wssUrl;
 
-        if(process.env.NODE_ENV === 'develop2ment') {
+        if(process.env.NODE_ENV === 'developme2nt') {
           wssUrl = 'ws://127.0.0.1:23010';
         }  else {
           wssUrl = `${location.protocol.startsWith('https') ? 'wss:' : 'ws:'}//${podUrl.replace(/^https?\:\/\//, '').split('/')[0].replace('23000-','23010-')}/`;
@@ -266,7 +266,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
           closeWss = null;
         };
 
-        const _randNum = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1-$2-$3-$4-$5');
+        const _wsRandNum = (Math.random().toString(16).substr(2).concat((+new Date().getTime()).toString(16)).concat(Math.random().toString(16).substr(2,8))).padEnd(32, '0').substr(0,32).replace(/([\w]{8})([\w]{4})([\w]{4})([\w]{4})([\w]{12})/, '$1-$2-$3-$4-$5');
 
         let timeId: any = setTimeout(() => {
           if(socket) {
@@ -281,7 +281,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
         }, 30000);
 
         socket.on("message", (data) => {
-          if(data._randNum!== _randNum ) {
+          if(data._wsRandNum!== _wsRandNum ) {
             return;
           }
           clearTimeout(timeId);
@@ -297,7 +297,7 @@ const WsPod: React.FC<RouteComponentProps<WsLoadingPageReactParams>>  = (props) 
 
         socket.send({
           ...e.data,
-          _randNum,
+          _wsRandNum,
         });
 
       }

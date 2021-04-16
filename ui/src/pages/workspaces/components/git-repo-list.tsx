@@ -48,13 +48,9 @@ export const GitRepoList: FC = () => {
         使用方法:
       </p>
       <p>url:</p>
-      <textarea cols={180} rows={2}>
-        {`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod&image=registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2`}
-      </textarea>
+      <textarea cols={180} rows={2} defaultValue={`${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod&image=registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2`}></textarea>
       <p>iframe:</p>
-      <textarea cols={180} rows={2}>
-        {`<iframe src="${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod"  height=\"500\" width=\"500\" />`}
-      </textarea>
+      <textarea cols={180} rows={2} defaultValue={`<iframe src="${window.location.protocol}//${window.location.host}${(window as any).routerBase || '/'}?gitUrl=https://code.choerodon.com.cn/13485/test-gitpod"  height=\"500\" width=\"500\" />`}></textarea>
       <div>
         <h3>参数解释:</h3>
         <table className={styles['var-table']} >

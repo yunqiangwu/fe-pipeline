@@ -73,18 +73,18 @@ export const useVscode = (config?: UseVscodeConfig) => {
         return;
       }
 
-      const { type,  _key, status } = e.data;
+      const { type, _postMessageKey, status } = e.data;
 
       if (type === 'command') {
-        console.log(e.data);
-        const promiseHandle = promiseMap.get(_key);
+        // console.log(e.data);
+        const promiseHandle = promiseMap.get(_postMessageKey);
         if(!promiseHandle) {
           return;
         }
 
         const [ resolve, reject ] = promiseHandle;
 
-        promiseMap.delete(_key);
+        promiseMap.delete(_postMessageKey);
 
         if(status === 'success') {
           resolve(e.data);
@@ -122,7 +122,7 @@ export const useVscode = (config?: UseVscodeConfig) => {
       iframeRef?.current?.contentWindow?.postMessage({
         type: 'command',
         content: commandStr,
-        _key: _randNum,
+        _postMessageKey: _randNum,
       }, '*');
 
       return _randNum;
