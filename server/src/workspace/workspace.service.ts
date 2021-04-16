@@ -103,6 +103,7 @@ export class WorkspaceService {
       const shouldDeleteTempWsList = await this.workspaceRepository.createQueryBuilder('workspace')
       .where("workspace.isTemp = 1")
       .andWhere("workspace.startTimestamp is not NULL")
+      .andWhere("workspace.destroy != 1")
       .andWhere("workspace.id != :wsId", { wsId: ws.id })
       .andWhere("workspace.userId = :userId", { userId: wsData.userId })
       .orderBy("workspace.startTimestamp", "DESC")
@@ -110,10 +111,8 @@ export class WorkspaceService {
       // .limit(100)
       .getMany();
       shouldDeleteTempWsList.forEach((item) => {
-        if(item.state !== 'deleting') {
-          console.log(`deleting ${ item.name } (${item.id})`);
-          this.deleteById(item.id);
-        }
+        console.log(`deleting ${ item.name } (${item.id})`);
+        this.deleteById(item.id);
       });
       // console.log(shouldDeleteTempWsList);
     }, 100);
@@ -130,6 +129,9 @@ export class WorkspaceService {
 
     if (!currentUser || +currentUser.userId !== ws.userId) {
       throw new HttpException(`ws: ${ws.id} is not get`, 403);;
+    }
+    if (ws.destroy) {
+      throw new HttpException(`ws is deleting`, 404);;
     }
     return ws;
   }
@@ -266,11 +268,9 @@ export class WorkspaceService {
       throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
     }
 
-    // if (ws.state === 'pending') {
-    //   return {
-    //     data: workspaceId,
-    //   };
-    // }
+    if (ws.destroy) {
+      throw new Error(`not find ws: ${ws}, wsId: ${workspaceId}`);
+    }
 
     let podName = await this.getPodName(ws);
     const wsDirName = await this.getWsDirName(ws);
@@ -767,7 +767,7 @@ export class WorkspaceService {
   }
 
   async findAllByCurrentUser(userId: number): Promise<Workspace[]> {
-    return await this.workspaceRepository.find({ userId });
+    return await this.workspaceRepository.find({ userId, destroy: false });
   }
 
   async save(workspaces: Workspace[]): Promise<Workspace[]> {
@@ -807,7 +807,7 @@ export class WorkspaceService {
   async deleteById(workspaceId: number) {
     const ws = await this.workspaceRepository.findOne(workspaceId);
     if (ws.state === 'deleting') {
-      await this.workspaceRepository.delete(workspaceId);
+      // await this.workspaceRepository.delete(workspaceId);
       return { workspaceId };
     }
 
@@ -815,8 +815,18 @@ export class WorkspaceService {
     ws.destroy = true;
 
     await this.workspaceRepository.save(ws);
-    const podName = await this.getPodName(ws);
 
+    setTimeout(() => {
+      this.realDeleteWs(ws);
+    }, 0)
+
+    return { workspaceId };
+
+  }
+
+  async realDeleteWs(ws){
+
+    const podName = await this.getPodName(ws);
     try {
       await this.deletePod(podName);
     } catch (e) {
@@ -834,12 +844,12 @@ export class WorkspaceService {
         console.error(e);
       }
     }
+    await this.workspaceRepository.delete(ws.id);
 
-    await this.workspaceRepository.delete(workspaceId);
-    return { workspaceId };
   }
 
   async closeWs(workspaceId: number, isEmptyData?: boolean) {
+
     const ws = await this.workspaceRepository.findOne(workspaceId);
     if (!ws) {
       throw new Error(`ws ${workspaceId} is not exist!`);

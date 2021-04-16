@@ -129,7 +129,6 @@ export class WorkspaceController {
     type: Workspace,
   })
   get(@Param('workspaceId') workspaceId: number, @CurrentUser() user: User): Promise<Workspace> {
-    Logger.log(`receive Workspaces id: ${workspaceId}`);
     return this.workspaceService.findById(workspaceId, user);
   }
 
