@@ -53,7 +53,7 @@ data:
 
     server {
         listen       80;
-        server_name  ~^(\d+)-(\d+)-(\d+)-(\d+)-(\d+)\.ws\.*;
+        server_name  ~^(\d+)-(\d+)-(\d+)-(\d+)-(\d+)\.ws\.(.*)$;
 
         location /api/workspace/redirect-ws-url/ {
             proxy_pass   http://{{ $fullName }}-manager:3000;
@@ -67,14 +67,16 @@ data:
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
+
         }
 
         set $fe_pipeline_ws_port $1;
         set $fe_pipeline_ws_ip $2.$3.$4.$5;
-
+        set $fe_pipeline_manager_host $6;
 
         location / {
             proxy_pass   http://$fe_pipeline_ws_ip:$fe_pipeline_ws_port;
+            proxy_connect_timeout 2s;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
             
@@ -85,9 +87,22 @@ data:
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
+
+            error_page 504 = @fallback;
+
         }
 
-       
+        location @fallback {
+            set $ws_id "";
+            if ($http_cookie ~* "ws_id=(.+?)(?=;|$)") {
+                set $ws_id "$1";
+            }
+            set $access_token "";
+            if ($http_cookie ~* "access_token=(.+?)(?=;|$)") {
+                set $access_token "$1";
+            }
+            rewrite ^/ "http://$fe_pipeline_manager_host:3000/api/workspace/redirect-ws-url/$ws_id?access_token=$access_token" permanent;
+        }
 
         error_page   500 502 503 504  /50x.html;
         location = /50x.html {
@@ -95,7 +110,6 @@ data:
         }
 
     }
-
 
     server {
         listen       80;

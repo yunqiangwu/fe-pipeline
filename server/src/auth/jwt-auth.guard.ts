@@ -1,4 +1,5 @@
-import { ExecutionContext, Injectable, UnauthorizedException, Request } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import * as querystring from 'querystring';
 
@@ -12,6 +13,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         if(!req.headers['authorization'] && req.url.includes('access_token=')) {
             req.headers['authorization'] = `Bearer ${querystring.parse(req.url.substr(req.url.indexOf('?') + 1)).access_token}`;
+        }
+
+        if(!req.headers['authorization'] && req.headers.cookie && req.headers.cookie.includes('access_token=')) {
+          const access_token = req.headers.cookie.replace(
+            /^.*access_token=([^;]+);?.*$/,
+            '$1',
+          );
+          req.headers['authorization'] = `Bearer ${access_token}`;
         }
 
         // 在这里添加自定义的认证逻辑

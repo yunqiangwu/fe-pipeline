@@ -13,9 +13,7 @@ type ShowOptions = {
 };
 
 type IWsMessage = {
-
 	content: string;
-
 }
 
 const runCommand = async (params: IWsMessage) => {
@@ -106,35 +104,110 @@ const openFile = async (params: IWsMessage ) => {
 	};
 };
 
+const getTcpFilePorts = async () => {
+
+	const fnNetTCP = "/proc/net/tcp";
+
+	const ports: number[] = [];
+	const pendingPorts: number[] = [];
+	const listenPortReg = /^\s*\w+:\s*\w+:(\w+)\s+\w+:\w+\s+0A\s+/;
+	const pendingPortReg = /^\s*\w+:\s*\w+:(\w+)\s+\w+:\w+\s+01\s+/;
+
+	const fileStream = fs.createReadStream(fnNetTCP);
+	const rl = readline.createInterface({
+		input: fileStream,
+		crlfDelay: Infinity
+	});
+	// 注意：我们使用 crlfDelay 选项将 input.txt 中的所有 CR LF 实例（'\r\n'）识别为单个换行符。
+	// input.txt 中的每一行在这里将会被连续地用作 `line`。
+	for await (const line of rl) {
+		if (line) {
+			const res = listenPortReg.exec(line);
+			if (res) {
+				ports.push(parseInt(res[1], 16));
+				//   console.log(`Line from file: ${line}`);
+			}
+			const res2 = pendingPortReg.exec(line);
+			if (res2) {
+				pendingPorts.push(parseInt(res2[1], 16));
+				//   console.log(`Line from file: ${line}`);
+			}
+
+		}
+	}
+	fileStream.close();
+	return {
+	  listenPorts: ports,
+	  pendingPorts,
+	};
+}
+
+const handleGitpodPorts = async ({
+	currentOpen, scriptUri, GITPOD_PORTS
+}:{
+	currentOpen: number[], scriptUri: vscode.Uri, GITPOD_PORTS: string
+}) => {
+	const _handled: number[] = [];
+	try {
+		const gitpodPorts = JSON.parse(GITPOD_PORTS) as any[];
+		for (const portIndex in gitpodPorts) {
+			if(_handled.includes(portIndex as any) ) {
+				continue;
+			}
+			const portObj = gitpodPorts[portIndex];
+			if(!currentOpen.includes(+portObj.port)) {
+				continue;
+			}
+			if (portObj.onOpen !== 'ignore') {
+				_handled.push(portIndex as any);
+				const openUrl = vscode.Uri.parse(`${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${portObj.port}-$1`)}`);
+				if (portObj.type === 'browser') {
+					vscode.env.openExternal(openUrl);
+				} else {
+					vscode.commands.executeCommand('simpleBrowser.api.open', openUrl, {
+						preserveFocus: true,
+						viewColumn: vscode.ViewColumn.Beside,
+					} as ShowOptions);
+				}
+				break;
+			}
+		}
+	} catch (e) {
+		console.error(e);
+	}
+	return _handled;
+}
+
+
 let isBreak = false;
 
 let wss: WebSocketService|null;
 
 const WS_DIR_FILE = path.join(`/workspace/.gitpod`, 'config.json') // '/workspace/.gitpod/config.json';
 
-	const setWsData = (key: string, value: string | null) => {
-		let data = {} as any;
-		if (!fs.existsSync(WS_DIR_FILE)) {
-			if (!fs.existsSync(path.dirname(WS_DIR_FILE))) {
-				fs.mkdirSync(path.dirname(WS_DIR_FILE), { recursive: true });
-			}
-		} else {
-			data = require(WS_DIR_FILE);
+const setWsData = (key: string, value: string | null) => {
+	let data = {} as any;
+	if (!fs.existsSync(WS_DIR_FILE)) {
+		if (!fs.existsSync(path.dirname(WS_DIR_FILE))) {
+			fs.mkdirSync(path.dirname(WS_DIR_FILE), { recursive: true });
 		}
-		if (value === null || value === undefined) {
-			delete data[key];
-		} else {
-			data[key] = value;
-		}
-		fs.writeFileSync(WS_DIR_FILE, JSON.stringify(data))
-	};
-
-	const getWsData = (key: string) => {
-		if (fs.existsSync(WS_DIR_FILE)) {
-			let data = require(WS_DIR_FILE);
-			return data[key];
-		}
+	} else {
+		data = require(WS_DIR_FILE);
 	}
+	if (value === null || value === undefined) {
+		delete data[key];
+	} else {
+		data[key] = value;
+	}
+	fs.writeFileSync(WS_DIR_FILE, JSON.stringify(data))
+};
+
+const getWsData = (key: string) => {
+	if (fs.existsSync(WS_DIR_FILE)) {
+		let data = require(WS_DIR_FILE);
+		return data[key];
+	}
+}
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -168,10 +241,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel.dispose();
 	}, 0);
 
-
+	// 监听并执行命令
 	(() => {
-		const terName = '__system';
-
 		setTimeout(() => {
 			const wssPort = 23010;
 			wss = new WebSocketService(wssPort);
@@ -186,8 +257,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				}
 				const params = args[0];
 				
-				console.log('接收到命令:', params);
-
 				try{
 					const {type} = params;
 
@@ -208,7 +277,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					});
 
 				}catch(er) {
-					console.log('xx::asd', er)
 					client.send({
 						status: 'failed',
 						...params,
@@ -223,15 +291,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}, 0);
 	})();
 
-	// 在你的内容中引用它
-	// panel.webview.html = `<!DOCTYPE html>
-	// <html>
-	// <body>
-	// 	<div>Hello</div>
-	// 	<script src="${scriptUri}"></script>
-	// </body>
-	// </html>`;
-	// http://23000-10-1-0-79.ws.fe-pipeline.localhost/webview/vscode-resource/file///workspace/.user-code-data-dir/extensions/fe-pipeline.fe-pipeline-extensions-0.0.1/res/main.js
 
 	const GITPOD_TASKS = process.env.GITPOD_TASKS;
 
@@ -282,93 +341,40 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	}
 
-	const GITPOD_PORTS = process.env.GITPOD_PORTS;
 
-	if (GITPOD_PORTS) {
+	(async () => {
 
-		let handled: number[] = [];
+		const fnNetTCP = "/proc/net/tcp";
 
-		async function getTcpFilePorts() {
+		if (!fs.existsSync(fnNetTCP)) {
+			return [];
+		}
 
-			const fnNetTCP = "/proc/net/tcp";
+		const GITPOD_PORTS = process.env.GITPOD_PORTS;
 
-			const ports: number[] = [];
-			const portReg = /^\s*\w+:\s*\w+:(\w+)\s+\w+:\w+\s+0A\s+/;
 
-			const fileStream = fs.createReadStream(fnNetTCP);
-			const rl = readline.createInterface({
-				input: fileStream,
-				crlfDelay: Infinity
+		while (!isBreak) {
+
+			const currentPorts = await getTcpFilePorts();
+
+			// console.log(`currentPorts: ${currentPorts.join(',')}`);
+
+			if (GITPOD_PORTS) {
+				await handleGitpodPorts({
+					scriptUri,
+					GITPOD_PORTS,
+					currentOpen: currentPorts.listenPorts,
+				});
+			}
+
+			await new Promise((resolve) => {
+				setTimeout(() => {
+					resolve(null);
+				}, 3000);
 			});
-			// 注意：我们使用 crlfDelay 选项将 input.txt 中的所有 CR LF 实例（'\r\n'）识别为单个换行符。
-			// input.txt 中的每一行在这里将会被连续地用作 `line`。
-			for await (const line of rl) {
-				if (line) {
-					const res = portReg.exec(line);
-					if (res) {
-						ports.push(parseInt(res[1], 16));
-						//   console.log(`Line from file: ${line}`);
-					}
-				}
-			}
-			fileStream.close();
-			return ports;
+
 		}
-
-		const handleGitpodPorts = (currentOpen: number[]) => {
-			try {
-				const gitpodPorts = JSON.parse(GITPOD_PORTS) as any[];
-				for (const portIndex in gitpodPorts) {
-					if(handled.includes(portIndex as any) ) {
-						continue;
-					}
-					const portObj = gitpodPorts[portIndex];
-					if(!currentOpen.includes(+portObj.port)) {
-						continue;
-					}
-					if (portObj.onOpen !== 'ignore') {
-						handled.push(portIndex as any);
-						const openUrl = vscode.Uri.parse(`${scriptUri.scheme}://${scriptUri.authority.replace(/^\d+-(.*)/, `${portObj.port}-$1`)}`);
-						if (portObj.type === 'browser') {
-							vscode.env.openExternal(openUrl);
-						} else {
-							vscode.commands.executeCommand('simpleBrowser.api.open', openUrl, {
-								preserveFocus: true,
-								viewColumn: vscode.ViewColumn.Beside,
-							} as ShowOptions);
-						}
-						break;
-					}
-				}
-			} catch (e) {
-				console.error(e);
-			}
-		}
-
-		(async () => {
-
-			const fnNetTCP = "/proc/net/tcp";
-
-			if (!fs.existsSync(fnNetTCP)) {
-				return [];
-			}
-
-			while (!isBreak) {
-
-				const currentPorts = await getTcpFilePorts();
-
-				// console.log(`currentPorts: ${currentPorts.join(',')}`);
-
-				handleGitpodPorts(currentPorts);
-
-				await new Promise((resolve) => {
-					setTimeout(() => {
-						resolve(null);
-					}, 3000);
-				})
-			}
-		})();
-	}
+	})();
 
 	context.subscriptions.push(vscode.window.registerExternalUriOpener(
 		'myExtension.opener',
@@ -424,53 +430,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('fe-pipeline-extensions.helloWorld', () => {
+	let disposable = vscode.commands.registerCommand('fe-pipeline-extensions.helloWorld', async () => {
 		// The code you place here will be executed every time your command is executed
 
-		// Display a message box to the user
 		vscode.window.showInformationMessage(`Hello World! ${WS_DIR_FILE}`);
 
-		// vscode.window.showInformationMessage(`Url! ${scriptUri.scheme}://${scriptUri.authority}`);
-
-		// // // 创建 webview
-		// const panel = vscode.window.createWebviewPanel(
-		// 	'catWebview',
-		// 	'Cat Webview',
-		// 	vscode.ViewColumn.Beside,
-		// 	{
-		// 		enableScripts: true,
-		// 		retainContextWhenHidden: false,
-		// 	}
-		// );
-
-		// // 获取内容的 Uri
-		// const scriptUri = panel.webview.asWebviewUri(
-		// 	vscode.Uri.file(path.join(context.extensionPath, 'res', 'main.js'))
-		// );
-
-		// // 在你的内容中引用它
-		// panel.webview.html = `<!DOCTYPE html>
-		// <html>
-		// <body>
-		// 	<div>Hello</div>
-		// 	<script src="${scriptUri}"></script>
-		// </body>
-		// </html>`;
-
-		// panel.webview.onDidReceiveMessage((e) => {
-		// 	console.log(e);
-		//     panel.dispose();
-		// }, null);
-
-		// const scriptUri = panel.webview.asWebviewUri(
-		//   vscode.Uri.file(path.join(context.extensionPath, 'res', 'main.js'))
-		// );
-		// panel.dispose();
-
-		// vscode.commands.executeCommand('simpleBrowser.api.open', 'https://www.baidu.com', {
-		// 	preserveFocus: true,
-		// 	viewColumn: vscode.ViewColumn.Beside,
-		// } as ShowOptions);
+		// await stopWs(scriptUri);
 
 	});
 
@@ -481,11 +446,6 @@ export async function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 
 	isBreak = true;
-
-	// if(panel) {
-	//   panel.dispose();
-	// }
-	// clearAllWsData();
 
 	const GITPOD_TASKS = process.env.GITPOD_TASKS;
 

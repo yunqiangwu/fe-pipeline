@@ -74,6 +74,8 @@ COPY ./defaultVsCodeSetting.json /home/coder/.local/share/code-server/User/setti
 
 RUN sudo chown -R coder:coder /workspace
 
+COPY ./auto-close.js /auto-close.js
+
 EXPOSE 8080
 # This way, if someone sets $DOCKER_USER, docker-exec will still work as
 # the uid will remain the same. note: only relevant if -u isn't passed to

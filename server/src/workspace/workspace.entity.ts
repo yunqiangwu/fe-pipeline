@@ -30,7 +30,7 @@ export class Workspace {
   @Column({ nullable: true, length: 200 })
   image: string;
 
-  @Column({ nullable: true, length: 200 })
+  @Column({ nullable: true, length: 200, default: 'created' })
   state: 'pending' | 'opening' | 'saving' | 'saved' | 'created' | 'error' | 'deleting';
 
   @Column({ nullable: true, length: 1200 })
@@ -69,7 +69,7 @@ export class Workspace {
   @Column({ nullable: true, length: 20 })
   hostPort: string;
 
-  @Column({ nullable: true, type: 'boolean' })
+  @Column({ nullable: true, type: 'boolean', default: false })
   isTemp: boolean;
 
   @Column({ nullable: true })

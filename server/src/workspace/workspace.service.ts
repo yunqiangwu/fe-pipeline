@@ -161,8 +161,8 @@ export class WorkspaceService {
     // return wsList.map(item => { return { ...item, podObject: null } });
   }
 
-  async getRedirectToWsInfo(workspaceId: number): Promise<any> {
-    const ws = await this.workspaceRepository.findOne(workspaceId);
+  async getRedirectToWsInfo(workspaceId: number, currentUser?: User): Promise<any> {
+    let ws = await this.workspaceRepository.findOne(workspaceId);
     // console.log(workspaceId, ws);
     let podObj;
     if (ws && ws.podObject) {
@@ -170,6 +170,20 @@ export class WorkspaceService {
     } else {
       if (!ws) {
         throw new HttpException(`ws: ${workspaceId} is not found`, 404);;
+      }
+      if(ws.state === 'saved') {
+        await this.openWs(ws.id, currentUser);
+        await new Promise(resolve => {
+          setTimeout(() => resolve(null), 3000);
+        });
+        let res = {} as any;
+        try {
+          res = await this.isAlive(workspaceId);
+        } catch (e) {
+          console.error(e);
+          // throw e;
+        }
+        ws = await this.workspaceRepository.findOne(workspaceId);
       }
       const podName = await this.getPodName(ws);
       const kubePodRes: any = await this.kubeClient.api.v1.namespace(this.ns).pods(podName).get({});
@@ -533,7 +547,7 @@ export class WorkspaceService {
                 "fe-pipeline": "ws",
                 "app": "fe-pipeline",
                 "ws-pod": podName,
-                "ws-id": workspaceId,
+                "ws-id": `${workspaceId}`,
               },
             },
             "spec": {
@@ -560,9 +574,21 @@ export class WorkspaceService {
                       value: ws.password,
                     },
                     {
+                      name: 'FE_PIPELINE_AUTO_CLOSE',
+                      value: 'enable',
+                    },
+                    {
+                      name: 'FE_PIPELINE_WS_ID',
+                      value: `${ws.id}`,
+                    },
+                    {
                       name: 'FE_PIPELINE_PASSWORD',
                       value: ws.password,
                     },
+                    // {
+                    //   name: 'FE_PIPELINE_MANAGE_API_HOST',
+                    //   value: `http://${process.env.FE_PIPELINE_MANAGER_SERVICE_HOST}:${process.env.FE_PIPELINE_MANAGER_SERVICE_PORT}`,
+                    // },
                     {
                       name: 'FE_PIPELINE_WORK_DIR',
                       value: FE_PIPELINE_WORK_DIR,
@@ -770,8 +796,22 @@ export class WorkspaceService {
     return await this.workspaceRepository.find({ userId, destroy: false });
   }
 
-  async save(workspaces: Workspace[]): Promise<Workspace[]> {
-    return await this.workspaceRepository.save(workspaces);
+  async save(workspaces: Workspace[], currentUser: User): Promise<Workspace[]> {
+
+    const currentNumber = await this.workspaceRepository.createQueryBuilder('workspace')
+      .where("workspace.userId = :userId", { userId: currentUser.userId })
+      .andWhere("(workspace.isTemp != 1 or workspace.isTemp is NULL)")
+      .andWhere("workspace.destroy != 1")
+      .andWhere("workspace.state != 'saved'")
+      .getCount();
+
+      console.log(`当前工作空间的数量: ${currentNumber}`);
+
+    if(currentNumber >= 5) {
+      throw new Error(`您当前已经有 5 个持久化工作空间,每个用户最多同时存在 5 个工作空间,如果您想继续创建,需要先释放掉其他的工作空间`);
+    }
+    
+    return await this.workspaceRepository.save([workspaces[0]]);
   }
 
   async delete(workspace: Workspace) {
@@ -858,7 +898,7 @@ export class WorkspaceService {
       throw new Error(`ws ${workspaceId} state ${ws.state} is not correct!`);
     }
     ws.state = 'saving';
-    ws.startTimestamp = null;
+    ws.startTimestamp = 0;
     ws.podObject = null;
     await this.workspaceRepository.save(ws);
     const podName = await this.getPodName(ws);

@@ -81,7 +81,7 @@ export class WorkspaceController {
         userId: user.userId,
         isZipUrl: item.gitUrl.includes('.zip'),
       };
-    }));
+    }), user);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -152,23 +152,29 @@ export class WorkspaceController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/close-ws/:workspaceId')
-  closeWs(@Param('workspaceId') workspaceId: number): Promise<any> {
+  closeWs(@Param('workspaceId') workspaceId: number, @Res({ passthrough: true }) response: Response, @Req() req: Request,): Promise<any> {
+
+    const authorization = (req)?.headers?.authorization;
+    // if(authorization && authorization.split(' ')[1]) {
+    //   const access_token = authorization.split(' ')[1];
+    //   response.cookie('access_token', access_token, {
+    //     path: '/',
+    //     domain: '',
+    //     sameSite: 'none',
+    //     secure: true,
+    //     expires: moment().add(7, 'days').toDate(),
+    //   });
+    // }
+
     return this.workspaceService.closeWs(workspaceId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/ws-is-alive/:workspaceId')
-  async isAlive(@Param('workspaceId') workspaceId: number, @Res({ passthrough: true }) response: Response): Promise<any> {
+  async isAlive(@Param('workspaceId') workspaceId: number): Promise<any> {
     let res = {} as any;
     try {
       res = await this.workspaceService.isAlive(workspaceId);
-      // response.cookie('key', hashKey, {
-      //   path: '/',
-      //   domain: res.wsHost,
-      // });
-      // response.status(302).redirect(`//${res.wsHost}`);
-      // return;
-      // console.log(`wsHost: ${res.wsHost}`);
     } catch (e) {
       console.error(e);
       throw e;
@@ -194,10 +200,10 @@ export class WorkspaceController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/redirect-ws-url/:workspaceId')
-  async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
+  async redirectToWsUrl(@Param('workspaceId') workspaceId: number, @Headers('host') _host: string, @Req() req: Request, @Res({ passthrough: true }) response: Response, @CurrentUser() currentUser?: User): Promise<any> {
     let res = {} as any;
     try {
-      res = await this.workspaceService.getRedirectToWsInfo(workspaceId);
+      res = await this.workspaceService.getRedirectToWsInfo(workspaceId, currentUser);
       const host = (_host || '').replace(/:\d+$/, '');
       // console.log(host, req.url);
       const configHost = Config.singleInstance().get('hostname').replace(/:\d+$/, '');
@@ -232,6 +238,31 @@ export class WorkspaceController {
           secure: true,
           expires: moment().add(7, 'days').toDate(),
         });
+        response.cookie('ws_id', workspaceId, {
+          path: '/',
+          domain: res.wsHost,
+          sameSite: 'none',
+          secure: true,
+          expires: moment().add(7, 'days').toDate(),
+        });
+        const authorization = (req)?.headers?.authorization;
+        if(authorization && authorization.split(' ')[1]) {
+          const access_token = authorization.split(' ')[1];
+          response.cookie('access_token', access_token, {
+            path: '/',
+            domain: '',
+            sameSite: 'none',
+            secure: true,
+            expires: moment().add(7, 'days').toDate(),
+          });
+        }
+        // response.cookie('access_token', '', {
+        //   path: '/',
+        //   domain: '',
+        //   sameSite: 'none',
+        //   secure: true,
+        //   expires: moment().add(-7, 'days').toDate(),
+        // });
         if (req.method.toLowerCase() === 'post' || req.url.includes('method=post')) {
           return {
             domain: res.wsHost

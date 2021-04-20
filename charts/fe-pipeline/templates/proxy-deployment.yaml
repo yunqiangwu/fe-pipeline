@@ -1,7 +1,5 @@
 {{- $fullName := include "fe-pipeline.fullname" . -}}
 
-# openresty/openresty:alpine
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:

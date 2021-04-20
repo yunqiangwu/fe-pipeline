@@ -30,6 +30,7 @@ fi
 # if [ "$CORAL_DEV" != "true" ];then
   if [ ! -d "/workspace/.user-code-data-dir" ]; then
     sudo mkdir -p /workspace/.user-code-data-dir/User
+    sudo mkdir -p /workspace/.user-code-data-dir/extensions
     if [ "$FE_PIPELINE_GIT_URL" == "none" ];then
         sudo chown coder:coder /workspace
         sudo chown -R coder:coder /workspace/.user-code-data-dir
@@ -54,5 +55,9 @@ fi
 #   done
 
 # fi
+
+if [ "$FE_PIPELINE_AUTO_CLOSE" = "enable" ];then
+  node /auto-close.js &
+fi
 
 dumb-init /usr/bin/code-server --disable-update-check --host=0.0.0.0 --user-data-dir=/workspace/.user-code-data-dir $@
