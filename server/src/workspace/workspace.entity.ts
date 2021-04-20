@@ -30,6 +30,9 @@ export class Workspace {
   @Column({ nullable: true, length: 200 })
   image: string;
 
+  @Column({ nullable: true, length: 200 })
+  imagePullSecretsName: string;
+
   @Column({ nullable: true, length: 200, default: 'created' })
   state: 'pending' | 'opening' | 'saving' | 'saved' | 'created' | 'error' | 'deleting';
 

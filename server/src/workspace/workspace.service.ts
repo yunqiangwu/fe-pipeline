@@ -676,6 +676,11 @@ export class WorkspaceService {
               value: currentUser.email,
             });
           }
+          if(ws.imagePullSecretsName) {
+            (resultConfig as any).spec.imagePullSecretsName = [{
+              name: ws.imagePullSecretsName,
+            }]
+          }
           if (ws.image === 'theia-full') {
             container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
           } else if (ws.image === 'vscode') {
@@ -802,7 +807,7 @@ export class WorkspaceService {
       .where("workspace.userId = :userId", { userId: currentUser.userId })
       .andWhere("(workspace.isTemp != 1 or workspace.isTemp is NULL)")
       .andWhere("workspace.destroy != 1")
-      .andWhere("workspace.state != 'saved'")
+      // .andWhere("workspace.state != 'saved'")
       .getCount();
 
       console.log(`当前工作空间的数量: ${currentNumber}`);

@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { webSocket } from 'rxjs/webSocket';
 import styles from './style.less';
 
 export const GitRepoList: FC = () => {
@@ -73,6 +73,12 @@ export const GitRepoList: FC = () => {
               <td>image</td>
               <td>镜像地址, 可以参考: <a href="https://github.com/yunqiangwu/theia-apps/blob/master/theia-full-docker/Dockerfile" target="_blank">构建镜像配置文件</a> 构建镜像</td>
               <td>vscode</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>imagePullSecretsName</td>
+              <td>k8s pod imagePullSecretsName</td>
+              <td></td>
               <td></td>
             </tr>
             <tr>
