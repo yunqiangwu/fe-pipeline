@@ -400,7 +400,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			openExternalUri(resolveUri: vscode.Uri) {
 
 				// vscode.open
-				console.log(resolveUri.toString());
+				console.log(`openExternalUri: ${resolveUri.toString()}`);
 				let port = resolveUri.authority.replace(/^.*:(\d+)/, '$1') as string;
 				if (!port.match(/^\d+$/)) {
 					port = '80';
