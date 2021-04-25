@@ -101,7 +101,7 @@ data:
             if ($http_cookie ~* "access_token=(.+?)(?=;|$)") {
                 set $access_token "$1";
             }
-            rewrite ^/ "http://$fe_pipeline_manager_host:3000/api/workspace/redirect-ws-url/$ws_id?access_token=$access_token" permanent;
+            rewrite ^/ "http://$fe_pipeline_manager_host/api/workspace/redirect-ws-url/$ws_id?access_token=$access_token" permanent;
         }
 
         error_page   500 502 503 504  /50x.html;

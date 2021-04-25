@@ -55,8 +55,8 @@ const stopWs = async () => {
         return;
     }
 
-    const FE_PIPELINE_MANAGE_API_HOST = `http://10.211.144.125:3000`;
-    // const FE_PIPELINE_MANAGE_API_HOST = `http://${FE_PIPELINE_MANAGER_SERVICE_HOST}:${FE_PIPELINE_MANAGER_SERVICE_PORT}`;
+    // const FE_PIPELINE_MANAGE_API_HOST = `http://10.211.144.125:3000`;
+    const FE_PIPELINE_MANAGE_API_HOST = `http://${FE_PIPELINE_MANAGER_SERVICE_HOST}:${FE_PIPELINE_MANAGER_SERVICE_PORT}`;
     // 10.211.144.125
 
     const manageApiUrl = FE_PIPELINE_MANAGE_API_HOST;
@@ -86,10 +86,10 @@ const stopWs = async () => {
                     stderr,
                 });
             });
-            p.stdout?.on('data', (chunk) => {
+            p.stdout && p.stdout.on('data', (chunk) => {
                 _stdout += chunk.toString();
             });
-            p.stderr?.on('data', (chunk) => {
+            p.stderr && p.stderr.on('data', (chunk) => {
                 _stderr += chunk.toString();
             });
         });

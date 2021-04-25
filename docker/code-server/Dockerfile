@@ -1,13 +1,14 @@
 FROM node:15.8.0 as vscode-extensions-builder
 WORKDIR /app
 ADD ./fe-pipeline-extensions/ /app/
-RUN echo 2 && yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
+RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run pkg-vsce
 
 FROM debian:10
 
 RUN apt-get update \
  && apt-get install -y \
     curl \
+    wget \
     dumb-init \
     unzip \
     htop \
@@ -37,30 +38,38 @@ RUN ARCH="$(dpkg --print-architecture)" && \
     mkdir -p /etc/fixuid && \
     printf "user: coder\ngroup: coder\n" > /etc/fixuid/config.yml
 
+RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-amd64.tar.gz -O kubernetes-client-linux-amd64.tar.gz && \
+    tar -zxvf kubernetes-client-linux-amd64.tar.gz && \
+    mv ./kubernetes/client/bin/kubectl /usr/local/bin/kubectl && \
+    chmod +x /usr/local/bin/kubectl && \
+    rm -rf /tmp/kubernetes*
+
 ENV NVM_DIR /sysapp/nvm
+ENV NVM_SOURCE https://gitee.com/mirrors/nvm.git
 ENV NVM_NODEJS_ORG_MIRROR http://npm.taobao.org/mirrors/node
 
-RUN mkdir -p $NVM_DIR && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+# https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh https://gitee.com/mirrors/nvm/raw/v0.38.0/install.sh
+RUN mkdir -p $NVM_DIR && curl -o- https://gitee.com/mirrors/nvm/raw/v0.38.0/install.sh | bash
 
-RUN . $NVM_DIR/nvm.sh && nvm install 14 && npm i -g yarn
-
-# COPY release-packages/code-server*.deb /tmp/
+RUN . $NVM_DIR/nvm.sh && nvm install 14 && nvm ls && npm i -g yarn && chmod -R 777 $NVM_DIR
 
 ARG CODE_SERVER_VERSION=3.9.3
 
 RUN curl -fL https://github.com/cdr/code-server/releases/download/v${CODE_SERVER_VERSION}/code-server_${CODE_SERVER_VERSION}_amd64.deb -o /tmp/code-server-install.deb
 RUN dpkg -i /tmp/code-server-install.deb && rm /tmp/code-server*.deb
 
-RUN cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && . $NVM_DIR/nvm.sh && yarn add vscode-codicons
+# . $NVM_DIR/nvm.sh &&
+RUN . $NVM_DIR/nvm.sh && cd /usr/lib/code-server/lib/vscode/extensions/simple-browser && yarn add vscode-codicons
 
 COPY ./code-cli /workspace/code-cli
+# . $NVM_DIR/nvm.sh && 
 RUN . $NVM_DIR/nvm.sh && cd /workspace/code-cli && yarn --registry=https://registry.npm.taobao.org/ && yarn run compile && yarn global add code-cli@/workspace/code-cli --registry=https://registry.npm.taobao.org/  && rm -rf /workspace/code-cli
 
 COPY --from=vscode-extensions-builder /app/*.vsix /workspace/extension/
 
 COPY ./install-extension.sh /workspace/install-vscode-extension.sh
 
-RUN . /workspace/install-vscode-extension.sh && rm -rf /workspace/install-vscode-extension.sh
+RUN chmod +x /workspace/install-vscode-extension.sh && /workspace/install-vscode-extension.sh && rm -rf /workspace/install-vscode-extension.sh
 
 COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 
@@ -82,8 +91,8 @@ EXPOSE 8080
 # docker-run.
 # USER coder
 
-# RUN sudo chown -R coder:coder $NVM_DIR
-RUN sudo chmod -R 777 $NVM_DIR
+RUN sudo chown -R coder:coder $NVM_DIR
+# RUN sudo chmod -R 777 $NVM_DIR
 
 # /etc/profile
 # ~/.bashrc

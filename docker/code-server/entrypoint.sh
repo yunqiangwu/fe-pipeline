@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 set -e
 
@@ -57,7 +57,7 @@ fi
 # fi
 
 if [ "$FE_PIPELINE_AUTO_CLOSE" = "enable" ];then
-  node /auto-close.js &
+   . $NVM_DIR/nvm.sh && nohup node /auto-close.js &
 fi
 
 dumb-init /usr/bin/code-server --disable-update-check --host=0.0.0.0 --user-data-dir=/workspace/.user-code-data-dir $@

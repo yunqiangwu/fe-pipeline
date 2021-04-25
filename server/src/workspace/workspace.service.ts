@@ -558,9 +558,9 @@ export class WorkspaceService {
                 {
                   "name": "web",
                   "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
-                  "securityContext": {
-                    privileged: !ws.isTemp
-                  },
+                  // "securityContext": {
+                  //   privileged: !ws.isTemp
+                  // },
                   "ports": [
                     {
                       "name": "web",

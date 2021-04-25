@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: fe-pipeline
+    meta.helm.sh/release-namespace: fe-pipeline
+  creationTimestamp: "2021-04-23T07:46:58Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: fe-pipeline
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fe-pipeline
+    app.kubernetes.io/version: 1.16.0
+    fe-pipeline: ws-manager
+    helm.sh/chart: fe-pipeline-0.1.0
+   name: fe-pipeline
+  namespace: fe-pipeline
+  resourceVersion: "371162"
+  selfLink: /apis/apps/v1/namespaces/fe-pipeline/deployments/fe-pipeline
+  uid: 749dd1e1-874a-41d7-a2d2-c0f90d915109
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: fe-pipeline
+      app.kubernetes.io/name: fe-pipeline
+      fe-pipeline: ws-manager
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: fe-pipeline
+        app.kubernetes.io/name: fe-pipeline
+        fe-pipeline: ws-manager
+    spec:
+      containers:
+      - env:
+        - name: WATCH
+          value: none
+        - name: WATCH_FILES
+          value: none
+        image: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 1000
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: fe-pipeline
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 3000
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 100m
+            memory: 2Gi
+          requests:
+            cpu: 100m
+            memory: 2Gi
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /app/server/config/config.production.yml
+          name: config
+          subPath: config.production.yml
+        - mountPath: /app/fe-pipeline-home/data
+          name: fe-pipeline-ws-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: fe-pipeline
+      serviceAccountName: fe-pipeline
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: fe-pipeline-ws-data
+        persistentVolumeClaim:
+          claimName: fe-pipeline-pvc2
+      - configMap:
+          defaultMode: 420
+          name: fe-pipeline-config
+        name: config
