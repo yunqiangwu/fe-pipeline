@@ -104,9 +104,9 @@ ARG strip=false
 ENV strip=$strip
 
 WORKDIR /home/theia
-ADD ./docker/theia-ide/package.json ./package.json
+ADD ./package.json ./package.json
 
-ADD ./docker/theia-ide/theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
+ADD ./theia-fe-pipeline-extensions/theia-fe-pipeline-extensions ./theia-fe-pipeline-extensions
 RUN cd ./theia-fe-pipeline-extensions && yarn --ignore-engines --registry=https://registry.npm.taobao.org/ && \
  rm -rf *.tgz && yarn pack && cp *.tgz ../theia-fe-pipeline-extensions.tgz && \
  cd  .. && rm  -rf ./theia-fe-pipeline-extensions && \
@@ -336,7 +336,7 @@ ENV SHELL=/bin/bash \
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-COPY ./docker/theia-ide/entrypoint.sh /usr/bin/entrypoint.sh
+COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 ENTRYPOINT ["/usr/bin/entrypoint.sh"]
 
 RUN sudo touch /etc/bash.bashrc && sudo sed -i '2i\if [ x"${PATH}" = "x" ]; then export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi\nif [ x"${PATH: -1}" = "x:" ]; then export PATH=${PATH/%:/}:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; fi' /etc/bash.bashrc

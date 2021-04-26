@@ -7,7 +7,10 @@ main() {
 
   # cd "$(dirname "$0")/../.."
   export VERSION=2
-  docker build -t "registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:$VERSION" -f ./docker/theia-ide/Dockerfile .
+  cd docker/theia-ide
+  docker build -t "registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:$VERSION" -f ./Dockerfile .
+  cd ../../
+
 
 }
 

@@ -14,6 +14,8 @@ kubectl -n fe-pipeline exec -ti deploy/dev-fe-pipeline-deployment -- bash
 
 # kubectl -n fe-pipeline exec -ti deploy/fe-pipeline -- bash
 
+docker run --privileged --name=rancher-server -d --restart=unless-stopped -p 32080:80 -v /d/private/opt/rancher:/var/lib/rancher -p 32443:443 rancher/rancher
+
 # docker build . -t registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 && docker push registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
 
 # helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --set service.enabled=true --set hostname=fe-pipeline.localhost --set ingress.enabled=true --set persistence.enabled=true --set persistence.existingClaim=fe-pipeline-pvc 
