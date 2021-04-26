@@ -28,7 +28,7 @@ export class WorkspaceService {
 
 
   private kubeClient = new Client1_13({});
-  private ns: string = 'fe-pipeline';
+  private ns: string = '';
   private imagePullSecretsName: string = '';
   private image: string = '';
 
@@ -47,20 +47,23 @@ export class WorkspaceService {
       const filePath = '/var/run/secrets/kubernetes.io/serviceaccount/namespace';
       if (existsSync(filePath)) {
         this.ns = readFileSync(filePath).toString();
-      }
-      (async () => {
-        try{
-          const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(os.hostname()).get({});
-          if(kubePodRes) {
-            if(kubePodRes?.body?.spec?.imagePullSecrets[0]?.name) {
-              this.imagePullSecretsName = kubePodRes.body.spec.imagePullSecrets[0].name;
-              this.image = kubePodRes.body.spec.containers[0].image;
+        (async () => {
+          try{
+            const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(os.hostname()).get({});
+            if(kubePodRes) {
+              if(kubePodRes?.body?.spec?.imagePullSecrets[0]?.name) {
+                this.imagePullSecretsName = kubePodRes.body.spec.imagePullSecrets[0].name;
+                this.image = kubePodRes.body.spec.containers[0].image;
+              }
             }
+          }catch(e) {
+            console.error(e);
           }
-        }catch(e) {
-          console.error(e);
-        }
-      })();
+        })();
+      }
+      if(!this.ns) {
+        this.ns = 'fe-pipeline';
+      }
     } catch (e) { }
   }
 
@@ -424,7 +427,7 @@ export class WorkspaceService {
               const config = Config.singleInstance();
               if (ta) {
                 const cloneUrl = `${repoObj.protocol}//oauth2:${ta.accessToken}@${repoObj.host}/${repoObj.owner}/${repoObj.repoName}.git`;
-                console.log(`clone dir ${cloneUrl}`);
+                console.log(`clone dir ${cloneUrl} to ${contextToDir}`);
                 try {
                   globalSubject.next(
                     {
@@ -436,7 +439,44 @@ export class WorkspaceService {
                       },
                     }
                   );
-                  await promisify(exec)(`cd ${contextToDir} \n git clone ${cloneUrl}`);
+                  // await promisify(exec)(`cd ${contextToDir} \n git clone ${cloneUrl}`);
+
+                  let _stdout = '', _stderr = '';
+
+                  const res: any = await new Promise((resolve, reject) => {
+                    const p = exec(`git clone ${cloneUrl}`, { cwd: contextToDir, shell: 'bash' }, (err, stdout, stderr) => {
+                      if(err) {
+                        reject(err);
+                        return;
+                      }
+                      _stdout = stdout;
+                      _stderr = stderr;
+                      resolve({
+                        stdout, stderr,
+                      });
+                    });
+                    p.stdout?.on('data', (chunk) => {
+                      _stdout  += chunk.toString();
+                    });
+                    p.stderr?.on('data', (chunk) => {
+                      _stderr  += chunk.toString();
+                    });
+                    // p.stdout?.on('end', (chunk) => {
+                    // 	_stdout  += chunk.toString();
+                    // });
+                  });
+
+                  // globalSubject.next(
+                  //   {
+                  //     wsId: workspaceId,
+                  //     data: {
+                  //       type: 'clone',
+                  //       message: _stdout,
+                  //       workspaceId,
+                  //     },
+                  //   }
+                  // );
+
                 } catch (e) {
                   console.error(e);
                   throw new HttpException(`当前账号 ${ta.threeAccountUsername} 无访问 ${ws.gitUrl} 的权限!`, 403);
