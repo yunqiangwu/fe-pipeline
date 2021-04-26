@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import fetch from 'node-fetch';
 import * as crypto from "crypto";
 import { Client1_13, ApiRoot } from 'kubernetes-client';
+import * as os from 'os';
 import { Workspace } from './workspace.entity';
 import { globalSubject } from '../events/events.utils';
 import { emptyDir, emptyDirSync, existsSync, fstat, mkdirpSync, readdir, readFileSync, rmdir } from 'fs-extra';
@@ -28,6 +29,8 @@ export class WorkspaceService {
 
   private kubeClient = new Client1_13({});
   private ns: string = 'fe-pipeline';
+  private imagePullSecretsName: string = '';
+  private image: string = '';
 
   @Inject(UsersService)
   private readonly usersService: UsersService;
@@ -45,6 +48,19 @@ export class WorkspaceService {
       if (existsSync(filePath)) {
         this.ns = readFileSync(filePath).toString();
       }
+      (async () => {
+        try{
+          const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(os.hostname()).get({});
+          if(kubePodRes) {
+            if(kubePodRes?.body?.spec?.imagePullSecrets[0]?.name) {
+              this.imagePullSecretsName = kubePodRes.body.spec.imagePullSecrets[0].name;
+              this.image = kubePodRes.body.spec.containers[0].image;
+            }
+          }
+        }catch(e) {
+          console.error(e);
+        }
+      })();
     } catch (e) { }
   }
 
@@ -646,6 +662,7 @@ export class WorkspaceService {
               ]
             }
           };
+
           const container = resultConfig.spec.containers[0];
           if (gitpodConfig) {
             if (gitpodConfig.tasks) {
@@ -682,14 +699,28 @@ export class WorkspaceService {
               name: ws.imagePullSecretsName,
             }]
           }
-          if (ws.image === 'theia-full') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
-          } else if (ws.image === 'vscode') {
-            container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
-            // container.args.push('--disable-update-check');
-          } else if (ws.image) {
-            container.image = ws.image;
+
+          const imageName = Config.singleInstance().get(`ideImages.${ws.image}`);
+          if(imageName) {
+            container.image = imageName;
+            if(this.imagePullSecretsName && this.image && container.image.split('/')[0] === this.image.split('/')[0] ) {
+              (resultConfig.spec as any).imagePullSecrets = [
+                {
+                  name: this.imagePullSecretsName,
+                },
+              ]
+            }
+          } else {
+            if (ws.image === 'theia-full') {
+              container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2';
+            } else if (ws.image === 'vscode') {
+              container.image = 'registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2';
+              // container.args.push('--disable-update-check');
+            } else if (ws.image) {
+              container.image = ws.image;
+            }
           }
+          
           if (ws.envJsonData) {
             const env = JSON.parse(ws.envJsonData);
             for (const key in env) {
@@ -799,6 +830,9 @@ export class WorkspaceService {
   }
 
   async findAllByCurrentUser(userId: number): Promise<Workspace[]> {
+
+    // console.log(`imagePullSecretsName: ${this.imagePullSecretsName}`);
+    
     return await this.workspaceRepository.find({ userId, destroy: false });
   }
 

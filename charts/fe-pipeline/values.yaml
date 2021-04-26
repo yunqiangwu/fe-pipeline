@@ -9,6 +9,10 @@ image:
   # tag: 1.16.0
   pullPolicy: IfNotPresent
 
+ideImages:
+  theia-full: registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2
+  vscode: registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

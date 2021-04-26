@@ -15,6 +15,8 @@ data:
     existingClaimForWs: {{ .Values.persistence.existingClaim }}
     hostname: {{.Values.hostname}}
     fe-port: 80
+    ideImages:
+{{ toYaml .Values.ideImages | indent 6 }}
     fe-path: /fed/
     authProviders:
 {{ toYaml .Values.authProviders | indent 6 }}
