@@ -41,6 +41,16 @@ fi
   fi
 # fi
 
+if [ "$CORAL_DEV" = "true" ];then
+  mkdir -p /workspace/.user-code-data-dir/User/state
+  echo '[   ["workbench.activity.showAccounts","false"],
+      [
+          "workbench.activity.pinnedViewlets2",
+          "[{\"id\":\"workbench.view.explorer\",\"pinned\":true,\"visible\":true,\"order\":0},{\"id\":\"workbench.view.search\",\"pinned\":false,\"visible\":false,\"order\":1},{\"id\":\"workbench.view.scm\",\"pinned\":true,\"visible\":false,\"order\":2},{\"id\":\"workbench.view.debug\",\"pinned\":true,\"visible\":false,\"order\":3},{\"id\":\"workbench.view.remote\",\"pinned\":true,\"visible\":false,\"order\":4},{\"id\":\"workbench.view.extensions\",\"pinned\":true,\"visible\":false,\"order\":4},{\"id\":\"workbench.view.extension.test\",\"pinned\":true,\"visible\":false,\"order\":6},{\"id\":\"workbench.view.extension.references-view\",\"pinned\":true,\"visible\":false,\"order\":7}]"
+      ]
+  ]' > /workspace/.user-code-data-dir/User/state/global.json
+fi
+
 if [ x"$FE_PIPELINE_WORK_DIR" != "x" ] && [ ! -d "$FE_PIPELINE_WORK_DIR" ]; then
   mkdir -p $FE_PIPELINE_WORK_DIR
 fi

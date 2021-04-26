@@ -14,6 +14,7 @@ type ShowOptions = {
 
 type IWsMessage = {
 	content: string;
+	cwd?: string;
 }
 
 const runCommand = async (params: IWsMessage) => {
@@ -76,7 +77,7 @@ const openFile = async (params: IWsMessage ) => {
 
 	if(!fs.existsSync(filePath)) {
 
-		filePath = path.join(process.cwd(), params.content);
+		filePath = path.join(params.cwd || process.cwd(), params.content);
 
 		if(!fs.existsSync(filePath)) {
 

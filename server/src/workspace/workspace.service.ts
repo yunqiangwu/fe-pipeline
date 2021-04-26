@@ -491,7 +491,7 @@ export class WorkspaceService {
 
       const envObj = ws.envJsonData ? JSON.parse(ws.envJsonData) : null;
 
-      const FE_PIPELINE_WORK_DIR = (envObj && envObj.FE_PIPELINE_WORK_DIR) ? envObj.FE_PIPELINE_WORK_DIR : join(`/workspace`, projectDirname || 'project');
+      const FE_PIPELINE_WORK_DIR = ((envObj && envObj.FE_PIPELINE_WORK_DIR) ? envObj.FE_PIPELINE_WORK_DIR : join(`/workspace`, projectDirname || 'project') ).replace(/\\/g, '/');
 
       let kubePodRes: any = null;
 
@@ -551,6 +551,7 @@ export class WorkspaceService {
               },
             },
             "spec": {
+              automountServiceAccountToken: false,
               volumes: [
                 vol,
               ],
@@ -558,9 +559,9 @@ export class WorkspaceService {
                 {
                   "name": "web",
                   "image": 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand',// "nginx",
-                  // "securityContext": {
-                  //   privileged: !ws.isTemp
-                  // },
+                  "securityContext": {
+                    privileged: !ws.isTemp
+                  },
                   "ports": [
                     {
                       "name": "web",

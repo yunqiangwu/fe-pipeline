@@ -72,6 +72,7 @@ const openFile = async ({ content }: { content: string }) => {
         socket.send({
             type: 'open',
             content,
+            cwd: process.cwd(),
             _randNum,
         });
     });
