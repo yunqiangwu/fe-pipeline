@@ -8,14 +8,29 @@ Docker构建:
   stage: Docker构建
   script:
   - saveImageMetadata
-  - kaniko --skip-tls-verify -c $PWD/docker/code-server -f $PWD/docker/code-server/Dockerfile -d ${DOCKER_REGISTRY}/${GROUP_NAME}/code-server:2
-  - saveImageMetadata
-  - kaniko --skip-tls-verify -c $PWD/docker/theia-ide -f $PWD/docker/theia-ide/Dockerfile -d ${DOCKER_REGISTRY}/${GROUP_NAME}/theia-ide:2
-  - saveImageMetadata
   - kaniko --skip-tls-verify -c $PWD/. -f $PWD/Dockerfile -d ${DOCKER_REGISTRY}/${GROUP_NAME}/${PROJECT_NAME}:${CI_COMMIT_TAG}
   only:
     refs:
     - master
+
+Docker构建ide-theia:
+  stage: Docker构建
+  script:
+  - saveImageMetadata
+  - kaniko --skip-tls-verify -c $PWD/docker/theia-ide -f $PWD/docker/theia-ide/Dockerfile -d ${DOCKER_REGISTRY}/${GROUP_NAME}/theia-ide:2
+  only:
+    refs:
+    - master
+
+Docker构建ide-vscode:
+  stage: Docker构建
+  script:
+  - saveImageMetadata
+  - kaniko --skip-tls-verify -c $PWD/docker/code-server -f $PWD/docker/code-server/Dockerfile -d ${DOCKER_REGISTRY}/${GROUP_NAME}/code-server:2
+  only:
+    refs:
+    - master
+
 发布Chart:
   stage: 发布Chart
   script:
