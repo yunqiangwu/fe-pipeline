@@ -48,15 +48,13 @@ const stopWs = async () => {
 
     const FE_PIPELINE_TOKEN = process.env.FE_PIPELINE_TOKEN;
     const FE_PIPELINE_WS_ID = process.env.FE_PIPELINE_WS_ID;
-    const FE_PIPELINE_MANAGER_SERVICE_HOST = process.env.FE_PIPELINE_MANAGER_SERVICE_HOST;
-    const FE_PIPELINE_MANAGER_SERVICE_PORT = process.env.FE_PIPELINE_MANAGER_SERVICE_PORT;
+    const FE_PIPELINE_MANAGE_API_HOST = process.env.FE_PIPELINE_MANAGE_API_HOST;
 
-    if (!FE_PIPELINE_TOKEN || !FE_PIPELINE_WS_ID || !FE_PIPELINE_MANAGER_SERVICE_PORT) {
+    if (!FE_PIPELINE_TOKEN || !FE_PIPELINE_WS_ID || !FE_PIPELINE_MANAGE_API_HOST) {
         return;
     }
 
     // const FE_PIPELINE_MANAGE_API_HOST = `http://10.211.144.125:3000`;
-    const FE_PIPELINE_MANAGE_API_HOST = `http://${FE_PIPELINE_MANAGER_SERVICE_HOST}:${FE_PIPELINE_MANAGER_SERVICE_PORT}`;
     // 10.211.144.125
 
     const manageApiUrl = FE_PIPELINE_MANAGE_API_HOST;
@@ -138,6 +136,9 @@ const stopWs = async () => {
                 console.log('8 分钟到了!, 当前没有操作的话, 开始休眠空间');
                 try {
                     const res = await stopWs();
+                    if(!res) {
+                        process.exit();
+                    }
                     console.log(`执行结果: ${res.stdout}`);
                     await new Promise((resolve) => {
                         setTimeout(() => {

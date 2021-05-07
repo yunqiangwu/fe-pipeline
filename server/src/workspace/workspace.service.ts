@@ -31,6 +31,7 @@ export class WorkspaceService {
   private ns: string = '';
   private imagePullSecretsName: string = '';
   private image: string = '';
+  private managerHost: string = 'fe-pipeline-manager'; // fe-pipeline-2acec-manager
 
   @Inject(UsersService)
   private readonly usersService: UsersService;
@@ -43,6 +44,9 @@ export class WorkspaceService {
     private readonly workspaceRepository: Repository<Workspace>,
     public readonly jwtService: JwtService,
   ) {
+    try {
+      this.managerHost = os.networkInterfaces()['eth0'][0]['address'];
+    } catch (e) { }
     try {
       const filePath = '/var/run/secrets/kubernetes.io/serviceaccount/namespace';
       if (existsSync(filePath)) {
@@ -642,10 +646,10 @@ export class WorkspaceService {
                       name: 'FE_PIPELINE_PASSWORD',
                       value: ws.password,
                     },
-                    // {
-                    //   name: 'FE_PIPELINE_MANAGE_API_HOST',
-                    //   value: `http://${process.env.FE_PIPELINE_MANAGER_SERVICE_HOST}:${process.env.FE_PIPELINE_MANAGER_SERVICE_PORT}`,
-                    // },
+                    {
+                      name: 'FE_PIPELINE_MANAGE_API_HOST',
+                      value: `http://${this.managerHost}:${3000}`,
+                    },
                     {
                       name: 'FE_PIPELINE_WORK_DIR',
                       value: FE_PIPELINE_WORK_DIR,
