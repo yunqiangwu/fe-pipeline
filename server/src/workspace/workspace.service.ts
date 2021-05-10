@@ -54,7 +54,7 @@ export class WorkspaceService {
         (async () => {
           try{
             const kubePodRes = await this.kubeClient.api.v1.namespace(this.ns).pods(os.hostname()).get({});
-            if(kubePodRes) {
+            if(kubePodRes && kubePodRes?.body?.spec?.imagePullSecrets) {
               if(kubePodRes?.body?.spec?.imagePullSecrets[0]?.name) {
                 this.imagePullSecretsName = kubePodRes.body.spec.imagePullSecrets[0].name;
                 this.image = kubePodRes.body.spec.containers[0].image;
