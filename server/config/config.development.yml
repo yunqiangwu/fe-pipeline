@@ -10,7 +10,7 @@ fe-path: /
 backend-port: 3000
 ingress-backend-port: 3000
 
-existingClaimForWs: fe-pipeline-pvc2
+# existingClaimForWs: fe-pipeline-pvc2
 
 # proxy-backend-host: 127.0.0.1
 # proxy-backend-port: 80

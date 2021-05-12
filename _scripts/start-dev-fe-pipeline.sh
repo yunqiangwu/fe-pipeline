@@ -31,4 +31,6 @@ docker run --privileged --name=rancher-server -d --restart=unless-stopped -p 320
 
 # kubectl -n fe-pipeline exec -ti deploy/fe-pipeline -- bash
 
+# docker run -d --name minio -p 9000:9000 minio/minio server /data
+
 # helm -n fe-pipeline template --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml > deployChart.yaml

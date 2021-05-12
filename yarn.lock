@@ -4643,7 +4643,7 @@ minimist@1.2.5, minimist@^1.1.1, minimist@^1.2.0, minimist@^1.2.5:
 
 minio@^7.0.18:
   version "7.0.18"
-  resolved "https://registry.npm.taobao.org/minio/download/minio-7.0.18.tgz#a2a6dae52a4dde9e35ed47cdf2accc21df4a512d"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/minio/-/minio-7.0.18.tgz#a2a6dae52a4dde9e35ed47cdf2accc21df4a512d"
   integrity sha1-oqba5SpN3p417UfN8qzMId9KUS0=
   dependencies:
     async "^3.1.0"
