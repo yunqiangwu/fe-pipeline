@@ -47,11 +47,11 @@ export default defineConfig({
       path: '/swagger-ui/oauth2-redirect.html',
       component: '@/pages/other/redirect-to-swagger-ui',
     },
-    // {
-    //   path: '/',
-    //   component: '@/pages/workspaces/create-temp-ws',
-    //   // redirect: '/app',
-    // },
+    {
+      path: '/',
+      // component: '@/pages/workspaces/create-temp-ws',
+      redirect: '/app',
+    },
     // {
     //   path: '/ws-demo',
     //   component: '@/pages/workspaces/demo',
@@ -64,22 +64,22 @@ export default defineConfig({
     //   icon: 'codepen', name: "Demo2",
     //   // redirect: '/app',
     // },
-    // {
-    //   path: '/app',
-    //   component: '@/layouts',
-    //   routes: [
-    //     {
-    //       path: '/app',
-    //       redirect: '/app/workspaces',
-    //     },
-    //     { path: '/app/workspaces',  component: '@/pages/workspaces',
-    //      icon: 'codepen', name: "空间管理",
-    //     },
-    //     { path: '/app/repos',  component: '@/pages/repos',
-    //     icon: 'codepen', name: "代码仓库",
-    //    },
-    //   ],
-    // },
+    {
+      path: '/app',
+      component: '@/layouts',
+      routes: [
+        {
+          path: '/app',
+          redirect: '/app/ms',
+        },
+        { path: '/app/ms',  component: '@/pages/ms',
+          icon: 'codepen', name: "空间管理",
+        },
+      //   { path: '/app/repos',  component: '@/pages/repos',
+      //   icon: 'codepen', name: "代码仓库",
+      //  },
+      ],
+    },
     { path: "/login", name: "Login", component: '@/pages/Login' },
     { path: "/auth/:host/callback", name: "AuthCallback", component: '@/pages/Login/auth-callback' },
     // { path: "/ws-pod1/:id", name: "ws-pod", component: '@/pages/Home' },

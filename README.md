@@ -42,6 +42,11 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## tech
+
+- https://github.com/svtslv/nestjs-s3
+- https://github.com/prisma/prisma-examples/tree/latest/typescript/rest-nestjs
+- https://docs.nestjs.com/techniques/caching#different-stores
 ## License
 
   Nest is [MIT licensed](LICENSE).
