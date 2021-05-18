@@ -42,3 +42,5 @@ node_modules
 /test-temp
 
 deployChart.yaml
+
+/prisma/dev.db

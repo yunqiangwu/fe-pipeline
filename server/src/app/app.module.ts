@@ -7,6 +7,7 @@ import { WsProxyModule } from '../ws-proxy/ws-proxy.module';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 import { AppController } from '../app/app.controller';
+import { PrismaService } from '../app/prisma.service';
 import { AppService } from '../app/app.service';
 import { EventsModule } from '../events/events.module';
 import { ConfigModule } from '../config/config.module';
@@ -35,6 +36,6 @@ import { Config } from '../config/config';
 
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [PrismaService, AppService, AuthService],
 })
 export class AppModule {}
