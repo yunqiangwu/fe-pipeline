@@ -25,6 +25,7 @@ import { ConfigModule } from '../config/config.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
+
   controllers: [AuthController],
   exports: [AuthService, LocalStrategy, JwtModule],
 })

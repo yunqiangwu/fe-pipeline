@@ -1,6 +1,7 @@
 import { Controller, Request, Post, Get, UseGuards, Headers, Param, Body, Query, Delete, Put } from '@nestjs/common';
 import { ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { omit } from 'lodash';
+import { InjectS3, S3 } from 'nestjs-s3';
 import { AppService } from '../app/app.service';
 import { User as UserModel, Post as PostModel, Prisma } from '@prisma/client'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -9,7 +10,11 @@ import { PrismaService } from './prisma.service';
 @ApiTags('fe-pipeline')
 @Controller('/api')
 export class AppController {
-  constructor(private readonly prismaService: PrismaService, private readonly appService: AppService) { }
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly appService: AppService,
+    @InjectS3() private readonly s3: S3,
+  ) { }
 
   @Get('hello')
   @ApiResponse({
@@ -68,15 +73,15 @@ export class AppController {
     })
   }
 
-  @Get('users')
-  async getAllUsers(): Promise<UserModel[]> {
-    return this.prismaService.user.findMany()
-  }
+  // @Get('users')
+  // async getAllUsers(): Promise<UserModel[]> {
+  //   return this.prismaService.user.findMany()
+  // }
 
   @Get('user/:id/drafts')
   async getDraftsByUser(@Param('id') id: string): Promise<PostModel[]> {
     return this.prismaService.user.findUnique({
-      where: { id: Number(id) }
+      where: { userId: Number(id) }
     }).posts({
       where: {
         published: false
@@ -102,7 +107,7 @@ export class AppController {
 
   @Post('signup')
   async signupUser(
-    @Body() userData: { name?: string; email: string, posts?: PostModel[] },
+    @Body() userData: { username?: string; email: string, posts?: PostModel[] },
   ): Promise<UserModel> {
 
     const postData = userData.posts?.map((post) => {
@@ -110,7 +115,7 @@ export class AppController {
     })
     return this.prismaService.user.create({
       data: {
-        name: userData?.name,
+        username: userData?.username,
         email: userData.email,
         posts: {
           create: postData
@@ -150,6 +155,31 @@ export class AppController {
         }
       }
     })
+  }
+
+  @Get('minio')
+  async getHelloForMinio() {
+    try {
+      await this.s3.createBucket({ Bucket: 'bucket' }).promise();
+     
+    } catch (e) { 
+      // console.error(e);
+    }
+
+    await this.s3.putObject({ Bucket: 'bucket', Key: '/xx', Body: 'asdf' }).promise();
+
+    const res = await this.s3.getObject({ Bucket: 'bucket', Key: '/xx' }).promise();
+
+    console.log('res:', res);
+
+    try {
+      const list = await this.s3.listBuckets().promise();
+      return list.Buckets;
+    } catch (e) {
+      console.log(e);
+    }
+
+    return 'error';
   }
 
 

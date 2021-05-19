@@ -6,13 +6,12 @@ import { ApiOAuth2, ApiBody, ApiResponse, ApiTags, ApiParam, ApiQuery } from '@n
 import { JwtService } from '@nestjs/jwt';
 import { omit } from 'lodash';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/users.entity';
+import { PrismaService } from '../app/prisma.service';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
 import { Config } from '../config/config';
 import { CurrentUser } from '../common/decos';
 import { AuthInfoWithAuthClientToken } from './dto/auth-info-with-auth-client-token';
-import { ThreeAccount } from '../users/three-account.entity';
 
 @ApiTags('auth')
 @Controller('api/auth')
@@ -20,6 +19,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+    private readonly prismaService: PrismaService,
     private readonly usersService: UsersService,
   ) {}
 

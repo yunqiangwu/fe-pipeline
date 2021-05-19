@@ -1,25 +1,34 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/users.entity';
+// import { User } from '../users/users.entity';
 import { JwtService } from '@nestjs/jwt';
 import { isArray, cloneDeep } from 'lodash';
 import { Config } from '../config/config';
 // import { ThreePlatformType } from '../users/enums';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
+import { PrismaService } from '../app/prisma.service';
 import { AuthInfoWithAuthClientToken } from './dto/auth-info-with-auth-client-token';
-import { ThreePlatformType } from 'src/users/enums';
-import { ThreeAccount } from 'src/users/three-account.entity';
+// import {   } from 'src/users/enums';
+// import { ThreeAccount } from 'src/users/three-account.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
   
-  async getOtherAccountBind(userId: number) {
 
-    return this.usersService.threeAccountRepository.find({ user: { userId, } });
+  constructor(
+    public readonly usersService: UsersService,
+    public readonly jwtService: JwtService,
+    private readonly prismaService: PrismaService,
+  ) {}
+
+  
+  async getOtherAccountBind(userId: number) {
+// user: { userId, }
+    return this.prismaService.threeAccount.findFirst({ select: { userId: true } });
     // throw new Error('Method not implemented.');
   }
 
@@ -39,10 +48,7 @@ export class AuthService {
     }
   }
 
-  constructor(
-    public readonly usersService: UsersService,
-    public readonly jwtService: JwtService
-  ) {}
+
 
   async otherAccountBind(args: any, currentUser?: User) {
 
