@@ -50,7 +50,7 @@ export class UsersService {
   async updateOauthBindInfo(options: { threeAccountUsername: string; user: User; loginType: ThreePlatformType; oauthToken: string; accountData: any; tokenInfo?: any; authClientId: string; authHost: string; }) {
     const { user, loginType, authClientId, authHost, oauthToken, threeAccountUsername } = options;
 
-    let threePlatform = await this.prismaService.threeAccount.findFirst({where: { userId: user.userId, threePlatformType: loginType } });
+    let threePlatform = await this.prismaService.threeAccount.findFirst({where: { userId: user.userId, threePlatformType: loginType, authClientId } });
     
     if (!threePlatform) {
       threePlatform = {} as any;
@@ -71,7 +71,7 @@ export class UsersService {
       threePlatform.tokenInfo = JSON.stringify(options.tokenInfo);
     }
 
-    const example:Partial<ThreeAccount> = { threePlatformType: threePlatform.threePlatformType, authClientId, userId: threePlatform.userId };
+    const example:Partial<ThreeAccount> = { threePlatformType: threePlatform.threePlatformType, authClientId, userId: user.userId };
 
     const count = await this.prismaService.threeAccount.count({where: example });
     if(count) {
