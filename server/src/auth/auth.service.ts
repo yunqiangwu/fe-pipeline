@@ -2,16 +2,15 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { UsersService } from '../users/users.service';
 // import { User } from '../users/users.entity';
+import { ThreeAccount, Prisma, User } from '@prisma/client'
 import { JwtService } from '@nestjs/jwt';
 import { isArray, cloneDeep } from 'lodash';
 import { Config } from '../config/config';
-// import { ThreePlatformType } from '../users/enums';
+import { ThreePlatformType } from '../users/enums';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
 import { PrismaService } from '../app/prisma.service';
 import { AuthInfoWithAuthClientToken } from './dto/auth-info-with-auth-client-token';
-// import {   } from 'src/users/enums';
-// import { ThreeAccount } from 'src/users/three-account.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -28,12 +27,12 @@ export class AuthService {
   
   async getOtherAccountBind(userId: number) {
 // user: { userId, }
-    return this.prismaService.threeAccount.findFirst({ select: { userId: true } });
+    return this.prismaService.threeAccount.findMany({ where: { userId } });
     // throw new Error('Method not implemented.');
   }
 
   async getOtherAccountBindToken(userId: number, authClientId: string) {
-    const res = await this.usersService.threeAccountRepository.findOne({ authClientId, user: { userId, } });
+    const res = await this.prismaService.threeAccount.findFirst({ where: { authClientId, userId } });
     if(res) {
       const authProviders = (Config.singleInstance().get('authProviders')) as any[];
       const authProviderItem = authProviders.find(item => item.id  ===  authClientId);
@@ -408,14 +407,21 @@ export class AuthService {
       }
       user = await this.usersService.findOneByExample(userExample);
       if(!user) {
-        user = await this.usersService.createUser(userInfo as User);
+        // user = await this.usersService.createUser(userInfo as User);
+        user = await this.usersService.createUser({
+          username: userInfo.username,
+          email: userInfo.email,
+          avatar: userInfo.avatar,
+          userId: userInfo.userId,
+          password: null, phone: userInfo.phone, sex: userInfo.sex
+        });
       }
     } else {
-      const threeInfos = await this.usersService.threeAccountRepository.find(threeAccountExample);
+      const threeInfos = await this.prismaService.threeAccount.findMany({ where: threeAccountExample, take: 20 });
       if(threeInfos && threeInfos.length) {
         console.log(`${threeAccountExample.authClientId} / ${threeAccountExample.threeAccountUsername} 已经存在, 将删除之前的绑定!`);
         for(const threeInfo of threeInfos) {
-          await this.usersService.threeAccountRepository.delete(threeInfo);
+          await this.prismaService.threeAccount.delete({ where: threeInfo });
         }
       }
       user = await this.usersService.findOneByExample({ userId: currentUser.userId });
@@ -563,7 +569,13 @@ export class AuthService {
       threeAccountUsername: userInfo.username
     };
 
-    const threeAccountInfo = await this.usersService.threeAccountRepository.findOne(threeAccountExample, { relations: ['user'] });
+    const threeAccountInfo = await this.prismaService.threeAccount.findFirst({
+      where: threeAccountExample, 
+      include: {
+        // { relations: ['user'] }
+        user: true
+      }
+    });
     let user;
     if(!threeAccountInfo) {
 
@@ -577,7 +589,13 @@ export class AuthService {
       user = await this.usersService.findOneByExample(userExample);
 
       if(!user) {
-        user = await this.usersService.createUser(userInfo as User);
+        user = await this.usersService.createUser({
+          username: userInfo.username,
+          email: userInfo.email,
+          avatar: userInfo.avatar,
+          userId: userInfo.userId,
+          password: null, phone: userInfo.phone, sex: userInfo.sex
+        });
       }
       await this.usersService.updateOauthBindInfo({
         user,

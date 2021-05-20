@@ -16,6 +16,6 @@ export class UsersController {
 
   @Get()
   async getAllUsers(): Promise<ThreeAccount[]> {
-    return this.prismaService.threeAccount.findMany();
+    return this.prismaService.threeAccount.findMany({ take: 3 })
   }
 }

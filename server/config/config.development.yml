@@ -30,8 +30,8 @@ authProviders:
       args:
         response_type: code
         scope: 'read_user api'
-      clientId: "92fdff9ebedb28166c425b902045285bb7d45c138fc8ed8b902f6e5d0d1070ca"
-      clientSecret: "623c4aaa71e60d86b6e04e64983298d7cdcb5fbabeee51d8c729a8c0d59f4456"
+      clientId: "db910a3b2eced76c6de38ae3cc56376a65910e8b732141601a45371148612bf8"
+      clientSecret: "c07a5cfff144bf3c3e0be5359e314a963aaed31677836232687763dd35223261"
       callBackUrl: "/oauth/authorize"
       settingsUrl: "https://code.choerodon.com.cn/profile/applications"
 

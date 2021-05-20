@@ -7,7 +7,7 @@ import { PrismaService } from '../app/prisma.service';
 // import { ThreeAccount } from './three-account.entity';
 
 @Module({
-  // imports: [TypeOrmModule.forFeature([User, ThreeAccount])],
+  // imports: [],
   providers: [UsersService, PrismaService],
   exports: [UsersService],
   controllers: [UsersController]

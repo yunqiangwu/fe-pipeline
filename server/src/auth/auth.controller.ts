@@ -6,6 +6,7 @@ import { ApiOAuth2, ApiBody, ApiResponse, ApiTags, ApiParam, ApiQuery } from '@n
 import { JwtService } from '@nestjs/jwt';
 import { omit } from 'lodash';
 import { UsersService } from '../users/users.service';
+import { ThreeAccount, Prisma, User } from '@prisma/client'
 import { PrismaService } from '../app/prisma.service';
 import { AuthInfoDto } from './dto/auth-info.dto';
 import { LoginAccountDto } from './dto/login-account.dto';
@@ -92,7 +93,7 @@ export class AuthController {
     @ApiResponse({
       status: 200,
       description: 'ThreeAccount info list',
-      type: [ThreeAccount],
+      type: [Object],
     })
     async getOtherAccountBind(@CurrentUser() user: User) {
       try{
@@ -133,7 +134,7 @@ export class AuthController {
   @ApiResponse({
     status: 200,
     description: 'user info',
-    type: User,
+    type: Object,
   })
   async getSelfInfo(@CurrentUser() user: User): Promise<User> {
     console.log(user);
@@ -141,7 +142,7 @@ export class AuthController {
     if(!userInfo) {
       throw new HttpException('用户信息不存在', HttpStatus.UNAUTHORIZED);
     }
-    return (omit(userInfo, ['password']));
+    return (omit(userInfo, ['password'])) as User;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -164,7 +165,7 @@ export class AuthController {
       await this.usersService.updateUser(userInfo);
     }
 
-    return (omit(userInfo, ['password']));
+    return (omit(userInfo, ['password'])) as User;
   }
 
   @Get('oauth-config')
