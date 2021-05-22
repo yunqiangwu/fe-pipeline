@@ -21,9 +21,9 @@ import { Config } from '../config/config';
     S3Module.forRootAsync({
       useFactory: () => ({
         config: {
-          accessKeyId: 'minioadmin',
-          secretAccessKey: 'minioadmin',
-          endpoint: 'http://localhost:9000',
+          accessKeyId: Config.singleInstance().get('minio.accessKey'),
+          secretAccessKey: Config.singleInstance().get('minio.secretKey'),
+          endpoint: Config.singleInstance().get('minio.endpoint'),
           s3ForcePathStyle: true,
           signatureVersion: 'v4',
         },

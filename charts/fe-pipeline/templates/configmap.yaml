@@ -11,12 +11,14 @@ metadata:
     {{- include "fe-pipeline.labels" . | nindent 4 }}
 data:
   config.production.yml: |-
-    HELLO_MESSAGE: 'Hello there, world!'
+    HELLO_MESSAGE: 'Hello there, world!, production'
+    minio:
+      endpoint: {{ default ( printf "http://%s.%s.svc.cluster.local:9000"  (index .Values "minio" "fullnameOverride") ( .Release.Namespace )) .Values.minio.endpoint }}
+      accessKey: minioadmin
+      secretKey: minioadmin
     existingClaimForWs: {{ .Values.persistence.existingClaim }}
     hostname: {{.Values.hostname}}
     fe-port: 80
-    ideImages:
-{{ toYaml .Values.ideImages | indent 6 }}
     fe-path: /fed/
     authProviders:
 {{ toYaml .Values.authProviders | indent 6 }}

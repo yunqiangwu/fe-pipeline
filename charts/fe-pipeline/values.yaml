@@ -9,10 +9,6 @@ image:
   # tag: 1.16.0
   pullPolicy: IfNotPresent
 
-ideImages:
-  theia-full: registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2
-  vscode: registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
@@ -141,3 +137,16 @@ authProviders:
       clientId: "hsop-app"
       callBackUrl: "/oauth/oauth/authorize"
 
+minio:
+  enabled: true
+  fullnameOverride: minio
+  accessKey: minioadmin
+  # endpoint: http://minio.com:9000
+  secretKey: minioadmin
+  serviceAccount:
+    create: true
+    name: minio
+  resources:
+    requests:
+      # defaults to 4GB, set to 2GB to be able to start on smaller instances
+      memory: 2G

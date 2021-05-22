@@ -4,6 +4,6 @@
 
 # kubectl get po -l fe-pipeline=ws-manager -o jsonpath="{.items[0].spec.imagePullSecrets[0].name}"
 
-envsubst <./test/pvc-for-linux.yaml | kubectl -n fe-pipeline apply -f -
+envsubst <./test/pvc-for-win.yaml | kubectl -n fe-pipeline apply -f -
 
-helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml --set hostname=fe-pipeline.hft-test-1.jajabjbj.top
+helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml

@@ -44,3 +44,5 @@ node_modules
 deployChart.yaml
 
 /prisma/dev.db
+
+/charts/fe-pipeline/charts

@@ -67,57 +67,58 @@ export class Config {
                 const file = fs.readFileSync(filePath).toString();
                 try {
                     fileConfig = assign(fileConfig, yaml.parse(file));
-
-                    const configObj = fileConfig;
-
-                    const templateVarReg = /(?<!\\)\$\{([A-Za-z_\-0-9]+):?-?(.+)?\}/g;
-
-                    /**
-                     * 处理 ${xxx:defaultVal} 模块变量
-                     * @param {string} val
-                     */
-                    const handleEnvStr = (val, result) => {
-                        if (templateVarReg.test(val)) {
-                            return val.replace(templateVarReg, (_, envName, defaultValue) => {
-                                return process.env[envName] || result[envName] || defaultValue;
-                            });
-                        }
-                        return val;
-                    };
-                    const handleEnvValue = (val, result) => {
-                        let resultVal = val;
-                        if (typeof val === 'string') {
-                            return handleEnvStr(val, result);
-                        } else if (typeof val === 'object') {
-                            if (Array.isArray(val)) {
-                                resultVal = val.map((item) => handleEnvValue(item, result));
-                            } else {
-                                resultVal = mapValues(val, (childrenVal) => {
-                                    if (typeof childrenVal === 'string') {
-                                        return handleEnvStr(childrenVal, result);
-                                    } else if (typeof childrenVal === 'object') {
-                                        return handleEnvValue(childrenVal, result);
-                                    }
-                                    return childrenVal;
-                                });
-                            }
-                        }
-                        return resultVal;
-                    };
-
-                    const envObj = Object.keys(configObj).reduce((result, configKey) => {
-                        const value = handleEnvValue(configObj[configKey], result);
-                        result[configKey] = value;
-                        return result;
-                    }, {});
-
-                    fileConfig = envObj;
-
                 } catch (e) {
                     Logger.error(e.message);
                 }
+            } else {
+                Logger.error(`文件: ${filePath} 不存在`);
             }
         }
+
+        const configObj = fileConfig;
+
+        const templateVarReg = /(?<!\\)\$\{([A-Za-z_\-0-9]+):?-?(.+)?\}/g;
+
+        /**
+         * 处理 ${xxx:defaultVal} 模块变量
+         * @param {string} val
+         */
+        const handleEnvStr = (val, result) => {
+            if (templateVarReg.test(val)) {
+                return val.replace(templateVarReg, (_, envName, defaultValue) => {
+                    return process.env[envName] || result[envName] || defaultValue;
+                });
+            }
+            return val;
+        };
+        const handleEnvValue = (val, result) => {
+            let resultVal = val;
+            if (typeof val === 'string') {
+                return handleEnvStr(val, result);
+            } else if (typeof val === 'object') {
+                if (Array.isArray(val)) {
+                    resultVal = val.map((item) => handleEnvValue(item, result));
+                } else {
+                    resultVal = mapValues(val, (childrenVal) => {
+                        if (typeof childrenVal === 'string') {
+                            return handleEnvStr(childrenVal, result);
+                        } else if (typeof childrenVal === 'object') {
+                            return handleEnvValue(childrenVal, result);
+                        }
+                        return childrenVal;
+                    });
+                }
+            }
+            return resultVal;
+        };
+
+        const envObj = Object.keys(configObj).reduce((result, configKey) => {
+            const value = handleEnvValue(configObj[configKey], result);
+            result[configKey] = value;
+            return result;
+        }, {});
+
+        fileConfig = envObj;
 
         return {
             ...defaultConfig,

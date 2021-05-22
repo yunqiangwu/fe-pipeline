@@ -4,11 +4,19 @@
 # hostname: localhost
 hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost:8000}
 
+HELLO_MESSAGE: 'Hello there, world!, development'
+
+
 fe-port: 8000
 fe-path: /
 
 backend-port: 3000
 ingress-backend-port: 3000
+
+minio:
+  accessKey: 'minioadmin'
+  secretKey: 'minioadmin'
+  endpoint: 'http://localhost:9000'
 
 # existingClaimForWs: fe-pipeline-pvc2
 

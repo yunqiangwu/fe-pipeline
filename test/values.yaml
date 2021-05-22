@@ -11,6 +11,22 @@ persistence:
   enabled: true
   existingClaim: fe-pipeline-pvc2
 
+
+minio:
+  enabled: false
+  endpoint: http://192.168.1.4:9000
+  fullnameOverride: minio
+  accessKey: minioadmin
+  secretKey: minioadmin
+  serviceAccount:
+    create: true
+    name: minio
+  resources:
+    requests:
+      # defaults to 4GB, set to 2GB to be able to start on smaller instances
+      memory: 2G
+
+
 authProviders:
   - id: "GitLab"
     host: "code.choerodon.com.cn"

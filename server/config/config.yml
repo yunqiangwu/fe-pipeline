@@ -8,9 +8,9 @@
 #   password: 'root'
 #   database: 'test'
 
-HELLO_MESSAGE: 'Hello there, world!'
+HELLO_MESSAGE: 'Hello there, world!, default'
 
 # hostname: localhost
 hostname: ${WEB_HOSTNAME:-fe-pipeline.localhost}
 fe-port: 80
-fe-path: /
+fe-path: /fed/

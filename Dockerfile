@@ -64,6 +64,7 @@ EXPOSE 3000
 ENV NODE_ENV=production
 WORKDIR /app
 ADD ./package.json /app/package.json
+ADD ./prisma /app/prisma
 RUN yarn install --production false
 
 ADD ./server /app/server
