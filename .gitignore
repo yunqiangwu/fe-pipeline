@@ -45,4 +45,4 @@ deployChart.yaml
 
 /prisma/dev.db
 
-/charts/fe-pipeline/charts
+# s/charts/fe-pipeline/charts
