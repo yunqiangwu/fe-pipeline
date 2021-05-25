@@ -8,14 +8,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PrismaService } from '../app/prisma.service';
 
 @ApiTags('users')
-@Controller('/api')
+@Controller('/api/users')
 export class UsersController {
   constructor(
     private readonly prismaService: PrismaService,
   ) { }
 
-  @Get()
-  async getAllUsers(): Promise<ThreeAccount[]> {
+  @Get('/threeAccount')
+  async getAllUsersThreeAccount(): Promise<ThreeAccount[]> {
     return this.prismaService.threeAccount.findMany({ take: 3 })
   }
 }

@@ -73,9 +73,9 @@ export class UsersService {
 
     const example:Partial<ThreeAccount> = { threePlatformType: threePlatform.threePlatformType, authClientId, userId: user.userId };
 
-    const count = await this.prismaService.threeAccount.count({where: example });
-    if(count) {
-      await this.prismaService.threeAccount.update({ where: example, data: threePlatform});
+    const updateRecord = await this.prismaService.threeAccount.findFirst({where: example });
+    if(updateRecord) {
+      await this.prismaService.threeAccount.update({ where: { id: updateRecord.id }, data: threePlatform});
     } else {
       await this.prismaService.threeAccount.create({ data: threePlatform });
     }

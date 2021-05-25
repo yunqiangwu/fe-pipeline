@@ -27,7 +27,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
-      - name: fe-pipeline-ws-data
+      - name: fe-pipeline-ms-data
         {{- if .Values.persistence.enabled }}
         persistentVolumeClaim:
           claimName: {{ .Values.persistence.existingClaim }}
@@ -55,7 +55,7 @@ spec:
             name: config
             subPath: 'config.production.yml'
           - mountPath: /app/fe-pipeline-home/data
-            name: fe-pipeline-ws-data
+            name: fe-pipeline-ms-data
             {{- if not (empty .Values.persistence.subPath) }}
             subPath: {{ .Values.persistence.subPath }}
             {{- end }}

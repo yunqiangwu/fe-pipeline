@@ -25,15 +25,20 @@ spec:
       volumes:
       - name: config
         hostPath:
-          path: /Users/wuyun/workspace/fe-pipeline/test/test-nginx/default.conf
+          path: /run/desktop/mnt/host/c/Users/q2320/workspace/fe-pipeline/test/test-nginx/default.conf
           type: File
+      - name: fe-pipeline-ms-data
+        persistentVolumeClaim:
+          claimName: fe-pipeline-pvc2
       containers:
       - name: 'proxy'
         image: 'registry.cn-hangzhou.aliyuncs.com/jajabjbj/openresty:alpine'
         volumeMounts:
-          - mountPath: /etc/nginx/conf.d/default.conf
-            name: config
-            subPath: ''
+        - mountPath: /etc/nginx/conf.d/default.conf
+          name: config
+          subPath: ''
+        - mountPath: /app/fe-pipeline-home/data
+          name: fe-pipeline-ms-data
         # securityContext:
         #   privileged: true
         ports:

@@ -166,14 +166,15 @@ export class AppController {
       // console.error(e);
     }
 
-    await this.s3.putObject({ Bucket: 'bucket', Key: '/xx', Body: 'asdf' }).promise();
+    await this.s3.putObject({ Bucket: 'bucket', Key: 'xx', Body: 'asdf' }).promise();
 
-    const res = await this.s3.getObject({ Bucket: 'bucket', Key: '/xx' }).promise();
+    const res = await this.s3.getObject({ Bucket: 'bucket', Key: 'xx' }).promise();
 
     console.log('res:', res);
 
     try {
       const list = await this.s3.listBuckets().promise();
+
       return list.Buckets;
     } catch (e) {
       console.log(e);

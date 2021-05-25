@@ -13,8 +13,8 @@ persistence:
 
 
 minio:
-  enabled: false
-  endpoint: http://192.168.1.4:9000
+  enabled: true
+  #  endpoint: http://192.168.1.4:9000
   fullnameOverride: minio
   accessKey: minioadmin
   secretKey: minioadmin

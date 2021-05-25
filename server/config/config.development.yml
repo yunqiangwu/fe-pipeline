@@ -16,7 +16,7 @@ ingress-backend-port: 3000
 minio:
   accessKey: 'minioadmin'
   secretKey: 'minioadmin'
-  endpoint: 'http://localhost:9000'
+  endpoint: 'http://minio.fe-pipeline.localhost'
 
 # existingClaimForWs: fe-pipeline-pvc2
 

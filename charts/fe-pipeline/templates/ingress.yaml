@@ -36,7 +36,7 @@ spec:
             backend:
               serviceName: {{ $fullName }}-proxy
               servicePort: 80
-    - host: "*.ws.{{ .Values.hostname }}"
+    - host: "*.ms.{{ .Values.hostname }}"
       http:
         paths:
           - path: /
