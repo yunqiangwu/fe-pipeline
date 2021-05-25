@@ -43,4 +43,18 @@ spec:
             backend:
               serviceName: {{ $fullName }}-proxy
               servicePort: 80
+    - host: "minio.{{ .Values.hostname }}"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: minio
+              servicePort: 9000
+    - host: "*.minio.{{ .Values.hostname }}"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: {{ $fullName }}-proxy
+              servicePort: 80
   {{- end }}

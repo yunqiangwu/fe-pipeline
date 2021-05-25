@@ -159,23 +159,62 @@ export class AppController {
 
   @Get('minio')
   async getHelloForMinio() {
+
+    const bucketName = 'bucket1';
+
     try {
-      await this.s3.createBucket({ Bucket: 'bucket' }).promise();
-     
+      console.log('delete ------')
+
+      const objects = await this.s3.listObjectsV2({ Bucket: bucketName }).promise();
+
+      for (const item of objects.Contents) {
+        await this.s3.deleteObject({
+          Bucket: bucketName,
+          Key: item.Key,
+        }).promise();
+      }
+
+      await this.s3.deleteBucket({ Bucket: bucketName }).promise();
     } catch (e) { 
-      // console.error(e);
+      console.error(e);
     }
 
-    await this.s3.putObject({ Bucket: 'bucket', Key: 'xx', Body: 'asdf' }).promise();
+    try {
+      console.log('create ------')
+      await this.s3.createBucket({ Bucket: bucketName
+    }).promise();
 
-    const res = await this.s3.getObject({ Bucket: 'bucket', Key: 'xx' }).promise();
+    var params = {
+      Bucket: bucketName, 
+      Policy: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:ListBucket\",\"s3:GetBucketLocation\"],\"Resource\":[\"arn:aws:s3:::bucket1\"]},{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],\"Resource\":[\"arn:aws:s3:::"+bucketName+"/*\"]}]}"
+     };0
+     this.s3.putBucketPolicy(params).promise();
 
-    console.log('res:', res);
+    } catch (e) { 
+      console.error(e);
+    }
 
     try {
-      const list = await this.s3.listBuckets().promise();
+      console.error('res ------')
 
-      return list.Buckets;
+      await this.s3.putObject({ Bucket: bucketName, Key: 'ddd/xx.html', Body: '<h1>xx</h1>',
+        ContentDisposition: 'text/plain;charset=utf-8',
+        ContentType: 'text/plain',
+        Metadata: {
+          a: '3',
+        }
+      }).promise();
+  
+      const res = await this.s3.getObject({ Bucket: bucketName, Key: 'ddd/xx.html' }).promise();
+      console.log('res:', res);
+    } catch (e) {
+      console.log(e);
+    }
+
+
+    try {
+      const list = await this.s3.listObjectsV2({ Bucket: bucketName, Prefix: 'ddd/', Delimiter: '/'}).promise();
+      return list.Contents;
     } catch (e) {
       console.log(e);
     }
