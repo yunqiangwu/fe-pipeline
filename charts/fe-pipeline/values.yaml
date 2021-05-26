@@ -150,3 +150,10 @@ minio:
     requests:
       # defaults to 4GB, set to 2GB to be able to start on smaller instances
       memory: 2G
+
+redis:
+  enabled: true
+  fullnameOverride: redis-server
+  auth:
+    enabled: false
+  architecture: standalone

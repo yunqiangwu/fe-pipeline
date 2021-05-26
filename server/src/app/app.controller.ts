@@ -1,6 +1,7 @@
-import { Controller, Request, Post, Get, UseGuards, Headers, Param, Body, Query, Delete, Put } from '@nestjs/common';
+import { Controller, Request, Post, Get, UseGuards, Headers, Param, Body, Query, Delete, Put, CACHE_MANAGER, Inject } from '@nestjs/common';
 import { ApiResponse, ApiTags, ApiOAuth2 } from '@nestjs/swagger';
 import { omit } from 'lodash';
+import { Cache } from 'cache-manager';
 import { InjectS3, S3 } from 'nestjs-s3';
 import { AppService } from '../app/app.service';
 import { User as UserModel, Post as PostModel, Prisma } from '@prisma/client'
@@ -14,6 +15,7 @@ export class AppController {
     private readonly prismaService: PrismaService,
     private readonly appService: AppService,
     @InjectS3() private readonly s3: S3,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
   @Get('hello')
@@ -169,6 +171,18 @@ export class AppController {
 
     return 'error';
   }
+
+  
+
+  
+  @Get('test-cache')
+  async testCache() {
+    await this.cacheManager.set('aaa', 'fff');
+    return {
+      data: (await this.cacheManager.get('aaa'))
+    };
+  }
+
 
 
 }

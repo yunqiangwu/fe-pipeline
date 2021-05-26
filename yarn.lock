@@ -733,6 +733,11 @@
     "@types/connect" "*"
     "@types/node" "*"
 
+"@types/cache-manager@^3.4.0":
+  version "3.4.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@types/cache-manager/-/cache-manager-3.4.0.tgz#414136ea3807a8cd071b8f20370c5df5dbffd382"
+  integrity sha1-QUE26jgHqM0HG48gNwxd9dv/04I=
+
 "@types/caseless@*":
   version "0.12.2"
   resolved "https://registry.npm.taobao.org/@types/caseless/download/@types/caseless-0.12.2.tgz?cache=0&sync_timestamp=1613378622464&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fcaseless%2Fdownload%2F%40types%2Fcaseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
@@ -1475,7 +1480,7 @@ async-limiter@~1.0.0:
   resolved "https://registry.npm.taobao.org/async-limiter/download/async-limiter-1.0.1.tgz#dd379e94f0db8310b08291f9d64c3209766617fd"
   integrity sha1-3TeelPDbgxCwgpH51kwyCXZmF/0=
 
-async@^3.1.0:
+async@3.2.0, async@^3.1.0:
   version "3.2.0"
   resolved "https://registry.npm.taobao.org/async/download/async-3.2.0.tgz#b3a2685c5ebb641d3de02d161002c60fc9f85720"
   integrity sha1-s6JoXF67ZB094C0WEALGD8n4VyA=
@@ -1813,6 +1818,22 @@ cache-base@^1.0.1:
     to-object-path "^0.3.0"
     union-value "^1.0.0"
     unset-value "^1.0.0"
+
+cache-manager-redis-store@^2.0.0:
+  version "2.0.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/cache-manager-redis-store/-/cache-manager-redis-store-2.0.0.tgz#25db93656c4ab7b3591bd6ca370e188ef90754c9"
+  integrity sha1-JduTZWxKt7NZG9bKNw4YjvkHVMk=
+  dependencies:
+    redis "^3.0.2"
+
+cache-manager@^3.4.3:
+  version "3.4.3"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/cache-manager/-/cache-manager-3.4.3.tgz#c978d58f82b414ade08903d4d72b56a80a4978be"
+  integrity sha1-yXjVj4K0FK3giQPU1ytWqApJeL4=
+  dependencies:
+    async "3.2.0"
+    lodash "^4.17.21"
+    lru-cache "6.0.0"
 
 cacheable-request@^6.0.0:
   version "6.1.0"
@@ -2398,6 +2419,11 @@ delegates@^1.0.0:
   version "1.0.0"
   resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/delegates/-/delegates-1.0.0.tgz#84c6e159b81904fdca59a0ef44cd870d31250f9a"
   integrity sha1-hMbhWbgZBP3KWaDvRM2HDTElD5o=
+
+denque@^1.5.0:
+  version "1.5.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/denque/-/denque-1.5.0.tgz#773de0686ff2d8ec2ff92914316a47b73b1c73de"
+  integrity sha1-dz3gaG/y2Owv+SkUMWpHtzscc94=
 
 depd@^2.0.0:
   version "2.0.0"
@@ -4587,7 +4613,7 @@ lodash.toarray@^4.4.0:
   resolved "https://registry.npm.taobao.org/lodash.toarray/download/lodash.toarray-4.4.0.tgz#24c4bfcd6b2fba38bfd0594db1179d8e9b656561"
   integrity sha1-JMS/zWsvuji/0FlNsRedjptlZWE=
 
-lodash@4.17.21, lodash@^4.17.19, lodash@^4.17.20:
+lodash@4.17.21, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21:
   version "4.17.21"
   resolved "https://registry.npm.taobao.org/lodash/download/lodash-4.17.21.tgz?cache=0&sync_timestamp=1613835860585&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Flodash%2Fdownload%2Flodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha1-Z5WRxWTDv/quhFTPCz3zcMPWkRw=
@@ -4616,7 +4642,7 @@ lowercase-keys@^2.0.0:
   resolved "https://registry.npm.taobao.org/lowercase-keys/download/lowercase-keys-2.0.0.tgz#2603e78b7b4b0006cbca2fbcc8a3202558ac9479"
   integrity sha1-JgPni3tLAAbLyi+8yKMgJVislHk=
 
-lru-cache@^6.0.0:
+lru-cache@6.0.0, lru-cache@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npm.taobao.org/lru-cache/download/lru-cache-6.0.0.tgz#6d6fe6570ebd96aaf90fcad1dafa3b2566db3a94"
   integrity sha1-bW/mVw69lqr5D8rR2vo7JWbbOpQ=
@@ -5804,6 +5830,33 @@ rechoir@^0.6.2:
   integrity sha1-hSBLVNuoLVdC4oyWdW70OvUOM4Q=
   dependencies:
     resolve "^1.1.6"
+
+redis-commands@^1.7.0:
+  version "1.7.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/redis-commands/-/redis-commands-1.7.0.tgz#15a6fea2d58281e27b1cd1acfb4b293e278c3a89"
+  integrity sha1-Fab+otWCgeJ7HNGs+0spPieMOok=
+
+redis-errors@^1.0.0, redis-errors@^1.2.0:
+  version "1.2.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/redis-errors/-/redis-errors-1.2.0.tgz#eb62d2adb15e4eaf4610c04afe1529384250abad"
+  integrity sha1-62LSrbFeTq9GEMBK/hUpOEJQq60=
+
+redis-parser@^3.0.0:
+  version "3.0.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/redis-parser/-/redis-parser-3.0.0.tgz#b66d828cdcafe6b4b8a428a7def4c6bcac31c8b4"
+  integrity sha1-tm2CjNyv5rS4pCin3vTGvKwxyLQ=
+  dependencies:
+    redis-errors "^1.0.0"
+
+redis@^3.0.2:
+  version "3.1.2"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/redis/-/redis-3.1.2.tgz#766851117e80653d23e0ed536254677ab647638c"
+  integrity sha1-dmhREX6AZT0j4O1TYlRnerZHY4w=
+  dependencies:
+    denque "^1.5.0"
+    redis-commands "^1.7.0"
+    redis-errors "^1.2.0"
+    redis-parser "^3.0.0"
 
 reflect-metadata@^0.1.13:
   version "0.1.13"

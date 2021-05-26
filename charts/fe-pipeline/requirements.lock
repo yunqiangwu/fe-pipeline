@@ -2,5 +2,8 @@ dependencies:
 - name: minio
   repository: https://helm.min.io/
   version: 8.0.7
-digest: sha256:5313d3ea04e27b4a7d04e6db68ec83adca9ba06eb82727a3bce3db1b308e81ce
-generated: "2021-05-21T11:48:59.9049125+08:00"
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 14.3.0
+digest: sha256:d1503a07e15b23f9f342d58f38c84709ab8654c281b6cde6a94529a87a44813c
+generated: "2021-05-26T11:33:16.6496911+08:00"

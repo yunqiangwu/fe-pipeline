@@ -18,6 +18,10 @@ minio:
   secretKey: 'minioadmin'
   endpoint: 'http://minio.fe-pipeline.localhost'
 
+redis:
+  endpoint_ip: localhost
+  endpoint_port: 30379
+
 # existingClaimForWs: fe-pipeline-pvc2
 
 # proxy-backend-host: 127.0.0.1

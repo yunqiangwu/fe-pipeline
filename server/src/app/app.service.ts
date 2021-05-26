@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { S3 } from 'aws-sdk';
 import { InjectS3 } from 'nestjs-s3';
 import { ConfigService } from '../config/config.service';
@@ -31,6 +31,7 @@ export class AppService implements OnModuleInit {
 
       // 判断是否存在
       await this.s3.headBucket({ Bucket: bucketName }).promise();
+
 
       // console.log('delete ------')
 

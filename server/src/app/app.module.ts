@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { User } from '../users/users.entity';
 // import { ThreeAccount } from '../users/three-account.entity';
 import { UsersModule } from '../users/users.module';
+import * as redisStore from 'cache-manager-redis-store';
 import { WsProxyModule } from '../ws-proxy/ws-proxy.module';
 import { S3Module } from 'nestjs-s3';
 import { AuthModule } from '../auth/auth.module';
@@ -17,6 +18,22 @@ import { join } from 'path';
 import { Config } from '../config/config';
 @Module({
   imports: [
+
+    CacheModule.registerAsync({
+      useFactory: () => ({
+        store: redisStore,
+        host: Config.singleInstance().get('redis.endpoint_ip'),  // 'localhost',
+        port: Config.singleInstance().get('redis.endpoint_port'),  //6379,
+        ttl: 999,
+        max: 999, 
+      }),
+    }),
+
+    // CacheModule.register({
+    //   store: redisStore,
+    //   host: 'localhost',
+    //   port: 6379,
+    // }),
 
     S3Module.forRootAsync({
       useFactory: () => ({

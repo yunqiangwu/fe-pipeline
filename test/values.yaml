@@ -26,6 +26,12 @@ minio:
       # defaults to 4GB, set to 2GB to be able to start on smaller instances
       memory: 2G
 
+redis:
+  master:
+    service:
+      type: NodePort
+      nodePort: 30379
+
 
 authProviders:
   - id: "GitLab"

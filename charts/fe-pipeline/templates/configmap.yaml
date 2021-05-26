@@ -16,6 +16,9 @@ data:
       endpoint: {{ default ( printf "http://%s.%s.svc.cluster.local:9000"  (index .Values "minio" "fullnameOverride") ( .Release.Namespace )) .Values.minio.endpoint }}
       accessKey: minioadmin
       secretKey: minioadmin
+    redis:
+      endpoint_ip: {{ default ( printf "%s-master.%s.svc.cluster.local"  (index .Values "redis" "fullnameOverride") ( .Release.Namespace )) .Values.redis.endpoint_ip }}
+      endpoint_port: {{ default "6379" .Values.redis.endpoint_port }}
     existingClaimForWs: {{ .Values.persistence.existingClaim }}
     hostname: {{.Values.hostname}}
     fe-port: 80
