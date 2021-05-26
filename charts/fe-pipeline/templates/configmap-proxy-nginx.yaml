@@ -81,17 +81,86 @@ data:
     upstream minio-upstream { 
         server minio:9000; # {{ default "minio:9000" (.Values.minio.endpoint) }}; 
     }
-
+    
     server {
         listen       80;
         server_name  ~^(.*)\.minio\.(.*)$;
 
-        set $fe_pipeline_project_id $1;
+        set $fe_pipeline_project_key $1;
         set $fe_pipeline_manager_host $2;
+
+        set $fe_pipeline_project_path "";
+
+        location @fallback404 {
+
+            proxy_intercept_errors off;
+            proxy_pass http://minio-upstream/$fe_pipeline_project_path/404.html;
+
+        }
 
         location / {
 
-            proxy_pass {{ default "http://minio-upstream" (.Values.minio.endpoint) }}/$fe_pipeline_project_id$uri;
+
+            # set $fe_pipeline_project_path "";
+            # set_by_lua
+            # rewrite_by_lua
+            rewrite_by_lua '
+
+                local function close_redis(red)  
+                    if not red then  
+                        return  
+                    end  
+                    local ok, err = red:close()  
+                    if not ok then  
+                        -- ngx.say("close redis error : ", err)  
+                    end  
+                end  
+                
+                local redis = require("resty.redis")  
+                
+                --创建实例  
+                local red = redis:new()  
+                --设置超时（毫秒）  
+                red:set_timeout(1000)  
+                --建立连接  
+                -- local ip = "redis-server-master" -- "{{ default ( printf "%s-master.%s.svc.cluster.local"  (index .Values "redis" "fullnameOverride") ( .Release.Namespace )) .Values.redis.endpoint_ip }}"
+                local ip = os.getenv("{{ (index .Values "redis" "fullnameOverride") | snakecase | upper }}_MASTER_SERVICE_HOST") -- "redis-server-master.fe-pipeline.svc.cluster.local"
+                if not ip then
+                    ip = "{{ default ( printf "%s-master.%s.svc.cluster.local"  (index .Values "redis" "fullnameOverride") ( .Release.Namespace )) .Values.redis.endpoint_ip }}"
+                    -- ngx.say("env var REDIS_SERVER_MASTER_SERVICE_HOST not set")
+                    -- close_redis(red)
+                    -- return ngx.exit(501)
+                end
+                local port = 6379  
+                local ok, err = red:connect(ip, port)  
+                if not ok then  
+                    ngx.say("connect to redis error : ", err)  
+                    close_redis(red)  
+                    return ngx.exit(501)
+                end 
+
+                --调用API获取数据  
+                local resp, err = red:get(ngx.var.fe_pipeline_project_key)  
+                if not resp then  
+                    ngx.say("get msg error : ", err)  
+                    close_redis(red) 
+                    return ngx.exit(501)
+                end  
+                --得到的数据为空处理  
+                if resp == ngx.null then  
+                    resp = string.gsub(ngx.var.fe_pipeline_project_key, "%-%-", "/")   --比如默认值  
+                end  
+                -- ngx.say("msg : ", resp)
+                
+                close_redis(red)
+
+                ngx.var.fe_pipeline_project_path =  "bucket/" .. resp
+
+                -- return "bucket/" .. ngx.var.fe_pipeline_project_key
+
+            ';
+
+            proxy_pass http://minio-upstream/$fe_pipeline_project_path$uri;
             proxy_read_timeout 300s;
             proxy_send_timeout 300s;
             
@@ -107,14 +176,9 @@ data:
 
             error_page  404 =404 @fallback404;
             error_page  307 301 302 300 =403 @fallback403;
+
         }
 
-
-        location @fallback404 {
-            proxy_pass {{ default "http://minio-upstream" (.Values.minio.endpoint) }}/$fe_pipeline_project_id/404.html;
-            proxy_intercept_errors off;
-            # rewrite ^(.*)$ /404.html break;
-        }
 
         location @fallback403 {
             add_header Content-Type "text/plain;charset=utf-8"; 
