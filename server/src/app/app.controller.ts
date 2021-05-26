@@ -172,17 +172,15 @@ export class AppController {
     return 'error';
   }
 
-  
-
-  
   @Get('test-cache')
   async testCache() {
-    await this.cacheManager.set('aaa', 'fff');
+    await this.cacheManager.set('aaa', 'fff', {
+      ttl: 0 // ttl 为 0 表示永久生效
+    });
     return {
       data: (await this.cacheManager.get('aaa'))
     };
   }
-
 
 
 }

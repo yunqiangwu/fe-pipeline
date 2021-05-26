@@ -25,7 +25,6 @@ import { Config } from '../config/config';
         host: Config.singleInstance().get('redis.endpoint_ip'),  // 'localhost',
         port: Config.singleInstance().get('redis.endpoint_port'),  //6379,
         ttl: 999,
-        max: 999, 
       }),
     }),
 
