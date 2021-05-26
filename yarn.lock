@@ -636,22 +636,22 @@
   resolved "https://registry.npm.taobao.org/@panva/asn1.js/download/@panva/asn1.js-1.0.0.tgz#dd55ae7b8129e02049f009408b97c61ccf9032f6"
   integrity sha1-3VWue4Ep4CBJ8AlAi5fGHM+QMvY=
 
-"@prisma/client@2.22.1":
-  version "2.22.1"
-  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/client/-/client-2.22.1.tgz#10fdcd1532a6baf46dd1c464cad9a54af0532bc8"
-  integrity sha1-EP3NFTKmuvRt0cRkytmlSvBTK8g=
+"@prisma/client@^2.22.1":
+  version "2.23.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/client/-/client-2.23.0.tgz#4bf16ab19b140873ba79bd159da86842b1746e0a"
+  integrity sha1-S/FqsZsUCHO6eb0VnahoQrF0bgo=
   dependencies:
-    "@prisma/engines-version" "2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c"
+    "@prisma/engines-version" "2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b"
 
-"@prisma/engines-version@2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c":
-  version "2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c"
-  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/engines-version/-/engines-version-2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c.tgz#e98ee17217a0ebb54f2f9314fbbfd610b05e6e31"
-  integrity sha1-6Y7hcheg67VPL5MU+7/WELBebjE=
+"@prisma/engines-version@2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b":
+  version "2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/engines-version/-/engines-version-2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b.tgz#c813279bbea48dedad039b0bc3b044117d2dbaa1"
+  integrity sha1-yBMnm76kje2tA5sLw7BEEX0tuqE=
 
-"@prisma/engines@2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c":
-  version "2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c"
-  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/engines/-/engines-2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c.tgz#4ccd255e0823605db3d8387a5195b6fdabe3b0c0"
-  integrity sha1-TM0lXggjYF2z2Dh6UZW2/avjsMA=
+"@prisma/engines@2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b":
+  version "2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/@prisma/engines/-/engines-2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b.tgz#440abe0ebef44b6e1bdaf2b4d14fcde9fe74f18c"
+  integrity sha1-RAq+Dr70S24b2vK00U/N6f508Yw=
 
 "@schematics/angular@~11.0.4":
   version "11.0.7"
@@ -5648,12 +5648,12 @@ pretty-format@^24.9.0:
     ansi-styles "^3.2.0"
     react-is "^16.8.4"
 
-prisma@2.22.1:
-  version "2.22.1"
-  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/prisma/-/prisma-2.22.1.tgz#884687a90c7b797b34c6110ea413049078c8da6e"
-  integrity sha1-iEaHqQx7eXs0xhEOpBMEkHjI2m4=
+prisma@^2.22.1:
+  version "2.23.0"
+  resolved "http://nexus.saas.hand-china.com/repository/hzero-npm-group/prisma/-/prisma-2.23.0.tgz#6464cca0e085ed23b1815013a67c868eff07a7d2"
+  integrity sha1-ZGTMoOCF7SOxgVATpnyGjv8Hp9I=
   dependencies:
-    "@prisma/engines" "2.22.0-21.60cc71d884972ab4e897f0277c4b84383dddaf6c"
+    "@prisma/engines" "2.23.0-36.adf5e8cba3daf12d456d911d72b6e9418681b28b"
 
 process-nextick-args@~2.0.0:
   version "2.0.1"

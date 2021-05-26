@@ -11,82 +11,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
-
-// @Entity()
-// export class ThreeAccount {
-
-//   @Column({primary: true, length: 500})
-//   threePlatformType: ThreePlatformType;
-
-//   @Column({length: 50})
-//   authHost: string;
-
-//   @Column({primary: true, length: 50})
-//   authClientId: string;
-
-//   @Column({type:'text', length: 50})
-//   threeAccountUsername: string;
-
-//   @Column('text')
-//   accessToken: string;
-
-//   @Column('text', {nullable: true})
-//   tokenInfo?: string;
-
-//   @Column('text', {nullable: true})
-//   accountData?: string;
-
-//   @ManyToOne(() => User, user => user.threeAccounts, { primary: true })
-//   user: User;
-
-// }
-
-
 model User {
-  userId    Int   @id @default(autoincrement())
-  email String  @unique
-  username  String?
-  avatar String?
-  password String?
-  phone String?
-  sex Int?
+  userId        Int            @id @default(autoincrement())
+  email         String         @unique
+  username      String?
+  avatar        String?
+  password      String?
+  phone         String?
+  sex           Int?
   threeAccounts ThreeAccount[]
-  posts Post[]
+  posts         Post[]
+  Space         Space[]
+  Project       Project[]
 }
-
-// export class User {
-//   @ApiProperty({ required: false, example: '1', description: '用户 ID' })
-//   @PrimaryGeneratedColumn()
-//   userId: number;
-
-//   @ApiProperty({ required: false, example: 'admin', description: '用户名称' })
-//   @Column({ length: 500 })
-//   username: string;
-
-//   @ApiProperty({ required: false, example: 'admin@xxx.com', description: '用户邮箱' })
-//   @Column('text')
-//   email: string;
-
-//   @Column('text', {nullable: true})
-//   @ApiProperty({ required: false, example: 'http://image-url.com/abc.png', description: '用户头像 url 地址' })
-//   avatar?: string;
-
-//   @ApiProperty({ required: false, example: 'password', description: '用户密码' })
-//   @Column('text', {nullable: true})
-//   password?: string;
-
-//   @ApiProperty({ required: false, example: '1871238492', description: '用户手机号码' })
-//   @Column('text', {nullable: true})
-//   phone?: string;
-
-//   // @ApiProperty({ required: false, example: '1871238492', description: '用户手机号码' })
-//   @Column('int', {nullable: true})
-//   sex?: number;
-
-//   @OneToMany(() => ThreeAccount, user => user.user)
-//   threeAccounts: ThreeAccount[];
-// }
 
 model Post {
   id        Int      @id @default(autoincrement())
@@ -101,14 +38,64 @@ model Post {
 }
 
 model ThreeAccount {
-  id    Int   @id @default(autoincrement())
-  threePlatformType String
-  authHost String
-  authClientId String
+  id                   Int     @id @default(autoincrement())
+  threePlatformType    String
+  authHost             String
+  authClientId         String
   threeAccountUsername String
-  accessToken String
-  tokenInfo String?
-  accountData String?
-  user   User   @relation(fields: [userId], references: [userId])
-  userId  Int
+  accessToken          String
+  tokenInfo            String?
+  accountData          String?
+  user                 User    @relation(fields: [userId], references: [userId])
+  userId               Int
+}
+
+model Space {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  user              User                @relation(fields: [userId], references: [userId])
+  userId            Int
+  SpaceVersion      SpaceVersion[]
+  SpaceVersionAlias SpaceVersionAlias[]
+}
+
+model SpaceVersion {
+  id                Int                 @id @default(autoincrement())
+  name              String
+  space             Space               @relation(fields: [spaceId], references: [id])
+  spaceId           Int
+  SpaceVersionAlias SpaceVersionAlias[]
+  ProjectItem       ProjectItem[]
+}
+
+model SpaceVersionAlias {
+  id        Int          @id @default(autoincrement())
+  name      String
+  space     Space        @relation(fields: [spaceId], references: [id])
+  spaceId   Int
+  version   SpaceVersion @relation(fields: [versionId], references: [id])
+  versionId Int
+
+  @@unique([versionId, spaceId], name: "SpaceVersionAlias_versionId_spaceId_key")
+  ProjectItem ProjectItem[]
+}
+
+model ProjectItem {
+  id        Int      @id @default(autoincrement())
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId Int?
+
+  version SpaceVersion?      @relation(fields: [spaceVersionId], references: [id])
+  alias   SpaceVersionAlias? @relation(fields: [spaceVersionAliasId], references: [id])
+
+  spaceVersionId      Int?
+  spaceVersionAliasId Int?
+}
+
+model Project {
+  id          Int           @id @default(autoincrement())
+  name        String
+  user        User          @relation(fields: [userId], references: [userId])
+  userId      Int
+  projectItem ProjectItem[]
 }

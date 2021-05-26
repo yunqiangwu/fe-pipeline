@@ -47,6 +47,9 @@ $ npm run test:cov
 - https://github.com/svtslv/nestjs-s3
 - https://github.com/prisma/prisma-examples/tree/latest/typescript/rest-nestjs
 - https://docs.nestjs.com/techniques/caching#different-stores
+- https://chonky.io/
+- https://microsoft.github.io/monaco-editor/
+
 ## License
 
   Nest is [MIT licensed](LICENSE).
