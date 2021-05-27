@@ -120,7 +120,7 @@ export const SpaceList: React.FC<any> = () => {
         header: '操作',
         command: ({record}) => {
           return [
-            <Link target="_blank" to={`//${record.get('id')}--latest.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</Link>,
+            <a target="_blank" href={`${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
           ]
         },
         width: 200,
