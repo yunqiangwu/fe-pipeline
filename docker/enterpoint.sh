@@ -19,4 +19,8 @@ set -e
 #   cp -r /app/fe-pipeline-home/theia/* /app/fe-pipeline-home/data/theia/
 # fi
 
+if [ ! -f "/app/fe-pipeline-home/data/sqlite.db" ]; then
+  npx prisma db push --accept-data-loss
+fi
+
 exec "$@"
