@@ -11,7 +11,7 @@
     "baseUrl": "./server",
     "incremental": true,
     "paths": {
-      "src、*": ["./src/*"]
+      "src/*": ["./src/*"]
     }
   },
   "include": ["server"],

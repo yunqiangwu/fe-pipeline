@@ -21,8 +21,8 @@ model User {
   sex           Int?
   threeAccounts ThreeAccount[]
   posts         Post[]
-  Space         Space[]
-  Project       Project[]
+  space         Space[]
+  project       Project[]
 }
 
 model Post {
@@ -52,11 +52,13 @@ model ThreeAccount {
 
 model Space {
   id                Int                 @id @default(autoincrement())
-  name              String
+  name              String @unique
   user              User                @relation(fields: [userId], references: [userId])
   userId            Int
-  SpaceVersion      SpaceVersion[]
-  SpaceVersionAlias SpaceVersionAlias[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  spaceVersions      SpaceVersion[]
+  spaceVersionAlias SpaceVersionAlias[]
 }
 
 model SpaceVersion {
@@ -64,8 +66,10 @@ model SpaceVersion {
   name              String
   space             Space               @relation(fields: [spaceId], references: [id])
   spaceId           Int
-  SpaceVersionAlias SpaceVersionAlias[]
-  ProjectItem       ProjectItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  spaceVersionAlias SpaceVersionAlias[]
+  projectItem       ProjectItem[]
 }
 
 model SpaceVersionAlias {
@@ -76,8 +80,8 @@ model SpaceVersionAlias {
   version   SpaceVersion @relation(fields: [versionId], references: [id])
   versionId Int
 
-  @@unique([versionId, spaceId], name: "SpaceVersionAlias_versionId_spaceId_key")
-  ProjectItem ProjectItem[]
+  @@unique([versionId, spaceId, name], name: "SpaceVersionAlias_versionId_spaceId_name_key")
+  projectItem ProjectItem[]
 }
 
 model ProjectItem {
@@ -97,5 +101,7 @@ model Project {
   name        String
   user        User          @relation(fields: [userId], references: [userId])
   userId      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   projectItem ProjectItem[]
 }

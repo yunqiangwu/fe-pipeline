@@ -84,7 +84,7 @@ const BasicLayout = (props: any) => {
 
   const userConfig = {
     logout: logout,
-    title: 'VS Code Online',
+    title: '前端部署系统',
     patchMenus: loopMenuItem,
   } as any;
 

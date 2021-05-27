@@ -68,7 +68,7 @@ data:
 
         location @fallback404 {
             root /app/fe-pipeline-home/data/ms-public/$fe_pipeline_project_id;
-            rewrite ^(.*)$ /404.html break;
+            rewrite ^(.*)$ /index.html break;
         }
 
         error_page   500 502 503 504  /50x.html;
@@ -94,7 +94,7 @@ data:
         location @fallback404 {
 
             proxy_intercept_errors off;
-            proxy_pass http://minio-upstream/$fe_pipeline_project_path/404.html;
+            proxy_pass http://minio-upstream/$fe_pipeline_project_path/index.html;
 
         }
 
@@ -148,7 +148,9 @@ data:
                 end  
                 --得到的数据为空处理  
                 if resp == ngx.null then  
-                    resp = string.gsub(ngx.var.fe_pipeline_project_key, "%-%-", "/")   --比如默认值  
+                    resp = string.gsub(ngx.var.fe_pipeline_project_key, "%-%-", "/")   --比如默认值
+                else
+                    resp = string.sub(resp, 2, -2 )   --比如默认值  
                 end  
                 -- ngx.say("msg : ", resp)
                 
