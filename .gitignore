@@ -48,3 +48,7 @@ deployChart.yaml
 # s/charts/fe-pipeline/charts
 
 /.vscode
+
+/yarn.lock
+
+/ui/yarn.lock
