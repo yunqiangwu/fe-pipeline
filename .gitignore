@@ -46,3 +46,5 @@ deployChart.yaml
 /prisma/dev.db
 
 # s/charts/fe-pipeline/charts
+
+/.vscode

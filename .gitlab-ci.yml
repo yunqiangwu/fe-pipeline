@@ -1,6 +1,6 @@
 # include: https://api.choerodon.com.cn/devops/v1/projects/1553/ci_contents/pipelines/5a95df53-e870-45ff-beb4-4c88ae096416/content.yaml
 
-image: registry.cn-shanghai.aliyuncs.com/c7n/cibase:0.10.1
+image: registry.cn-shanghai.aliyuncs.com/c7n/cibase:0.11.0
 stages:
 - Docker构建
 - 发布Chart
