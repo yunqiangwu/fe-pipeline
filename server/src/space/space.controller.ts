@@ -1,7 +1,7 @@
 import { Space, User } from '.prisma/client';
 import { Body, CACHE_MANAGER, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiParam, ApiBody, ApiOAuth2 } from '@nestjs/swagger';
 import { S3 } from 'aws-sdk';
 import { Cache } from 'cache-manager';
 import { InjectS3 } from 'nestjs-s3';
@@ -120,6 +120,7 @@ export class SpaceController {
 
 
   @UseGuards(AuthGuard('jwt'))
+  @ApiOAuth2([])
   @Post('create-space')
   @ApiBody({
     // name: 'workspace',
