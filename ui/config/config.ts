@@ -79,7 +79,7 @@ export default defineConfig({
           // icon: 'heart', name: "空间管理-详情",
         },
         { path: '/app/gitlab-repo',  component: '@/pages/gitlab-repo',
-          icon: 'codepen', name: "仓库浏览",
+          icon: 'codepen', name: "项目管理(待开发)",
         },
       //   { path: '/app/repos',  component: '@/pages/repos',
       //   icon: 'codepen', name: "代码仓库",

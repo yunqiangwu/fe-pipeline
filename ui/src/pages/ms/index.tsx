@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useAsync, useAsyncFn } from 'react-use';
+import { copy } from 'iclipboard';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { from, Observable, Subject, timer } from 'rxjs';
@@ -17,7 +18,9 @@ import { Link } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import moment from 'moment';
 
-
+const deleteSpaces = async (params?: any) => {
+  console.log(params);
+}
 
 export const SpaceList: React.FC<any> = () => {
 
@@ -81,6 +84,9 @@ export const SpaceList: React.FC<any> = () => {
     });
   }, []);
 
+  const selectSpace = useCallback(() => {
+  }, []);
+
   const columns = useMemo<ColumnProps[]>(() => {
     return [
       // { name: 'id', width: 100, },
@@ -117,13 +123,36 @@ export const SpaceList: React.FC<any> = () => {
         width: 200
       },
       {
-        header: '操作',
+        header: '访问',
         command: ({record}) => {
           return [
             <a target="_blank" href={`${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
           ]
         },
-        width: 200,
+        width: 80,
+        lock: 'right' as ColumnLock,
+      },
+      {
+        header: '操作',
+        command: ({record}) => {
+          return [
+            <Button icon="select" onClick={() => {
+              const url = `${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`;
+              if(copy(url)) {
+                notification.success({
+                  message: '复制成功',
+                  description: '',
+                });
+              } else {
+                notification.warning({
+                  message: '复制失败',
+                  description: '',
+                });
+              }
+            }} >复制访问链接</Button>
+          ]
+        },
+        width: 150,
         lock: 'right' as ColumnLock,
       }
     ];
@@ -131,7 +160,10 @@ export const SpaceList: React.FC<any> = () => {
 
   return (
     <PageHeaderWrapper>
-      <Table buttons={[<Button icon="add" onClick={createSpaces} >创建新的空间</Button>]} columns={columns} dataSet={repoDs} />
+      <Table buttons={[<Button icon="add" onClick={createSpaces} >创建新的空间</Button>,
+      <Button icon="add" onClick={deleteSpaces} >删除空间</Button>,
+      <Button icon="add" >选配空间创建新的项目</Button>
+    ]} columns={columns} dataSet={repoDs} />
     </PageHeaderWrapper>
   );
 

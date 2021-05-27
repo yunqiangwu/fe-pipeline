@@ -16,6 +16,18 @@ import { ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
 import { Link, useParams } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 
+const createSpacesVersionAlias = async ({ id }: any) => {
+  console.log(id);
+};
+
+const deleteSpacesVersionAlias = async ({ id }: any) => {
+  console.log(id);
+};
+
+const deleteSpacesVersion = async ({ id }: any) => {
+  console.log(id);
+};
+
 export const SpaceDetail: React.FC<any> = () => {
 
   const { id } = useParams<any>();
@@ -243,10 +255,15 @@ export const SpaceDetail: React.FC<any> = () => {
         </Form>
       </Card>
       <Card title="版本别名管理列表">
-        <Table columns={aliasColumns} dataSet={spaceDs.children.spaceVersionAlias} />
+        <Table buttons={[
+          <Button icon="add" onClick={() => createSpacesVersionAlias({ id })} >添加别名</Button>,
+          <Button icon="remove" onClick={() => deleteSpacesVersionAlias({ id })} >删除别名</Button>
+        ]}  columns={aliasColumns} dataSet={spaceDs.children.spaceVersionAlias} />
       </Card>
       <Card title="版本列表">
-        <Table buttons={[<Button icon="add" onClick={() => createSpaces({ id })} >发布新版本</Button>]} columns={columns} dataSet={spaceDs.children.spaceVersions} />
+        <Table buttons={[<Button icon="add" onClick={() => createSpaces({ id })} >发布新版本</Button>,
+        <Button icon="remove" onClick={() => deleteSpacesVersion({ id })} >删除版本</Button>
+      ]} columns={columns} dataSet={spaceDs.children.spaceVersions} />
       </Card>
     </PageHeaderWrapper>
   );
