@@ -53,6 +53,7 @@ $ npm run test:cov
 - https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#uploadPart-property
 - https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
 - https://github.com/prestonlimlianjie/aws-s3-multipart-presigned-upload
+- https://github.com/odysseyscience/react-s3-uploader
 
 ## License
 

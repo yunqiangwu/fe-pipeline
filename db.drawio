@@ -1,6 +1,6 @@
 <mxfile>
     <diagram id="QS9N6ND0GIkGB1dUGtAi" name="第 1 页">
-        <mxGraphModel dx="2283" dy="1016" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
+        <mxGraphModel dx="1887" dy="683" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="1" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -17,7 +17,7 @@
                     <mxGeometry x="190" y="520" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="5" value="项目id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;fontStyle=5" parent="1" vertex="1">
-                    <mxGeometry x="160" y="740" width="120" height="80" as="geometry"/>
+                    <mxGeometry x="170" y="700" width="120" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="7" value="项目名称" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
                     <mxGeometry x="330" y="680" width="120" height="80" as="geometry"/>
@@ -40,7 +40,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="9" value="别名" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;fontStyle=4" parent="1" vertex="1">
-                    <mxGeometry x="510" y="190" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="540" y="180" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="13" value="N:1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;shape=link;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="60" target="2" edge="1">
                     <mxGeometry relative="1" as="geometry">
@@ -57,7 +57,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="11" value="版本" style="rhombus;whiteSpace=wrap;html=1;rounded=0;strokeColor=#006EAF;fontColor=#ffffff;fillColor=#1ba1e2;" parent="1" vertex="1">
-                    <mxGeometry x="470" y="300" width="80" height="80" as="geometry"/>
+                    <mxGeometry x="440" y="310" width="80" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="16" value="别名名称" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
                     <mxGeometry x="490" y="60" width="120" height="80" as="geometry"/>
@@ -82,7 +82,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="18" value="空间" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" parent="1" vertex="1">
-                    <mxGeometry x="170" y="190" width="120" height="60" as="geometry"/>
+                    <mxGeometry x="220" y="230" width="120" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="29" value="版本号" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
                     <mxGeometry x="570" y="440" width="120" height="80" as="geometry"/>
@@ -111,33 +111,33 @@
                 <mxCell id="58" value="别名id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;fontStyle=4;" parent="1" vertex="1">
                     <mxGeometry x="354" y="150" width="120" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="63" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="60" target="62">
+                <mxCell id="63" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="60" target="62" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="65" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="60" target="64">
+                <mxCell id="65" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="60" target="64" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="60" target="66">
+                <mxCell id="67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="60" target="66" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;shape=link;" edge="1" parent="1" source="60" target="11">
+                <mxCell id="102" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;shape=link;" parent="1" source="60" target="11" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="104" value="1：1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="102">
+                <mxCell id="104" value="1：1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="102" vertex="1" connectable="0">
                     <mxGeometry x="0.0115" y="-2" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="60" value="项目元素" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" vertex="1" parent="1">
+                <mxCell id="60" value="项目元素" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="270" y="390" width="120" height="40" as="geometry"/>
                 </mxCell>
-                <mxCell id="62" value="版本id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;fontStyle=4" vertex="1" parent="1">
-                    <mxGeometry x="-100" y="360" width="120" height="80" as="geometry"/>
+                <mxCell id="62" value="版本id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;fontStyle=4" parent="1" vertex="1">
+                    <mxGeometry x="-190" y="320" width="120" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="64" value="是否跟踪别名" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+                <mxCell id="64" value="是否跟踪别名" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
                     <mxGeometry x="-140" y="520" width="120" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="66" value="别名id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+                <mxCell id="66" value="别名id" style="ellipse;whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
                     <mxGeometry x="40" y="350" width="120" height="80" as="geometry"/>
                 </mxCell>
             </root>

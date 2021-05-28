@@ -88,10 +88,11 @@ model ProjectItem {
   id        Int      @id @default(autoincrement())
   Project   Project? @relation(fields: [projectId], references: [id])
   projectId Int?
+  watchAlias Boolean?
+  lastVersionId Int?
 
   version SpaceVersion?      @relation(fields: [spaceVersionId], references: [id])
   alias   SpaceVersionAlias? @relation(fields: [spaceVersionAliasId], references: [id])
-
   spaceVersionId      Int?
   spaceVersionAliasId Int?
 }

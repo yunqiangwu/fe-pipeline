@@ -10,7 +10,7 @@ import { Modal, Button, notification, Form, TextField, DataSet, Select, Table } 
 import axios from '@/utils/axios.config';
 import styles from './index.less';
 import { getToken, hash } from '@/utils/token';
-import { createSpaces, refreshSpacesCache } from './services/repos';
+import { createSpaces, deleteSpaces } from './services/repos';
 import { AxiosRequestConfig } from 'axios';
 import { ColumnProps } from 'choerodon-ui/pro/lib/table/Column';
 import { ColumnLock } from 'choerodon-ui/pro/lib/table/enum';
@@ -18,9 +18,9 @@ import { Link } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import moment from 'moment';
 
-const deleteSpaces = async (params?: any) => {
-  console.log(params);
-}
+
+
+
 
 export const SpaceList: React.FC<any> = () => {
 
@@ -84,8 +84,28 @@ export const SpaceList: React.FC<any> = () => {
     });
   }, []);
 
-  const selectSpace = useCallback(() => {
-  }, []);
+  // const selectSpace = useCallback(() => {
+  // }, []);
+
+  const deleteSpacesUI = async ({id}: any) => {
+    try {
+      const res = await deleteSpaces({
+        id,
+      });
+      notification.success({
+        message: '删除成功',
+        description: '',
+      });
+      repoDs.query();
+      return res;
+    } catch (e) {
+      notification.error({
+        message: e.message,
+        description: '',
+      })
+      return false;
+    }
+  };
 
   const columns = useMemo<ColumnProps[]>(() => {
     return [
@@ -105,7 +125,7 @@ export const SpaceList: React.FC<any> = () => {
         renderer: ({ record }) => {
           return record?.get('spaceVersions')?.get(0)?.name;
         },
-        width: 200
+        width: 100
       },
       {
         header: '最新发布时间',
@@ -113,18 +133,18 @@ export const SpaceList: React.FC<any> = () => {
           const timeString = record?.get('spaceVersions')?.get(0)?.createdAt;
           return timeString && moment(timeString).format('YYYY-MM-DD HH:mm');
         },
-        width: 200
+        width: 150
       },
       {
         header: 'latest 版本',
         renderer: ({ record }) => {
           return record?.get('spaceVersionAlias')?.get(0)?.version?.name;
         },
-        width: 200
+        width: 100
       },
       {
         header: '访问',
-        command: ({record}) => {
+        command: ({ record }) => {
           return [
             <a target="_blank" href={`${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
           ]
@@ -134,11 +154,11 @@ export const SpaceList: React.FC<any> = () => {
       },
       {
         header: '操作',
-        command: ({record}) => {
+        command: ({ record }) => {
           return [
             <Button icon="select" onClick={() => {
               const url = `${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`;
-              if(copy(url)) {
+              if (copy(url)) {
                 notification.success({
                   message: '复制成功',
                   description: '',
@@ -151,22 +171,92 @@ export const SpaceList: React.FC<any> = () => {
               }
             }} >复制访问链接</Button>,
             <Button icon="select" onClick={() => {
-              return createSpaces({ existSpaceId: record.get('id') });
-            }} >发布新版本</Button>
+              // return createSpaces({ existSpaceId: record.get('id') });
+            }} >发布新版本</Button>,
+            <Button icon="delete" onClick={() => {
+              return deleteSpacesUI({ id: record.get('id') });
+            }} >删除</Button>
           ]
         },
-        width: 250,
+        width: 320,
         lock: 'right' as ColumnLock,
       }
     ];
   }, []);
 
+
+  const createSpacesUI = async ({
+    existSpaceId,
+  }: any = {}) => {
+
+    const CreateSpace: React.FC<any> = ({ modal }) => {
+      const createSpaceDs = React.useMemo(() => {
+        return new DataSet({
+          primaryKey: 'id',
+          autoCreate: true,
+          paging: false,
+          // selection: false,
+          fields: [
+            {
+              name: 'name',
+              label: '空间名称',
+              required: true,
+            },
+          ],
+        });
+      }, []);
+
+      useEffect(() => {
+        modal.handleOk(async () => {
+
+          if ((await createSpaceDs.validate()) === false) {
+            return false;
+          }
+
+          try {
+            const res = await createSpaces({
+              body: createSpaceDs.records[0].toJSONData(),
+            });
+            notification.success({
+              message: '创建成功',
+              description: '',
+            });
+            repoDs.query();
+            return res;
+          } catch (e) {
+            notification.error({
+              message: e.message,
+              description: '',
+            })
+            return false;
+          }
+
+        });
+      }, []);
+
+      return (
+        <Form columns={2} dataSet={createSpaceDs}>
+          <TextField name="name" />
+        </Form>
+      )
+    };
+
+    Modal.open({
+      title: '创建新空间',
+      children: <CreateSpace />,
+      okText: '确定',
+      // okProps: { disabled: true },
+    });
+
+  };
+
+
   return (
     <PageHeaderWrapper>
-      <Table buttons={[<Button icon="add" onClick={createSpaces} >创建新的空间</Button>,
-      <Button icon="add" onClick={deleteSpaces} >删除空间</Button>,
+      <Table buttons={[<Button icon="add" onClick={createSpacesUI} >创建新的空间</Button>,
+      // <Button icon="add" onClick={deleteSpaces} >删除空间</Button>,
       <Button icon="add" >选配空间创建新的项目</Button>
-    ]} columns={columns} dataSet={repoDs} />
+      ]} columns={columns} dataSet={repoDs} />
     </PageHeaderWrapper>
   );
 
