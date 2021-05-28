@@ -23,12 +23,17 @@
       "prettier --parser=typescript --write"
     ]
   },
+  "resolutions": {
+    "react-intl": "5.18.1"
+  },
   "dependencies": {
     "@ant-design/pro-layout": "^5.0.12",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.3.1",
     "axios": "0.19.2",
     "choerodon-ui": "^0.8.67",
+    "chonky": "^2.1.0",
+    "chonky-icon-fontawesome": "^2.1.0",
     "core-js": "3.6.5",
     "iclipboard": "^1.0.1",
     "lint-staged": "^10.0.7",

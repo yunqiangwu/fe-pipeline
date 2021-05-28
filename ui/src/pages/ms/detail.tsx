@@ -173,21 +173,23 @@ export const SpaceDetail: React.FC<any> = () => {
         command: ({record}) => {
           return [
             <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('name')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
+            <span> / </span>,
+            <Link target="_blank" to={`/file-manager/${record.get('id')}`} >管理版本文件</Link>,
           ]
         },
-        width: 80,
+        width: 480,
         lock: 'right' as ColumnLock,
       },
-      {
-        header: '操作',
-        command: ({record}) => {
-          return [
-            <Button>上传文件夹</Button>,
-          ]
-        },
-        width: 200,
-        lock: 'right' as ColumnLock,
-      }
+      // {
+      //   header: '操作',
+      //   command: ({record}) => {
+      //     return [
+      //       <Button>管理版本空间</Button>,
+      //     ]
+      //   },
+      //   width: 200,
+      //   lock: 'right' as ColumnLock,
+      // }
     ];
   }, []);
 

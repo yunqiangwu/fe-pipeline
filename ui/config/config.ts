@@ -75,6 +75,7 @@ export default defineConfig({
         { path: '/app/ms',  component: '@/pages/ms',
           icon: 'heart', name: "空间管理",
         },
+       
         { path: '/app/ms/detail/:id',  component: '@/pages/ms/detail',
           // icon: 'heart', name: "空间管理-详情",
         },
@@ -88,7 +89,9 @@ export default defineConfig({
     },
     { path: "/login", name: "Login", component: '@/pages/Login' },
     { path: "/auth/:host/callback", name: "AuthCallback", component: '@/pages/Login/auth-callback' },
-    
+    { path: '/file-manager/:versionId',  component: '@/pages/ms/file-manager/VFSReadOnly',
+    // icon: 'heart', name: "空间管理-详情",
+  },
     // { path: "/ws-pod1/:id", name: "ws-pod", component: '@/pages/Home' },
     // { path: "/ws-pod/:id", name: "ws-pod", component: '@/pages/workspaces/ws-loading' },
   ],

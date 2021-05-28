@@ -49,6 +49,10 @@ $ npm run test:cov
 - https://docs.nestjs.com/techniques/caching#different-stores
 - https://chonky.io/
 - https://microsoft.github.io/monaco-editor/
+- https://www.npmjs.com/package/tar-stream
+- https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#uploadPart-property
+- https://developer.mozilla.org/en-US/docs/Web/API/HTMLInputElement/webkitdirectory
+- https://github.com/prestonlimlianjie/aws-s3-multipart-presigned-upload
 
 ## License
 

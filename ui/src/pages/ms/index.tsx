@@ -149,10 +149,13 @@ export const SpaceList: React.FC<any> = () => {
                   description: '',
                 });
               }
-            }} >复制访问链接</Button>
+            }} >复制访问链接</Button>,
+            <Button icon="select" onClick={() => {
+              return createSpaces({ existSpaceId: record.get('id') });
+            }} >发布新版本</Button>
           ]
         },
-        width: 150,
+        width: 250,
         lock: 'right' as ColumnLock,
       }
     ];
