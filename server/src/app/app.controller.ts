@@ -164,7 +164,7 @@ export class AppController {
 
     try {
       const list = await this.s3.listObjectsV2({ Bucket: 'bucket', Prefix: 'ddd/', Delimiter: '/'}).promise();
-      return list.Contents;
+      return list;
     } catch (e) {
       console.log(e);
     }

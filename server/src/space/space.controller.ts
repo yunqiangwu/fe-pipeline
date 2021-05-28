@@ -144,7 +144,6 @@ export class SpaceController {
     })
   }
   
-  
   @Delete('delete-space/:id')
   async deleteSpace(@Param('id') id: string): Promise<Space> {
     return this.prismaService.space.delete({ where: { id: Number(id) } })

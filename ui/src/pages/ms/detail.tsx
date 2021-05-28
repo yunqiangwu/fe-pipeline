@@ -28,49 +28,6 @@ const deleteSpacesVersion = async ({ id }: any) => {
   console.log(id);
 };
 
-const threeData = [{
-  title: '0-0',
-  key: '0-0',
-  children: [
-    {
-      title: '0-0-0',
-      key: '0-0-0',
-      children: [
-        { title: '0-0-0-0', key: '0-0-0-0' },
-        { title: '0-0-0-1', key: '0-0-0-1' },
-        { title: '0-0-0-2', key: '0-0-0-2' },
-      ],
-    },
-    {
-      title: '0-0-1',
-      key: '0-0-1',
-      children: [
-        { title: '0-0-1-0', key: '0-0-1-0' },
-        { title: '0-0-1-1', key: '0-0-1-1' },
-        { title: '0-0-1-2', key: '0-0-1-2' },
-      ],
-    },
-    {
-      title: '0-0-2',
-      key: '0-0-2',
-    },
-  ],
-},
-{
-  title: '0-1',
-  key: '0-1',
-  children: [
-    { title: '0-1-0-0', key: '0-1-0-0' },
-    { title: '0-1-0-1', key: '0-1-0-1' },
-    { title: '0-1-0-2', key: '0-1-0-2' },
-  ],
-},
-{
-  title: '0-2',
-  key: '0-2',
-}];
-
-
 export const SpaceDetail: React.FC<any> = () => {
 
   const { id } = useParams<any>();
@@ -291,8 +248,13 @@ export const SpaceDetail: React.FC<any> = () => {
   const createSpacesVersionUI = async ({
     id,
   }: any = {}) => {
-
-    const CreateSpaceVersionAlias: React.FC<any> = ({ modal }) => {
+    const latestVersion = spaceDs?.children?.spaceVersions?.records[0]?.get('name');
+    const nextVersion = (version: string) => {
+      return version && version.replace(/(\d+$|$)/, (match) => {
+        return match ? `${(1 + (+match))}` : `.1`;
+      });
+    };
+    const CreateSpaceVersion: React.FC<any> = ({ modal }) => {
 
       const [filelist, setFilelist] = useState<any[]>(() => []);
       const [progressInfo, setProgressInfo] = useState<any>(null);
@@ -306,12 +268,13 @@ export const SpaceDetail: React.FC<any> = () => {
           fields: [
             {
               name: 'name',
-              label: '版本名称',
+              label: '新发布版本号',
+              defaultValue: latestVersion ? nextVersion(latestVersion) : '0.0.0',
               required: true,
             },
             {
               name: 'versionAliasName',
-              label: '别名指向版本',
+              label: '版本别名',
               defaultValue: 'latest',
               type: 'string' as any,
               required: true,
@@ -340,7 +303,16 @@ export const SpaceDetail: React.FC<any> = () => {
             return false;
           }
 
+          if(filelist.length === 0) {
+            notification.warning({
+              message: '',
+              description: '当前版本为上传任务文件， 请在版本创建之后，进入文件管理， 上传文件',
+            })
+            // return false;
+          }
+
           try {
+            const data = createSpaceDs.records[0].toJSONData();
             const res = await createSpacesVersion({
               onprogress: (info: any) => {
                 setProgressInfo(info);
@@ -352,7 +324,7 @@ export const SpaceDetail: React.FC<any> = () => {
               },
             });
             notification.success({
-              message: '创建成功',
+              message: `版本 ${data.name} 发布成功`,
               description: '',
             });
             spaceDs.query();
@@ -377,12 +349,19 @@ export const SpaceDetail: React.FC<any> = () => {
           return data.map((item: any) => {
             if (item.children) {
               return (
-                <TreeNode title={item.title} key={item.key}>
+                <TreeNode icon={<Icon type="custom_Directory" />} title={item.title} key={item.key}>
                   {renderTreeNodes(item.children)}
                 </TreeNode>
               );
             }
-            return <TreeNode key={item.key} {...item} />;
+            return <TreeNode key={item.key} {...item} title={<span>{item.title}  <Icon style={{fontSize: '12px'}} onClick={() => {
+              const file = filelist.find(f => f.uid === item.key);
+              if(file) {
+                setFilelist((oldList) => {
+                  return [...oldList.filter(item => item.uid !== file.uid)];
+                });
+              }
+            }} type="delete" /></span>} icon={<Icon type="insert_drive_file" />} />;
           });
         };
 
@@ -480,7 +459,7 @@ export const SpaceDetail: React.FC<any> = () => {
 
       return (
         <div>
-          <Card title="版本基本信息">
+          <Card title="版本基本信息" extra={<span>当前最新版本： {latestVersion || '未发布版本'}</span>}>
             <Form columns={2} dataSet={createSpaceDs}>
               <TextField name="name" />
               <Select name="versionAliasName" combo />
@@ -507,6 +486,8 @@ export const SpaceDetail: React.FC<any> = () => {
             </Dragger>
             <div style={{overflowY: 'scroll', height: '150px'}}>
               {fileThreeDataEle && <Tree
+                      showIcon
+                      // showLine
                 // checkable
                 // onExpand={this.onExpand}
                 // expandedKeys={this.state.expandedKeys}
@@ -521,7 +502,7 @@ export const SpaceDetail: React.FC<any> = () => {
             </div>
             {progressInfo && <div>
               <Progress value={progressInfo.value} status={ 'active' as any} />
-                当前正在上传{progressInfo.file.name} 文件
+                正在上传{progressInfo.file.name} 文件
             </div>}
           </Card>
         </div>
@@ -530,8 +511,8 @@ export const SpaceDetail: React.FC<any> = () => {
 
     Modal.open({
       title: '发布新的空间版本',
-      style: { width: 600 },
-      children: <CreateSpaceVersionAlias />,
+      style: { width: '600px', top: '20px' },
+      children: <CreateSpaceVersion />,
       okText: '确定',
       // okProps: { disabled: true },
     });
@@ -556,8 +537,8 @@ export const SpaceDetail: React.FC<any> = () => {
               required: true,
             },
             {
-              name: 'name',
-              label: '版本别名',
+              name: 'versionId',
+              label: '指向版本',
               required: true,
               type: 'string' as any,
               textField: 'name',
@@ -641,6 +622,5 @@ export const SpaceDetail: React.FC<any> = () => {
     </PageHeaderWrapper>
   );
 };
-
 
 export default SpaceDetail;
