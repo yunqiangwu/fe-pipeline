@@ -89,7 +89,7 @@ export default defineConfig({
     },
     { path: "/login", name: "Login", component: '@/pages/Login' },
     { path: "/auth/:host/callback", name: "AuthCallback", component: '@/pages/Login/auth-callback' },
-    { path: '/file-manager/:versionId',  component: '@/pages/ms/file-manager/VFSReadOnly',
+    { path: '/file-manager/:versionId', component: '@/pages/ms/file-manager',
     // icon: 'heart', name: "空间管理-详情",
   },
     // { path: "/ws-pod1/:id", name: "ws-pod", component: '@/pages/Home' },

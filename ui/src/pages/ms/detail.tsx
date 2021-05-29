@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { useAsync, useAsyncFn } from 'react-use';
+import { useAsync, useAsyncFn, useSearchParam } from 'react-use';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { from, Observable, Subject, timer } from 'rxjs';
@@ -172,26 +172,45 @@ export const SpaceDetail: React.FC<any> = () => {
         header: '访问',
         command: ({ record }) => {
           return [
-            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('name')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
+            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
             <span> / </span>,
             <Link target="_blank" to={`/file-manager/${record.get('id')}`} >管理版本文件</Link>,
           ]
         },
-        width: 480,
+        width: 180,
         lock: 'right' as ColumnLock,
       },
-      // {
-      //   header: '操作',
-      //   command: ({record}) => {
-      //     return [
-      //       <Button>管理版本空间</Button>,
-      //     ]
-      //   },
-      //   width: 200,
-      //   lock: 'right' as ColumnLock,
-      // }
+      {
+        header: '操作',
+        command: ({record}) => {
+          return [
+            <Button onClick={
+              async () => {
+                try {
+                  const res = await axios.delete(`/space/delete-space-version/${record.get('id')}`);
+                  notification.success({
+                    message: '删除成功',
+                    description: '',
+                  });
+                  spaceDs.query();
+                  return res;
+                } catch (e) {
+                  notification.error({
+                    message: e.message,
+                    description: '',
+                  })
+                  return false;
+                }
+              }
+            }>删除</Button>
+          ]
+        },
+        width: 200,
+        lock: 'right' as ColumnLock,
+      }
     ];
   }, []);
+
 
   const aliasColumns = useMemo<ColumnProps[]>(() => {
     return [
@@ -226,7 +245,33 @@ export const SpaceDetail: React.FC<any> = () => {
         header: '操作',
         command: ({ record }) => {
           return [
-            <Button>修改指向版本</Button>,
+            <Button onClick={
+              () => {
+                createSpacesVersionAliasUI({ id: id as string, aliasName: record.get('name'), versionId: record?.get('version')?.id });
+              }
+            }>修改指向版本</Button>,
+            <Button onClick={
+              async () => {
+                try {
+                  // const res = await deleteSpaces({
+                  //   id,
+                  // });
+                  const res = await axios.delete(`/space/delete-space-version-alias/${record.get('id')}`);
+                  notification.success({
+                    message: '删除成功',
+                    description: '',
+                  });
+                  spaceDs.query();
+                  return res;
+                } catch (e) {
+                  notification.error({
+                    message: e.message,
+                    description: '',
+                  })
+                  return false;
+                }
+              }
+            }>删除</Button>
           ]
         },
         width: 200,
@@ -245,9 +290,9 @@ export const SpaceDetail: React.FC<any> = () => {
     })();
   }, [id]);
 
-  const createSpacesVersionUI = async ({
+  const createSpacesVersionUI = useCallback( async ({
     id,
-  }: any = {}) => {
+  }: { id: string }) => {
     const latestVersion = spaceDs?.children?.spaceVersions?.records[0]?.get('name');
     const nextVersion = (version: string) => {
       return version && version.replace(/(\d+$|$)/, (match) => {
@@ -501,7 +546,7 @@ export const SpaceDetail: React.FC<any> = () => {
               </Tree>}
             </div>
             {progressInfo && <div>
-              <Progress value={progressInfo.value} status={ 'active' as any} />
+              <Progress percent={progressInfo.value} status={ 'active' as any} />
                 正在上传{progressInfo.file.name} 文件
             </div>}
           </Card>
@@ -517,11 +562,13 @@ export const SpaceDetail: React.FC<any> = () => {
       // okProps: { disabled: true },
     });
 
-  };
+  }, [id]);
 
-  const createSpacesVersionAliasUI = async ({
+  const createSpacesVersionAliasUI = useCallback(async ({
     id,
-  }: any = {}) => {
+    aliasName,
+    versionId,
+  }: { id: string, aliasName?: string, versionId?: number }) => {
 
     const CreateSpaceVersionAlias: React.FC<any> = ({ modal }) => {
       const createSpaceDs = React.useMemo(() => {
@@ -532,14 +579,16 @@ export const SpaceDetail: React.FC<any> = () => {
           // selection: false,
           fields: [
             {
-              name: 'name',
+              name: 'aliasName',
               label: '别名名称',
+              defaultValue: aliasName,
               required: true,
             },
             {
               name: 'versionId',
               label: '指向版本',
               required: true,
+              defaultValue: versionId,
               type: 'string' as any,
               textField: 'name',
               valueField: 'id',
@@ -578,11 +627,11 @@ export const SpaceDetail: React.FC<any> = () => {
           }
 
         });
-      }, []);
+      });
 
       return (
         <Form columns={2} dataSet={createSpaceDs}>
-          <TextField name="name" />
+          <TextField name="aliasName" />
           <Select name="versionId" />
         </Form>
       )
@@ -595,7 +644,7 @@ export const SpaceDetail: React.FC<any> = () => {
       // okProps: { disabled: true },
     });
 
-  };
+  }, [id]);
 
   return (
     <PageHeaderWrapper title="空间详情">
@@ -610,13 +659,11 @@ export const SpaceDetail: React.FC<any> = () => {
       </Card>
       <Card title="版本别名管理列表">
         <Table buttons={[
-          <Button icon="add" onClick={() => createSpacesVersionAliasUI({ id })} >添加别名</Button>,
-          <Button icon="remove" onClick={() => deleteSpacesVersionAlias({ id })} >删除别名</Button>
+          <Button icon="add" onClick={() => createSpacesVersionAliasUI({ id: id as string })} >添加别名</Button>,
         ]} columns={aliasColumns} dataSet={spaceDs.children.spaceVersionAlias} />
       </Card>
       <Card title="版本列表">
         <Table buttons={[<Button icon="add" onClick={() => createSpacesVersionUI({ id })} >发布新版本</Button>,
-        <Button icon="remove" onClick={() => deleteSpacesVersion({ id })} >删除版本</Button>
         ]} columns={columns} dataSet={spaceDs.children.spaceVersions} />
       </Card>
     </PageHeaderWrapper>

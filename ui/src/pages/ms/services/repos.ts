@@ -1,5 +1,6 @@
 import axios from '@/utils/axios.config';
 import { AxiosRequestConfig } from 'axios';
+import querystring from 'querystring';
 import { divide, memoize } from 'lodash';
 import React from 'react';
 
@@ -17,42 +18,51 @@ export const createSpaces = async ({
 }
 
 export const createSpacesVersionAlias = async ({
-  existSpaceId,
   body,
-}: any = {}) => {
-
-  // const res = await axios.post(`/space/create-space`, body);
-
-  // return res.data;
-
+}: any) => {
+  const res = await axios.get(`/space/change-or-create-version-alias?${querystring.stringify(body)}`);
+  return res.data;
 }
 
-export const createSpacesVersion= async ({
+export const createSpacesVersion = async ({
   filelist,
   onprogress,
   body,
 }: any = {}) => {
 
-  // const {spaceId} = body;
-  // const res = await axios.post(`/space/create-space`, body);
+  const {
+    spaceId,
+    name,
+    versionAliasName,
+  } = body;
 
-  // return res.data;
+  const data = new FormData();
 
-  await new Promise((re) => {
-    setTimeout(re, 2000)
-  });
+  data.append('spaceId', spaceId);
+  data.append('name', name);
+  data.append('versionAliasName', versionAliasName);
 
-  console.log(filelist);
+  const filesPath: string[] = [];
 
-  for(let fIndex = 0; fIndex < filelist.length; fIndex++) {
+  for (let fIndex = 0; fIndex < filelist.length; fIndex++) {
+    const file = filelist[fIndex];
     onprogress({
-      value: (fIndex / filelist.length ) * 100,
-      file: filelist[fIndex],
+      value: ((fIndex / filelist.length) * 100).toFixed(2),
+      file: file,
     });
-    await new Promise((re) => {
-      setTimeout(re, 2000)
-    });
+    // await new Promise((re) => {
+    //   setTimeout(re, 2000)
+    // });
+    data.append('files', file);
+    filesPath.push((file.webkitRelativePath && file.webkitRelativePath.replace(/[^\/]*\//, '')) || file.name);
   }
+  data.append('filesPath', JSON.stringify(filesPath));
+
+  const res = await axios.post(`/space/create-space-version`, data);
+
+  // throw new Error('test');
+
+  return res.data;
 
 }
 

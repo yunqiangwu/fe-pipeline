@@ -18,10 +18,6 @@ import { Link } from 'react-router-dom';
 import { FieldType } from 'choerodon-ui/pro/lib/data-set/enum';
 import moment from 'moment';
 
-
-
-
-
 export const SpaceList: React.FC<any> = () => {
 
   const repoDs = React.useMemo(() => {
@@ -261,6 +257,5 @@ export const SpaceList: React.FC<any> = () => {
   );
 
 };
-
 
 export default SpaceList;

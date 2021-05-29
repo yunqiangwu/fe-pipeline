@@ -80,7 +80,8 @@ model SpaceVersionAlias {
   version   SpaceVersion @relation(fields: [versionId], references: [id])
   versionId Int
 
-  @@unique([versionId, spaceId, name], name: "SpaceVersionAlias_versionId_spaceId_name_key")
+  @@unique([spaceId, name], name: "SpaceVersionAlias_spaceId_name_key")
+
   projectItem ProjectItem[]
 }
 

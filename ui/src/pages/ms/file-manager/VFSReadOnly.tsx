@@ -4,7 +4,7 @@
  * @license MIT
  */
 
- import {
+import {
     ChonkyActions,
     ChonkyFileActionData,
     FileArray,
@@ -17,12 +17,14 @@
     FileToolbar,
     setChonkyDefaults,
 } from 'chonky';
+import { useParams, useHistory } from 'react-router';
 import { ChonkyIconFA } from 'chonky-icon-fontawesome';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { Modal, Button, notification, Form, TextField, DataSet, Select, Table, DatePicker } from 'choerodon-ui/pro';
+import axios from '@/utils/axios.config';
+import { useAsync } from 'react-use';
 // import { showActionNotification, useStoryLinks } from '../util';
-const DemoFsMap = require('./demo.fs_map.json');
 
 const ignoredActions = new Set<String>();
 ignoredActions.add(ChonkyActions.MouseClickFile.id);
@@ -80,39 +82,120 @@ export const showActionNotification = (data: ChonkyFileActionData) => {
 
 setChonkyDefaults({ iconComponent: ChonkyIconFA });
 
-const rootFolderId = DemoFsMap.rootFolderId;
-const fileMap = (DemoFsMap.fileMap as unknown) as {
-    [fileId: string]: FileData & { childrenIds: string[] };
-};
+export const useFiles = (currentFolderId: string, versionId: string): FileArray => {
 
-export const useFiles = (currentFolderId: string): FileArray => {
-    return useMemo(() => {
-        const currentFolder = fileMap[currentFolderId];
-        const files = currentFolder.childrenIds
-            ? currentFolder.childrenIds.map((fileId: string) => fileMap[fileId] ?? null)
-            : [];
-        return files;
-    }, [currentFolderId]);
-};
+    if (currentFolderId === '/') {
+        currentFolderId = '';
+    }
 
-export const useFolderChain = (currentFolderId: string): FileArray => {
-    return useMemo(() => {
-        const currentFolder = fileMap[currentFolderId];
+    const space = useAsync(async () => {
+        const spaceData = await axios.get(`space/get-file-ls-by-versionid/${versionId}?prefixPath=${currentFolderId}`, {
+            // data: {
+            //     prefixPath: currentFolderId,
+            // }
+        });
+        return spaceData.data;
+    }, [versionId, currentFolderId]);
 
-        const folderChain = [currentFolder];
+    const fileArrays = useMemo(() => {
+        const root: FileData = {
+            "id": "/",
+            "name": "root",
+            isDir: true,
+        };
 
-        let parentId = currentFolder.parentId;
-        while (parentId) {
-            const parentFile = fileMap[parentId];
-            if (parentFile) {
-                folderChain.unshift(parentFile);
-                parentId = parentFile.parentId;
-            } else {
-                parentId = null;
+        // const otherFiles: FileArray = [];
+
+        if (space.value) {
+
+            const paths = currentFolderId ? currentFolderId.split('/') : [];
+
+            let currentFile = root;
+
+            for (let i = 0; i < paths.length; i++) {
+                const currentPaths = paths.slice(0, i + 1);
+                const newObj: FileData = {
+                    "id": currentPaths.join('/'),
+                    "name": paths[i],
+                    isDir: true,
+                    isHidden: true,
+                    size: 0,
+                    parentId: currentFile.id,
+                };
+                // otherFiles.push(newObj);
+                currentFile.childrenIds = [newObj.id];
+                currentFile = newObj;
             }
-        }
 
-        return folderChain;
+            const files = [
+                ...space.value.CommonPrefixes.map((item: any) => {
+                    const match = /^\d+\/\d+\/(.+)\/$/.exec(item.Prefix);
+                    const match2 = /\/([^\/]+)\/$/.exec(item.Prefix);
+                    const newObj: FileData = {
+                        "id": match ? match[1] : item.Prefix,
+                        "name": match2 ? match2[1] : item.Prefix,
+                        isDir: true,
+                        parentId: currentFile.id,
+                    };
+                    // otherFiles.push(newObj);
+                    return newObj;
+                }),
+                ...space.value.Contents.map((item: any) => {
+                    const match2 = /^\d+\/\d+\/(.+)$/.exec(item.Key);
+                    const match = /\/([^\/]+)$/.exec(item.Key);
+                    const newObj: FileData = {
+                        "id": match2 ? match2[1] : item.Key,
+                        "name": match ? match[1] : item.Key,
+                        size: item.Size,
+                        parentId: currentFile.id,
+                        "LastModified": "2020-10-20T03:11:50.570Z",
+                    };
+                    // otherFiles.push(newObj);
+                    return newObj;
+                }),
+            ];
+
+            currentFile.childrenIds = files.map(item => item.id);
+            return files;
+        }
+        return [];
+    }, [space.value]);
+    return fileArrays;
+};
+
+export const useFolderChain = (currentFolderId: string, filesArray: FileArray): FileArray => {
+    if (currentFolderId === '/') {
+        currentFolderId = '';
+    }
+    return useMemo(() => {
+
+        const root: FileData = {
+            "id": "/",
+            "name": "root",
+            isDir: true,
+        };
+
+        const paths = currentFolderId ? currentFolderId.split('/') : [];
+
+        let currentFile = root;
+
+        const files: FileArray = [root];
+
+        for (let i = 0; i < paths.length; i++) {
+            const currentPaths = paths.slice(0, i + 1);
+            const newObj: FileData = {
+                "id": currentPaths.join('/'),
+                "name": paths[i],
+                isDir: true,
+                isHidden: true,
+                size: 0,
+                parentId: currentFile.id,
+            };
+            files.push(newObj);
+            currentFile.childrenIds = [newObj.id];
+            currentFile = newObj;
+        }
+        return files;
     }, [currentFolderId]);
 };
 
@@ -136,11 +219,19 @@ export const useFileActionHandler = (
     );
 };
 
-export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string }> = (props) => {
-    const [currentFolderId, setCurrentFolderId] = useState(rootFolderId);
-    const files = useFiles(currentFolderId);
-    const folderChain = useFolderChain(currentFolderId);
-    const handleFileAction = useFileActionHandler(setCurrentFolderId);
+
+export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string, path: string, versionId: string, onChangePath?: Function }> = (props) => {
+    const { path, versionId } = props;
+    // const [currentFolderId, setCurrentFolderId] = useState(path);
+    const files = useFiles(path, versionId);
+    const folderChain = useFolderChain(path, files);
+    const history = useHistory();
+    const handleChangePath = useCallback((newPath) => {
+        console.log(newPath);
+        history.replace(`${history.location.pathname}?path=${newPath}`)
+    }, []);
+    const handleFileAction = useFileActionHandler(handleChangePath);
+
     return (
         <div style={{ height: 400 }}>
             <FileBrowser
@@ -161,49 +252,4 @@ export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string }> = (props) => {
     );
 };
 
-const storyName = 'Simple read-only VFS';
-export const ReadOnlyVirtualFileSystem: React.FC = () => {
-    return (
-        <div className="story-wrapper">
-            <div className="story-description">
-                <h1 className="story-title">
-                    {storyName.replace('VFS', 'Virtual File System')}
-                </h1>
-                <p>
-                    This example uses the same file map as <em>Advanced mutable VFS</em>
-                    , except it is running in read-only mode. This means nothing will
-                    happen when you try to move or delete files.
-                </p>
-                <p>
-                    Read-only mode greatly simplifies the code, so it should be easier
-                    to follow, especially if you're new to Chonky. You can view it using
-                    the buttons below.
-                </p>
-                {/* <div className="story-links">
-                    {useStoryLinks([
-                        { gitPath: '2.x_storybook/src/demos/VFSReadOnly.tsx' },
-                        {
-                            name: 'File map JSON',
-                            gitPath: '2.x_storybook/src/demos/demo.fs_map.json',
-                        },
-                    ])}
-                </div> */}
-            </div>
-            <ReadOnlyVFSBrowser instanceId={storyName} />
-        </div>
-    );
-};
-(ReadOnlyVirtualFileSystem as any).storyName = storyName;
 
-
-const Page = () => {
-
-    return (
-        <div>
-            <ReadOnlyVirtualFileSystem />
-        </div>
-    );
-};
-
-
-export default Page
