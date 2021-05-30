@@ -53,6 +53,8 @@ data:
         include       mime.types;
         default_type  application/octet-stream;
 
+        client_max_body_size 500M;
+
         # Enables or disables the use of underscores in client request header fields.
         # When the use of underscores is disabled, request header fields whose names contain underscores are marked as invalid and become subject to the ignore_invalid_headers directive.
         # underscores_in_headers off;

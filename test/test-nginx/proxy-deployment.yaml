@@ -27,6 +27,9 @@ spec:
         hostPath:
           path: /run/desktop/mnt/host/c/Users/q2320/workspace/fe-pipeline/test/test-nginx/default.conf
           type: File
+      - name: config-main
+        configMap:
+          name: fe-pipeline-proxy-config-main
       - name: fe-pipeline-ms-data
         persistentVolumeClaim:
           claimName: fe-pipeline-pvc2
@@ -37,6 +40,9 @@ spec:
         - mountPath: /etc/nginx/conf.d/default.conf
           name: config
           subPath: ''
+        - mountPath: /usr/local/openresty/nginx/conf/nginx.conf
+          name: config-main
+          subPath: 'nginx.conf'
         - mountPath: /app/fe-pipeline-home/data
           name: fe-pipeline-ms-data
         # securityContext:
