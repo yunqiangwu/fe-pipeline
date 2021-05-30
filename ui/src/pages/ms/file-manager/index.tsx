@@ -1,5 +1,5 @@
 import axios from '@/utils/axios.config';
-import { Form, Output } from 'choerodon-ui/pro/lib';
+import { Button, Form, Output } from 'choerodon-ui/pro/lib';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router';
 import { useAsync, useSearchParam } from 'react-use';
@@ -20,19 +20,23 @@ const Page = () => {
     if (!versionId) {
         return <div>error not versionId</div>;
     }
-    if(space.loading) {
+    if (space.loading) {
         return <div>loading...</div>
     }
-    if(space.error) {
+    if (space.error) {
         return <div>{space.error.message}</div>
     }
 
     return (
         <div className="story-wrapper">
-        <div className="story-description">
+            <div className="story-description">
                 <h1 className="story-title">
                     {storyName.replace('VFS', space?.value?.name).replace('Verion', space?.value?.spaceVersions[0]?.name)} {path}
                 </h1>
+                <p>
+                    <Button>下载当前文件夹</Button>
+                    <Button>上传压缩包解压到当前文件夹</Button>
+                </p>
                 <Form columns={3}>
                     <Output label="项目名称" value={space?.value?.name} />
                     <Output label="版本号" value={space?.value?.spaceVersions[0]?.name} />
@@ -40,7 +44,7 @@ const Page = () => {
                     <Output label="版本别名" value={space?.value?.spaceVersions[0]?.spaceVersionAlias?.map((item: any) => item.name).join(', ')} />
                 </Form>
             </div>
-            <ReadOnlyVFSBrowser instanceId={storyName} path={path} versionId={versionId} />
+            <ReadOnlyVFSBrowser basePath={`bucket/${space.value.id}/${versionId}`} instanceId={storyName} path={path} versionId={versionId} />
         </div>
     );
 };

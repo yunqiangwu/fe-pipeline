@@ -172,7 +172,7 @@ export const SpaceDetail: React.FC<any> = () => {
         header: '访问',
         command: ({ record }) => {
           return [
-            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
+            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : `minio.${location.host}`}`} >访问</a>,
             <span> / </span>,
             <Link target="_blank" to={`/file-manager/${record.get('id')}`} >管理版本文件</Link>,
           ]
@@ -235,7 +235,7 @@ export const SpaceDetail: React.FC<any> = () => {
         header: '访问',
         command: ({ record }) => {
           return [
-            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('name')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
+            <a target="_blank" href={`${location.protocol}//${record.get('spaceId')}--${record.get('name')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' :  `minio.${location.host}`}`} >访问</a>,
           ]
         },
         width: 80,

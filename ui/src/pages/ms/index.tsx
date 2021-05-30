@@ -142,7 +142,7 @@ export const SpaceList: React.FC<any> = () => {
         header: '访问',
         command: ({ record }) => {
           return [
-            <a target="_blank" href={`${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`} >访问</a>,
+            <a target="_blank" href={`${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' :  `minio.${location.host}`}`} >访问</a>,
           ]
         },
         width: 80,
@@ -153,7 +153,7 @@ export const SpaceList: React.FC<any> = () => {
         command: ({ record }) => {
           return [
             <Button icon="select" onClick={() => {
-              const url = `${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' : location.host}`;
+              const url = `${location.protocol}//${record.get('id')}.${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' :  `minio.${location.host}`}`;
               if (copy(url)) {
                 notification.success({
                   message: '复制成功',

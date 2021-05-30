@@ -69,7 +69,7 @@ export const showActionNotification = (data: ChonkyFileActionData) => {
 
     notification.success({
         message: 'success',
-        description: text,
+        description: <div dangerouslySetInnerHTML={{__html: text}} />,
     });
 
     // new Noty({
@@ -160,10 +160,13 @@ export const useFiles = (currentFolderId: string, versionId: string): FileArray 
         }
         return [];
     }, [space.value]);
+    const path = useMemo(() => {
+        return space.value ? `${space.value.id}/${versionId}` : `${versionId}`
+    },  [space.value]);
     return fileArrays;
 };
 
-export const useFolderChain = (currentFolderId: string, filesArray: FileArray): FileArray => {
+export const useFolderChain = (currentFolderId: string): FileArray => {
     if (currentFolderId === '/') {
         currentFolderId = '';
     }
@@ -199,38 +202,71 @@ export const useFolderChain = (currentFolderId: string, filesArray: FileArray): 
     }, [currentFolderId]);
 };
 
+
+const windowOpen = async (wsUrl: any) => {
+
+    if (!wsUrl) {
+      return;
+    }
+  
+    console.log(wsUrl);
+  
+    // await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
+    const a = document.createElement('a');
+    a.href = wsUrl;
+    a.target = '_blank';
+    document.body.appendChild(a);
+  
+    setTimeout(() => {
+      a.click();
+      setTimeout(() => {
+        a.remove();
+      }, 0);
+    }, 200);
+  
+  }
+  
+
 export const useFileActionHandler = (
-    setCurrentFolderId: (folderId: string) => void
+    setCurrentFolderId: (folderId: string) => void,
+    basePath: string,
 ) => {
     return useCallback(
         (data: ChonkyFileActionData) => {
             if (data.id === ChonkyActions.OpenFiles.id) {
                 const { targetFile, files } = data.payload;
-                const fileToOpen = targetFile ?? files[0];
+                const fileToOpen: any = targetFile ?? files[0];
                 if (fileToOpen && FileHelper.isDirectory(fileToOpen)) {
                     setCurrentFolderId(fileToOpen.id);
                     return;
+                } else {
+                    if(targetFile || files.length === 1)  {
+                        const fileUrl = `${location.protocol}//${process.env.NODE_ENV === 'development' ? 'minio.fe-pipeline.localhost' :  `minio.${location.host}`}/${basePath}/${fileToOpen?.id || ''}`;
+                        // console.log(fileUrl);
+                        // windowOpen(fileUrl);
+                        return windowOpen(fileUrl);
+                    }
                 }
             }
 
             showActionNotification(data);
         },
-        [setCurrentFolderId]
+        [setCurrentFolderId, basePath]
     );
 };
 
 
-export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string, path: string, versionId: string, onChangePath?: Function }> = (props) => {
-    const { path, versionId } = props;
+export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string, path: string, versionId: string, onChangePath?: Function, basePath?: string }> = (props) => {
+    const { path, versionId, basePath } = props;
     // const [currentFolderId, setCurrentFolderId] = useState(path);
     const files = useFiles(path, versionId);
-    const folderChain = useFolderChain(path, files);
+    const folderChain = useFolderChain(path);
     const history = useHistory();
     const handleChangePath = useCallback((newPath) => {
         console.log(newPath);
         history.replace(`${history.location.pathname}?path=${newPath}`)
     }, []);
-    const handleFileAction = useFileActionHandler(handleChangePath);
+    const handleFileAction = useFileActionHandler(handleChangePath, basePath || '') ;
 
     return (
         <div style={{ height: 400 }}>
