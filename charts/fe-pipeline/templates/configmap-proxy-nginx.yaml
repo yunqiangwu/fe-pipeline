@@ -128,7 +128,7 @@ data:
                 local port = 6379
                 if not ip then
                     ip = "{{ default ( printf "%s-master.%s.svc.cluster.local"  (index .Values "redis" "fullnameOverride") ( .Release.Namespace )) .Values.redis.endpoint_ip }}"
-                    ip = "{{ default ("6379") .Values.redis.endpoint_port }}"
+                    port = {{ default ("6379") .Values.redis.endpoint_port }}
                 end
                 local ok, err = red:connect(ip, port)  
                 if not ok then  
