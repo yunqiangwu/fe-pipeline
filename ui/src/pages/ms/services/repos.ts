@@ -58,7 +58,15 @@ export const createSpacesVersion = async ({
   }
   data.append('filesPath', JSON.stringify(filesPath));
 
-  const res = await axios.post(`/space/create-space-version`, data);
+  const res = await axios.post(`/space/create-space-version`, data, {
+    onUploadProgress: progressEvent => {
+      let complete = (progressEvent.loaded / progressEvent.total * 100 | 0);
+      onprogress({
+        value: (complete).toFixed(2),
+        // file: filelist[0],
+      });
+    }
+  });
 
   // throw new Error('test');
 

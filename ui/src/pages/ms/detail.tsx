@@ -547,7 +547,6 @@ export const SpaceDetail: React.FC<any> = () => {
             </div>
             {progressInfo && <div>
               <Progress percent={progressInfo.value} status={ 'active' as any} />
-                正在上传{progressInfo.file.name} 文件
             </div>}
           </Card>
         </div>
