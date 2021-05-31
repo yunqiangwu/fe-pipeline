@@ -19,7 +19,7 @@ import {
 } from 'chonky';
 import { useParams, useHistory } from 'react-router';
 import { ChonkyIconFA } from 'chonky-icon-fontawesome';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Modal, Button, notification, Form, TextField, DataSet, Select, Table, DatePicker } from 'choerodon-ui/pro';
 import axios from '@/utils/axios.config';
@@ -208,24 +208,24 @@ const windowOpen = async (wsUrl: any) => {
     if (!wsUrl) {
       return;
     }
-  
+
     console.log(wsUrl);
-  
+
     // await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
     const a = document.createElement('a');
     a.href = wsUrl;
     a.target = '_blank';
     document.body.appendChild(a);
-  
+
     setTimeout(() => {
       a.click();
       setTimeout(() => {
         a.remove();
       }, 0);
     }, 200);
-  
+
   }
-  
+
 
 export const useFileActionHandler = (
     setCurrentFolderId: (folderId: string) => void,
@@ -258,13 +258,16 @@ export const useFileActionHandler = (
 
 export const ReadOnlyVFSBrowser: React.FC<{ instanceId: string, path: string, versionId: string, onChangePath?: Function, basePath?: string }> = (props) => {
     const { path, versionId, basePath } = props;
-    // const [currentFolderId, setCurrentFolderId] = useState(path);
-    const files = useFiles(path, versionId);
-    const folderChain = useFolderChain(path);
+    const [currentFolderId, setCurrentFolderId] = useState(path);
+    useEffect(() => {
+      setCurrentFolderId(path);
+    }, [path])
+    const files = useFiles(currentFolderId, versionId);
+    const folderChain = useFolderChain(currentFolderId);
     const history = useHistory();
     const handleChangePath = useCallback((newPath) => {
-        console.log(newPath);
-        history.replace(`${history.location.pathname}?path=${newPath}`)
+        setCurrentFolderId(newPath);
+        history.replace(`${history.location.pathname}?path=${newPath}`);
     }, []);
     const handleFileAction = useFileActionHandler(handleChangePath, basePath || '') ;
 
