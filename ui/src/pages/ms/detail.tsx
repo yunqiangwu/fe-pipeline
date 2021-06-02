@@ -5,7 +5,7 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { from, Observable, Subject, timer } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Spin, Alert, Icon, Card, Tag, Upload, message, Tree } from 'choerodon-ui';
-import { Modal, Button, notification, Form, TextField, DataSet, Select, Table, DatePicker, Progress } from 'choerodon-ui/pro';
+import { Modal, Button, notification, Form, TextField, DataSet, Select, Table, DatePicker, Progress, Switch } from 'choerodon-ui/pro';
 import axios from '@/utils/axios.config';
 import styles from './index.less';
 import { getToken, hash } from '@/utils/token';
@@ -318,6 +318,15 @@ export const SpaceDetail: React.FC<any> = () => {
               required: true,
             },
             {
+              name: 'isZip',
+              label: '是否上传 zip 解压',
+              type: 'boolean' as FieldType,
+              trueValue: 1,
+              falseValue: 0,
+              defaultValue: 0,
+              // required: true,
+            },
+            {
               name: 'versionAliasName',
               label: '版本别名',
               defaultValue: 'latest',
@@ -508,6 +517,7 @@ export const SpaceDetail: React.FC<any> = () => {
             <Form columns={2} dataSet={createSpaceDs}>
               <TextField name="name" />
               <Select name="versionAliasName" combo />
+              <Switch name="isZip" />
             </Form>
           </Card>
           <Card title="上传版本文件" extra={<Button

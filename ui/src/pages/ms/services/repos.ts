@@ -34,6 +34,8 @@ export const createSpacesVersion = async ({
     spaceId,
     name,
     versionAliasName,
+    isZip,
+    // prefixPath,
   } = body;
 
   const data = new FormData();
@@ -41,6 +43,13 @@ export const createSpacesVersion = async ({
   data.append('spaceId', spaceId);
   data.append('name', name);
   data.append('versionAliasName', versionAliasName);
+  data.append('isZip', isZip);
+  // data.append('versionId', versionId);
+  // data.append('prefixPath', prefixPath);
+
+  if(!Array.isArray(filelist)) {
+    filelist = [filelist];
+  }
 
   const filesPath: string[] = [];
 
@@ -73,6 +82,64 @@ export const createSpacesVersion = async ({
   return res.data;
 
 }
+
+
+export const uploadZipToVersion = async ({
+  filelist,
+  onprogress,
+  body,
+}: any = {}) => {
+
+  const {
+    spaceId,
+    versionId,
+    prefixPath,
+    isResetFiles,
+  } = body;
+
+  const data = new FormData();
+  data.append('spaceId', spaceId);
+  data.append('versionId', versionId);
+  data.append('prefixPath', prefixPath);
+  data.append('isResetFiles', isResetFiles);
+
+  if(!Array.isArray(filelist)) {
+    filelist = [filelist];
+  }
+
+  data.append('files', filelist[0]);
+
+  // const filesPath: string[] = [];
+
+  // for (let fIndex = 0; fIndex < filelist.length; fIndex++) {
+  //   const file = filelist[fIndex];
+  //   // onprogress({
+  //   //   value: ((fIndex / filelist.length) * 100).toFixed(2),
+  //   //   file: file,
+  //   // });
+  //   // await new Promise((re) => {
+  //   //   setTimeout(re, 2000)
+  //   // });
+  //   filesPath.push((file.webkitRelativePath && file.webkitRelativePath.replace(/[^\/]*\//, '')) || file.name);
+  // }
+  // data.append('filesPath', JSON.stringify(filesPath));
+
+  const res = await axios.post(`/space/upload-zip-to-version`, data, {
+    onUploadProgress: progressEvent => {
+      let complete = (progressEvent.loaded / progressEvent.total * 100 | 0);
+      onprogress({
+        value: (complete).toFixed(2),
+        // file: filelist[0],
+      });
+    }
+  });
+  
+  // throw new Error('test');
+
+  return res.data;
+
+}
+
 
 export const deleteSpaces = async ({
   id,
