@@ -24,6 +24,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal, Button, notification, Form, TextField, DataSet, Select, Table, DatePicker } from 'choerodon-ui/pro';
 import axios from '@/utils/axios.config';
 import { useAsync } from 'react-use';
+import { windowOpen } from '@/utils/utils';
 // import { showActionNotification, useStoryLinks } from '../util';
 
 const ignoredActions = new Set<String>();
@@ -201,30 +202,6 @@ export const useFolderChain = (currentFolderId: string): FileArray => {
         return files;
     }, [currentFolderId]);
 };
-
-
-const windowOpen = async (wsUrl: any) => {
-
-    if (!wsUrl) {
-      return;
-    }
-
-    console.log(wsUrl);
-
-    // await new Promise((resolve) => { setTimeout(() => resolve(null), 500)});
-    const a = document.createElement('a');
-    a.href = wsUrl;
-    a.target = '_blank';
-    document.body.appendChild(a);
-
-    setTimeout(() => {
-      a.click();
-      setTimeout(() => {
-        a.remove();
-      }, 0);
-    }, 200);
-
-  }
 
 
 export const useFileActionHandler = (

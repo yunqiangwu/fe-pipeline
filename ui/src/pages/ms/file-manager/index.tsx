@@ -1,4 +1,6 @@
 import axios from '@/utils/axios.config';
+import { getToken } from '@/utils/token';
+import { windowOpen } from '@/utils/utils';
 import { Button, Form, Output } from 'choerodon-ui/pro/lib';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router';
@@ -17,6 +19,15 @@ const Page = () => {
         return spaceData.data;
     }, [versionId]);
 
+    const downloadZip = useCallback(async () => {
+
+      const p = (path || '').replace(/^\//, "");
+      const zipDownloadUrl = `${axios.defaults.baseURL}space/get-zip-by-path?path=/${space.value.id}/${versionId}/${p}&access_token=${getToken()}`;
+
+      await windowOpen(zipDownloadUrl);
+
+    }, [path, space.value]);
+
     if (!versionId) {
         return <div>error not versionId</div>;
     }
@@ -34,7 +45,7 @@ const Page = () => {
                     {storyName.replace('VFS', space?.value?.name).replace('Verion', space?.value?.spaceVersions[0]?.name)} {path}
                 </h1>
                 <p>
-                    <Button>下载当前文件夹</Button>
+                    <Button onClick={downloadZip}>下载当前文件夹</Button>
                     <Button>上传压缩包解压到当前文件夹</Button>
                 </p>
                 <Form columns={3}>

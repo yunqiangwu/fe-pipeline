@@ -1,14 +1,18 @@
 import { Space, SpaceVersion, SpaceVersionAlias, User } from '.prisma/client';
-import { Body, CACHE_MANAGER, Controller, Delete, Get, HttpException, Inject, Param, Post, Put, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, CACHE_MANAGER, Controller, Delete, Get, HttpException, Inject, Param, Res, Req, Post, Put, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiParam, ApiBody, ApiOAuth2, ApiQuery } from '@nestjs/swagger';
+import { Response, Request } from 'express';
 import { S3 } from 'aws-sdk';
+import * as AdmZip from 'adm-zip';
 import { Cache } from 'cache-manager';
 import { InjectS3 } from 'nestjs-s3';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { CurrentUser } from 'src/common/decos';
 import { PrismaService } from '../app/prisma.service';
 import { CreateSpaceDto } from './dto/create-temp-workspace.dto';
+import fetch from 'node-fetch';
 @ApiTags('space')
 @Controller('/api/space')
 export class SpaceController {
@@ -123,6 +127,68 @@ export class SpaceController {
     }
     return space[0];
   }
+
+
+
+  @Get('get-zip-by-path')
+  @ApiQuery({ required: true, name: 'prefixPath' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOAuth2([])
+  async getSpacePathZipByVersionId( @CurrentUser() currentUser, @Query('prefixPath') prefixPath: string,
+  @Req() req: Request, @Res({ passthrough: true }) response: Response): Promise<any> {
+
+    const match = /(\d+)\/(\d+)\/.*/.exec(prefixPath);
+
+    if(!match) {
+      throw new HttpException(`Error prefixPath: ${prefixPath}`, 403);
+    }
+
+    const [_, spaceId, versionId] = match;
+
+    const space = await this.prismaService.space.findMany({
+      take: 2,
+      where: {
+        userId: currentUser?.userId,
+        id: +spaceId,
+        spaceVersions: {
+          some: {
+            id: +versionId,
+          },
+        }
+      }
+    });
+
+    if (!space || space.length !== 1) {
+      throw new HttpException('未经授权的操作', 403);
+    }
+
+    const list = await this.s3.listObjectsV2({ Bucket: 'bucket', Prefix: prefixPath }).promise();
+
+    // // creating archives
+    var zip = new AdmZip();
+    
+    // // add file directly
+    var content = "inner content of the file";
+    zip.addFile("test.txt", Buffer.alloc(content.length, content), "entry comment goes here");
+    // // add local file
+    // // zip.addLocalFile("/home/me/some_picture.png");
+    // // get everything as a buffer
+    const b = zip.toBuffer();
+    // zip.writeZip()
+
+    response.set({
+      'Content-Disposition': `xxx.zip`
+    });  
+
+    response.end(b);
+  
+    // return {
+    //   spaceId, versionId,
+    //   list,
+    //   b
+    // };
+  }
+  
 
   @Get('get-file-ls-by-versionid/:versionId')
   @ApiQuery({ required: false, name: 'prefixPath' })
