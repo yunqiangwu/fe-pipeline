@@ -36,7 +36,7 @@ const Page = () => {
 
     const createSpacesVersionUI = useCallback( async () => {
         const CreateSpaceVersion: React.FC<any> = ({ modal }) => {
-    
+
           const [filelist, setFilelist] = useState<any[]>(() => []);
           const [progressInfo, setProgressInfo] = useState<any>(null);
 
@@ -65,7 +65,7 @@ const Page = () => {
                 //   valueField: 'name',
                 //   options: spaceDs.children.spaceVersionAlias,
                 // },
-    
+
                 // {
                 //   name: 'versionId',
                 //   label: '别名指向版本',
@@ -78,10 +78,10 @@ const Page = () => {
               ],
             });
           }, []);
-    
+
           useEffect(() => {
             modal.handleOk(async () => {
-    
+
               if(filelist.length === 0) {
                 notification.warning({
                   message: '',
@@ -89,7 +89,7 @@ const Page = () => {
                 })
                 return false;
               }
-    
+
               try {
                 const data = ds.records[0].toJSONData();
                 const res = await uploadZipToVersion({
@@ -121,13 +121,13 @@ const Page = () => {
               }
             });
           }, [filelist]);
-    
-    
+
+
           const fileThreeDataEle = useMemo(() => {
             if(filelist.length === 0) {
               return null;
             }
-    
+
             const renderTreeNodes = (data: any) => {
               return data.map((item: any) => {
                 if (item.children) {
@@ -147,9 +147,9 @@ const Page = () => {
                 }} type="delete" /></span>} icon={<Icon type="insert_drive_file" />} />;
               });
             };
-    
+
             const data: any[] = [];
-    
+
             filelist.forEach(file => {
               if(file.webkitRelativePath) {
                 const paths: string[] = file.webkitRelativePath.split('/').slice(1);
@@ -183,10 +183,10 @@ const Page = () => {
                 });
               }
             });
-    
+
             return renderTreeNodes(data);
           }, [filelist]);
-    
+
           const uploadProps = {
             name: 'files',
             // multiple: true,
@@ -219,9 +219,9 @@ const Page = () => {
               }
             },
           };
-    
+
         //   const dirFileInputRef = useRef<any>(null);
-    
+
         //   const filesForDirProps = {
         //     name: "filesForDir", type: "file", webkitdirectory: true, multiple: true, ref: dirFileInputRef,
         //     onChange: (event: any) => {
@@ -241,15 +241,15 @@ const Page = () => {
         //       });
         //     }
         //   };
-    
+
           return (
             <div>
               <Card title="版本基本信息" extra={<span>当前上传解压路径：{path}</span>}>
-                {/* <Form columns={2} dataSet={ds}>
+                <Form columns={2} dataSet={ds}>
                   <Switch name="isResetFiles" />
-                </Form> */}
+                </Form>
               </Card>
-              <Card title="上传版本文件" 
+              <Card title="上传版本文件"
             //   extra={<Button
             //     onClick={
             //       () => {
@@ -264,7 +264,7 @@ const Page = () => {
                 {/* <div style={{ display: 'none' }}>
                   {React.createElement('input', filesForDirProps)}
                 </div> */}
-                <Dragger {...uploadProps}> 
+                <Dragger {...uploadProps}>
                   <p className="c7n-upload-drag-icon">
                     <Icon type="inbox" />
                   </p>
@@ -293,7 +293,7 @@ const Page = () => {
             </div>
           )
         };
-    
+
         Modal.open({
           title: '上传压缩包',
           style: { width: '600px', top: '20px' },
@@ -301,7 +301,7 @@ const Page = () => {
           okText: '确定',
           // okProps: { disabled: true },
         });
-    
+
       }, [versionId, path, space?.value]);
 
     if (!versionId) {

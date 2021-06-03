@@ -382,15 +382,18 @@ export class SpaceController {
     // }).promise();
     const deleteKeyPrefix = `${space[0].id}/${id}/`;
     const deleteList = (await this.s3.listObjectsV2({ Bucket: 'bucket', Prefix: deleteKeyPrefix }).promise());
-    const deleteRes = await this.s3.deleteObjects({
-      Bucket: 'bucket',
-      // Key: `${space[0].id}/${id}/`,
-      Delete: {
-        Objects: deleteList.Contents.map(item => ({
-          Key: item.Key,
-        })),
-      },
-    }).promise();
+    if(deleteList.Contents.length >= 1) {
+      const deleteRes = await this.s3.deleteObjects({
+        Bucket: 'bucket',
+        // Key: `${space[0].id}/${id}/`,
+        Delete: {
+          Objects: deleteList.Contents.map(item => ({
+            Key: item.Key,
+          })),
+        },
+      }).promise();
+    }
+
     // console.log(deleteRes);
     // throw new Error('test');
     return res;
@@ -449,7 +452,7 @@ export class SpaceController {
         throw new Error('请上传一个 zip 文件');
       }
       const zip = new AdmZip(files[0].buffer);
-      if(zip.getEntries().length){
+      if(zip.getEntries().length < 1){
         throw new Error('zip 内容为空');
       }
     }
@@ -586,17 +589,19 @@ export class SpaceController {
     var zipEntries = zip.getEntries(); // an array of ZipEntry records
 
     if(isResetFiles === '1') {
-      const deleteKeyPrefix = `${spaceId}/${versionId}/${prefixPath}/`;
+      const deleteKeyPrefix = `${spaceId}/${versionId}/${prefixPath}/`.replace('//', "/");
       const deleteList = (await this.s3.listObjectsV2({ Bucket: 'bucket', Prefix: deleteKeyPrefix }).promise());
-      const deleteRes = await this.s3.deleteObjects({
-        Bucket: 'bucket',
-        // Key: `${space[0].id}/${id}/`,
-        Delete: {
-          Objects: deleteList.Contents.map(item => ({
-            Key: item.Key,
-          })),
-        },
-      }).promise();
+      if(deleteList.Contents.length >= 1) {
+        const deleteRes = await this.s3.deleteObjects({
+          Bucket: 'bucket',
+          // Key: `${space[0].id}/${id}/`,
+          Delete: {
+            Objects: deleteList.Contents.map(item => ({
+              Key: item.Key,
+            })),
+          },
+        }).promise();
+      }
     }
 
     const promises = [];
@@ -607,7 +612,7 @@ export class SpaceController {
         if(!type) {
           type = undefined;
         }
-        console.log(type);
+        // console.log(`${spaceId}/${versionId}/${prefixPath}/${zipEntry.entryName.replace(/^\//, '')}`.replace('//', "/"));
         const p = this.s3.putObject({
           Bucket: 'bucket',
           Key: `${spaceId}/${versionId}/${prefixPath}/${zipEntry.entryName.replace(/^\//, '')}`.replace('//', "/"),
