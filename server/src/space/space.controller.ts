@@ -417,12 +417,15 @@ export class SpaceController {
 
   @UseGuards(AuthGuard('jwt'))
   @ApiOAuth2([])
+  @ApiParam({ required: false, name: 'versionId' })
+  @ApiParam({ required: false, name: 'versionAliasName' })
   @Post('/create-space-version')
   @UseInterceptors(FilesInterceptor('files'))
-  async incrementPostViewCount(
+  async publishSpaceVersion(
     @Body('spaceId') spaceId: string,
     @Body('name') name: string,
     @Body('isZip') isZip: string,
+    @Body('versionId') versionId: string,
     @Body('versionAliasName') versionAliasName: string,
     @CurrentUser() user: User,
     @Body('filesPath') filesPath: string,
@@ -433,12 +436,22 @@ export class SpaceController {
       throw new Error('丢失 form data：name ');
     }
 
-    if (!versionAliasName) {
+    if (!(versionAliasName || versionId)) {
       throw new Error('丢失 form data: versionAliasName ');
     }
 
     if (!filesPath) {
       throw new Error('丢失 form data: filesPath ');
+    }
+
+    if(isZip === '1') {
+      if(files.length !== 1 || !files[0].originalname.endsWith('.zip')) {
+        throw new Error('请上传一个 zip 文件');
+      }
+      const zip = new AdmZip(files[0].buffer);
+      if(zip.getEntries().length){
+        throw new Error('zip 内容为空');
+      }
     }
 
     const filePathArray: string[] = JSON.parse(filesPath);
@@ -455,34 +468,47 @@ export class SpaceController {
       throw new HttpException('未授权', 403);
     }
 
-    const version = await this.prismaService.spaceVersion.create({
-      data: {
-        name,
-        space: {
-          connect: {
-            id: +spaceId,
-          },
-        },
-        spaceVersionAlias: {
-          connectOrCreate: {
-            where: {
-              SpaceVersionAlias_spaceId_name_key: {
-                name: versionAliasName,
-                spaceId: +spaceId,
-              },
-            },
-            create: {
-              name: versionAliasName,
-              space: {
-                connect: {
-                  id: +spaceId,
-                },
-              }
-            }
-          },
+    let version: SpaceVersion = null;
+
+    if(versionId) {
+      version = await this.prismaService.spaceVersion.findUnique({
+        where: {
+          id: +versionId,
         }
-      },
-    });
+      });
+      if(!version || version.spaceId !== +spaceId) {
+        throw new HttpException('未授权', 403);
+      }
+    } else {
+      version = await this.prismaService.spaceVersion.create({
+        data: {
+          name,
+          space: {
+            connect: {
+              id: +spaceId,
+            },
+          },
+          spaceVersionAlias: {
+            connectOrCreate: {
+              where: {
+                SpaceVersionAlias_spaceId_name_key: {
+                  name: versionAliasName,
+                  spaceId: +spaceId,
+                },
+              },
+              create: {
+                name: versionAliasName,
+                space: {
+                  connect: {
+                    id: +spaceId,
+                  },
+                }
+              }
+            },
+          }
+        },
+      });
+    }
 
     if(isZip === '1') {
       await this.uploadZipToVersionSpace(spaceId, "1", "", `${version.id}`, user, files);
@@ -558,6 +584,20 @@ export class SpaceController {
     var zip = new AdmZip(files[0].buffer);
 
     var zipEntries = zip.getEntries(); // an array of ZipEntry records
+
+    if(isResetFiles === '1') {
+      const deleteKeyPrefix = `${spaceId}/${versionId}/${prefixPath}/`;
+      const deleteList = (await this.s3.listObjectsV2({ Bucket: 'bucket', Prefix: deleteKeyPrefix }).promise());
+      const deleteRes = await this.s3.deleteObjects({
+        Bucket: 'bucket',
+        // Key: `${space[0].id}/${id}/`,
+        Delete: {
+          Objects: deleteList.Contents.map(item => ({
+            Key: item.Key,
+          })),
+        },
+      }).promise();
+    }
 
     const promises = [];
 

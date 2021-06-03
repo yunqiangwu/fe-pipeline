@@ -166,9 +166,9 @@ export const SpaceList: React.FC<any> = () => {
                 });
               }
             }} >复制访问链接</Button>,
-            <Button icon="select" onClick={() => {
-              // return createSpaces({ existSpaceId: record.get('id') });
-            }} >发布新版本</Button>,
+            // <Button icon="select" onClick={() => {
+            //   // return createSpaces({ existSpaceId: record.get('id') });
+            // }} >发布新版本</Button>,
             <Button icon="delete" onClick={() => {
               return deleteSpacesUI({ id: record.get('id') });
             }} >删除</Button>
