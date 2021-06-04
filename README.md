@@ -1,7 +1,7 @@
 # fe-pipelne
 ## Description
 
-在线 vscode
+前端部署系统
 ## Installation
 
 ```bash

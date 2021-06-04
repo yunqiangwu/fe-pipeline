@@ -1,6 +1,6 @@
 # fe-pipeline
 
-在线 vscode 服务.
+前端部署系统.
 
 ## 在线演示
 
