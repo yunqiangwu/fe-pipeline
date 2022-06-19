@@ -6,6 +6,12 @@
 
 - [http://fe-pipeline.open-front.hand-china.com/](http://fe-pipeline.open-front.hand-china.com/)
 
+<img width="1918" alt="image" src="https://user-images.githubusercontent.com/26475774/174489382-0dbabbf1-7a80-4b3b-a97c-d1b76c6ea6e2.png">
+<img width="1910" alt="image" src="https://user-images.githubusercontent.com/26475774/174489388-b9752718-f974-488f-bc5b-98e5e9f7196b.png">
+<img width="1916" alt="image" src="https://user-images.githubusercontent.com/26475774/174489396-d0c6003d-6e95-4933-b5ba-b4854a754356.png">
+
+
+
 ## 安装
 
 ```bash
