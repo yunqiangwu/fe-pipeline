@@ -16,7 +16,7 @@ kubectl -n fe-pipeline exec -ti deploy/dev-fe-pipeline-deployment -- bash
 
 docker run --privileged --name=rancher-server -d --restart=unless-stopped -p 32080:80 -v /d/private/opt/rancher:/var/lib/rancher -p 32443:443 rancher/rancher
 
-# docker build . -t registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 && docker push registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
+# docker build . -t registry.cn-hangzhou.aliyuncs.com/jajabjbj/fe-pipeline:1.16.0 && docker push registry.cn-hangzhou.aliyuncs.com/jajabjbj/fe-pipeline:1.16.0
 
 # helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --set service.enabled=true --set hostname=fe-pipeline.localhost --set ingress.enabled=true --set persistence.enabled=true --set persistence.existingClaim=fe-pipeline-pvc 
 # helm -n fe-pipeline upgrade --install --create-namespace fe-pipeline ./charts/fe-pipeline --values ./test/values.yaml
@@ -25,7 +25,7 @@ docker run --privileged --name=rancher-server -d --restart=unless-stopped -p 320
 
 # kubectl -n fe-pipeline exec -ti deploy/fe-pipeline-proxy -- nginx -s reload
 
-# docker run -e GIT_USER=3 -e GIT_EMAIL=a@q.c -p 8080:8080 -v `pwd`/dist:/workspace --rm -ti --name xxx -p 23000:23000 registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2 --port=23000 --auth=none
+# docker run -e GIT_USER=3 -e GIT_EMAIL=a@q.c -p 8080:8080 -v `pwd`/dist:/workspace --rm -ti --name xxx -p 23000:23000 registry.cn-hangzhou.aliyuncs.com/jajabjbj/theia-ide:2 --port=23000 --auth=none
 
 # sudo kubectl -n nginx-ingress port-forward deploy/nginx-ingress-nginx-ingress 80:80
 

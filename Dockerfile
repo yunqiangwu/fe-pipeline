@@ -13,7 +13,7 @@ RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run build:prod
 # ADD ./theia-plugin/theia-fe-pipeline-plugin/ /app/
 # RUN yarn --registry=https://registry.npm.taobao.org/
 
-# FROM registry.cn-hangzhou.aliyuncs.com/gitpod/theia-ide:2 as theia-extensions-builder
+# FROM registry.cn-hangzhou.aliyuncs.com/jajabjbj/theia-ide:2 as theia-extensions-builder
 
 # USER root
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# docker build . -t registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0 --no-cache
+# docker build . -t registry.cn-hangzhou.aliyuncs.com/jajabjbj/fe-pipeline:1.16.0 --no-cache
 
 # kubectl get po -l fe-pipeline=ws-manager -o jsonpath="{.items[0].spec.imagePullSecrets[0].name}"
 

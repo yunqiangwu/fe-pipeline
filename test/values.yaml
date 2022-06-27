@@ -6,7 +6,7 @@ replicaCount: 1
 
 
 image:
-  repository: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline
+  repository: registry.cn-hangzhou.aliyuncs.com/jajabjbj/fe-pipeline
   tag: 1.16.0
 
 service:

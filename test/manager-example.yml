@@ -47,7 +47,7 @@ spec:
           value: none
         - name: WATCH_FILES
           value: none
-        image: registry.cn-hangzhou.aliyuncs.com/gitpod/fe-pipeline:1.16.0
+        image: registry.cn-hangzhou.aliyuncs.com/jajabjbj/fe-pipeline:1.16.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 1000

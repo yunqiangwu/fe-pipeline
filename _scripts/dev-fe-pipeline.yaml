@@ -29,7 +29,7 @@ spec:
           # emptyDir: {}
       containers:
       - name: 'main'
-        image: 'registry.cn-hangzhou.aliyuncs.com/gitpod/theia-app:dev-hand'
+        image: 'registry.cn-hangzhou.aliyuncs.com/jajabjbj/theia-app:dev-hand'
         securityContext:
           privileged: true
         ports:

@@ -216,7 +216,7 @@ spec:
       value: "13485"
     - name: GIT_EMAIL
       value: yunqiang.wu@hand-china.com
-    image: registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2
+    image: registry.cn-hangzhou.aliyuncs.com/jajabjbj/code-server:2
     imagePullPolicy: IfNotPresent
     livenessProbe:
       failureThreshold: 1000
@@ -306,7 +306,7 @@ status:
     type: PodScheduled
   containerStatuses:
   - containerID: docker://0830c4ac8e66dff69427ad98bda3b507c7d004ed5ec25cdd65e0e32c1de5d0b9
-    image: registry.cn-hangzhou.aliyuncs.com/gitpod/code-server:2
+    image: registry.cn-hangzhou.aliyuncs.com/jajabjbj/code-server:2
     imageID: docker://sha256:c5174d2081591ef835f62ce347e9d9af0968900e25fa80f09e18a342ce5ddb3f
     lastState: {}
     name: web
