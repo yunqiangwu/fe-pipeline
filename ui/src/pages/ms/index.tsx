@@ -246,12 +246,11 @@ export const SpaceList: React.FC<any> = () => {
 
   };
 
-
   return (
     <PageHeaderWrapper>
       <Table buttons={[<Button icon="add" onClick={createSpacesUI} >创建新的空间</Button>,
       // <Button icon="add" onClick={deleteSpaces} >删除空间</Button>,
-      <Button icon="add" >选配空间创建新的项目</Button>
+      // <Button icon="add" >选配空间创建新的项目</Button>
       ]} columns={columns} dataSet={repoDs} />
     </PageHeaderWrapper>
   );

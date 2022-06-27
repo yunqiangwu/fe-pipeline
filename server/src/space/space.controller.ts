@@ -174,7 +174,7 @@ export class SpaceController {
 
       const data = await this.s3.getObject({ Bucket: 'bucket', Key: item.Key }).promise();
 
-      zip.addFile(item.Key.replace(prefixPath, ''), Buffer.from(data.Body), item.ETag);
+      zip.addFile(item.Key.replace(prefixPath, ''), Buffer.from(data.Body as string), item.ETag);
     }
 
 

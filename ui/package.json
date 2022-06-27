@@ -31,7 +31,7 @@
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.3.1",
     "axios": "0.19.2",
-    "choerodon-ui": "^0.8.67",
+    "choerodon-ui": "~1.5.1",
     "chonky": "^2.1.0",
     "chonky-icon-fontawesome": "^2.1.0",
     "core-js": "3.6.5",

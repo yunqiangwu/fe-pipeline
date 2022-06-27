@@ -1,10 +1,28 @@
 require('./global.less');
 import axios from './utils/axios.config';
-import { notification } from 'choerodon-ui';
+import { notification, configure } from 'choerodon-ui';
 
 notification.config({
     placement: 'bottomRight',
+    // @ts-ignore
+    dataKey: '_rows',
 });
+
+const c7nAxios = axios.create({
+  baseURL: axios.defaults.baseURL,
+
+});
+
+c7nAxios.interceptors.response.use((response) => {
+  return response.data;
+});
+
+configure({
+  axios: c7nAxios,
+  tableColumnAlign: () => {
+    return 'left' as any;
+  },
+})
 
 
 // export async function getInitialState() {

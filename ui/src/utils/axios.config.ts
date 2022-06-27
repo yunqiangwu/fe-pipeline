@@ -49,6 +49,7 @@ if(!(axios as any)._IS_CONFIGED) {
 
   axios.interceptors.response.use((response) => {
     return response;
+    // return response.data;
   }, (error) => {
 
     let err = null;

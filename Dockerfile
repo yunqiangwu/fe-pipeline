@@ -52,7 +52,7 @@ RUN yarn --registry=https://registry.npm.taobao.org/ && yarn run build:prod
 # ;fi
 
 
-FROM node:15.8.0 as runner
+FROM node:16 as runner
 
 # RUN cd /tmp && wget https://dl.k8s.io/v1.21.0-alpha.3/kubernetes-client-linux-amd64.tar.gz -O kubernetes-client-linux-amd64.tar.gz && \
 #     tar -zxvf kubernetes-client-linux-amd64.tar.gz && \

@@ -319,7 +319,7 @@ export const SpaceDetail: React.FC<any> = () => {
             },
             {
               name: 'isZip',
-              label: '是否上传 zip 解压',
+              label: '上传 zip 解压',
               type: 'boolean' as FieldType,
               trueValue: 1,
               falseValue: 0,
@@ -533,7 +533,7 @@ export const SpaceDetail: React.FC<any> = () => {
             <div style={{ display: 'none' }}>
               {React.createElement('input', filesForDirProps)}
             </div>
-            <Dragger {...uploadProps}> 
+            <Dragger {...uploadProps}>
               <p className="c7n-upload-drag-icon">
                 <Icon type="inbox" />
               </p>
