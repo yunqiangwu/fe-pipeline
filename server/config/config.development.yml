@@ -36,6 +36,7 @@ redis:
 authProviders:
   - id: "GitLab"
     host: "code.choerodon.com.cn"
+    clientProtocol: http
     protocol: "https"
     type: "GitLab"
     oauth:
@@ -46,6 +47,20 @@ authProviders:
       clientSecret: "c07a5cfff144bf3c3e0be5359e314a963aaed31677836232687763dd35223261"
       callBackUrl: "/oauth/authorize"
       settingsUrl: "https://code.choerodon.com.cn/profile/applications"
+
+  - id: GitLab2
+    host: code.choerodon.com.cn
+    clientProtocol: https
+    protocol: https
+    type: GitLab
+    oauth:
+      args:
+        response_type: code
+        scope: read_user api
+      clientId: 2f898fa2e2f6db8d54b4d76b162635f5131ebecc7141ec19e14781373f38cf92
+      clientSecret: 9edbc9f81a72e34a8b6e0082f60c6b6a7e0bb158897f3e44489133783b4b1d06
+      callBackUrl: /oauth/authorize
+      settingsUrl: https://code.choerodon.com.cn/profile/applications
 
   - id: "Github"
     host: "github.com"
@@ -83,12 +98,12 @@ authProviders:
       callBackUrl: "/oauth/oauth/authorize"
       # settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
 
-  - id: corallium-uat
-    host: 192.168.17.180:8080
-    protocol: http
-    type: open-hand
-    oauth:
-      args:
-        response_type: token
-      clientId: localhost
-      callBackUrl: /oauth/oauth/authorize
+  # - id: corallium-uat
+  #   host: 192.168.17.180:8080
+  #   protocol: http
+  #   type: open-hand
+  #   oauth:
+  #     args:
+  #       response_type: token
+  #     clientId: localhost
+  #     callBackUrl: /oauth/oauth/authorize

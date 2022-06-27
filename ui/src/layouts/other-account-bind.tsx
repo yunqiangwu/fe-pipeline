@@ -40,7 +40,7 @@ export const OtherAccountBind = () => {
   }, []);
 
   const [authConfigs, fetch] = useAsyncFn(async () => {
-    const response = await axios.get('/auth/oauth-config');
+    const response = await axios.get(`/auth/oauth-config?protocol=${window.location.protocol.replace(':','')}`);
     const authInfoResponse = await axios.get('/auth/other-account-bind');
     const data = response.data.map(
       (configItem: any) => {

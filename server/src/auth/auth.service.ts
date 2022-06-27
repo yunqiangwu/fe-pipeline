@@ -48,7 +48,6 @@ export class AuthService {
   }
 
 
-
   async otherAccountBind(args: any, currentUser?: User) {
 
     const {access_token, state, authHost, code, redirect_uri, bindUsername } = args;
@@ -67,6 +66,18 @@ export class AuthService {
     for(const authConfigItem of authProviders) {
       if(authConfigItem.host !== authHost) {
         continue;
+      }
+
+      if(authConfigItem.clientProtocol) {
+        if(redirect_uri.startsWith('https')) {
+          if(authConfigItem.clientProtocol === 'http') {
+            continue;
+          }
+        } else {
+          if(authConfigItem.clientProtocol === 'https') {
+            continue;
+          }
+        }
       }
 
       loginType = authConfigItem.type;

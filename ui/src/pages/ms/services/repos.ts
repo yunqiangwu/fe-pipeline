@@ -133,7 +133,7 @@ export const uploadZipToVersion = async ({
       });
     }
   });
-  
+
   // throw new Error('test');
 
   return res.data;
@@ -148,11 +148,11 @@ export const deleteSpaces = async ({
   return res.data;
 }
 
-export const refreshSpacesCache = async (id: any) => {
+export const refreshSpacesCache = async (id: any, aliasName: string) => {
 
   console.log('refreshSpacesCache spaces');
 
-  const res = await axios.get(`/space/refresh-space-alias-cache/${id}`);
+  const res = await axios.get(`/space/refresh-space-alias-cache/${id}?aliasName=${aliasName || ''}`);
 
   return res;
 

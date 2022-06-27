@@ -6,6 +6,9 @@ fe-pipeline-home
 .git
 /fe-pipeline-home
 
+/server/config/config.development.yml
+/server/config/config.production.yml
+
 /dist
 /docker/theia-ide/lib
 /docker/theia-ide/theia-fe-pipeline-extensions/lib

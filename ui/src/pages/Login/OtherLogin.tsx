@@ -44,7 +44,7 @@ const OtherLogin = () => {
   }, [location.search]);
 
   const authConfigs = useAsync(async () => {
-    const response = await axios.get('/auth/oauth-config');
+    const response = await axios.get(`/auth/oauth-config?protocol=${window.location.protocol.replace(':','')}`);
     return response.data;
   });
 

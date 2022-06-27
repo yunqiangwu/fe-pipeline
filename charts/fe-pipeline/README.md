@@ -78,34 +78,4 @@ authProviders:
       callBackUrl: "/login/oauth/authorize"
       settingsUrl: "https://github.com/settings/connections/applications/4f5afda4c1420c3e0dd4"
 
-  - id: "Choerodon"
-    host: "api.choerodon.com.cn"
-    protocol: "https"
-    type: "Choerodon"
-    oauth:
-      args:
-        response_type: token
-      clientId: "localhost"
-      callBackUrl: "/oauth/oauth/authorize"
-
-  - id: "open-hand"
-    host: "gateway.open.hand-china.com"
-    protocol: "https"
-    type: "open-hand"
-    oauth:
-      args:
-        response_type: token
-      clientId: "hsop-app"
-      callBackUrl: "/oauth/oauth/authorize"
-
-  - id: corallium-uat
-    host: 192.168.17.180:8080
-    protocol: http
-    type: open-hand
-    oauth:
-      args:
-        response_type: token
-      clientId: localhost
-      callBackUrl: /oauth/oauth/authorize
-
 ```

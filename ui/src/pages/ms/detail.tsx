@@ -245,6 +245,7 @@ export const SpaceDetail: React.FC<any> = () => {
         header: '操作',
         command: ({ record }) => {
           return [
+            <Button onClick={() => handleRefreshRedisCache(record.get('name'))} >刷新缓存</Button>,
             <Button onClick={
               () => {
                 createSpacesVersionAliasUI({ id: id as string, aliasName: record.get('name'), versionId: record?.get('version')?.id });
@@ -274,15 +275,15 @@ export const SpaceDetail: React.FC<any> = () => {
             }>删除</Button>
           ]
         },
-        width: 200,
+        width: 400,
         lock: 'right' as ColumnLock,
       }
     ];
   }, []);
 
-  const handleRefreshRedisCache = useCallback(() => {
+  const handleRefreshRedisCache = useCallback((aliasName: string) => {
     return (async () => {
-      const data = await refreshSpacesCache(id);
+      const data = await refreshSpacesCache(id, aliasName);
       notification.success({
         message: '操作成功',
         description: `成功刷新 ${data.data.data} 个 alias 缓存`
@@ -659,7 +660,6 @@ export const SpaceDetail: React.FC<any> = () => {
     <PageHeaderWrapper title="空间详情">
       <Card title="空间信息" extra={[
         <Button onClick={refresh}>刷新数据</Button>,
-        <Button target="_blank" onClick={handleRefreshRedisCache} >刷新别名缓存</Button>
       ]}>
         <Form columns={2} dataSet={spaceDs}>
           <TextField pristine name="name" />

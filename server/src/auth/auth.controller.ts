@@ -169,10 +169,17 @@ export class AuthController {
   }
 
   @Get('oauth-config')
-  async getOauthConfig(@Request() req): Promise<any> {
+  async getOauthConfig(@Query('protocol') protocol: string): Promise<any> {
     let res = (Config.singleInstance().get('authProviders'));
     if(res && Array.isArray(res)) {
-
+      if(protocol) {
+        res = res.filter(item => {
+          if(!item.clientProtocol) {
+            return true;
+          }
+          return protocol === item.clientProtocol;
+        });
+      }
       res = res.map(item => {
 
        const type = item.type;
@@ -203,6 +210,7 @@ export class AuthController {
             // ...item.oauth,
             authUrl,
             // clientSecret: null,
+            clientProtocol: item.clientProtocol && `${item.clientProtocol}`,
           }
         }
       })

@@ -19,6 +19,7 @@ persistence:
   existingClaim: fe-pipeline-pvc2
 
 
+
 minio:
   enabled: true
   #  endpoint: http://192.168.1.4:9000
@@ -34,25 +35,43 @@ minio:
       memory: 2G
 
 redis:
+  # master.service.nodePorts.redis: 30379
   master:
     service:
       type: NodePort
-      nodePort: 30379
+      # nodePort: 30379
+      nodePorts: 
+        redis: 30379
 
 
 authProviders:
   - id: "GitLab"
     host: "code.choerodon.com.cn"
+    clientProtocol: https
     protocol: "https"
     type: "GitLab"
     oauth:
       args:
         response_type: code
         scope: 'read_user api'
-      clientId: "b5a73be21b138bc526c7ac4eba9f1fb8774cd9b81e6620f4f9e390614f1522fa"
-      clientSecret: "a050c67bbbc87b54c273ea172a1816461e0bb7157b69559d4412eb8432d5847a"
+      clientId: '04decd836dcae4b4ff9ddd7da560491cd370650b08d3806c78ceb8e6d3c55bb8'
+      clientSecret: '55d8532be67181cb70f57e12a4a97ec964c4f5cba352b1356e8541dd457fb371'
       callBackUrl: "/oauth/authorize"
       settingsUrl: "https://code.choerodon.com.cn/profile/applications"
+
+  - id: GitLab2
+    host: code.choerodon.com.cn
+    clientProtocol: http
+    protocol: https
+    type: GitLab
+    oauth:
+      args:
+        response_type: code
+        scope: 'read_user api'
+      clientId: "b5a73be21b138bc526c7ac4eba9f1fb8774cd9b81e6620f4f9e390614f1522fa"
+      clientSecret: "a050c67bbbc87b54c273ea172a1816461e0bb7157b69559d4412eb8432d5847a"
+      callBackUrl: /oauth/authorize
+      settingsUrl: https://code.choerodon.com.cn/profile/applications
 
   - id: "Github"
     host: "github.com"
@@ -86,12 +105,12 @@ authProviders:
       clientId: "hsop-app"
       callBackUrl: "/oauth/oauth/authorize"
 
-  - id: corallium-uat
-    host: 192.168.17.180:8080
-    protocol: http
-    type: open-hand
-    oauth:
-      args:
-        response_type: token
-      clientId: localhost
-      callBackUrl: /oauth/oauth/authorize
+  # - id: corallium-uat
+  #   host: 192.168.17.180:8080
+  #   protocol: http
+  #   type: open-hand
+  #   oauth:
+  #     args:
+  #       response_type: token
+  #     clientId: localhost
+  #     callBackUrl: /oauth/oauth/authorize

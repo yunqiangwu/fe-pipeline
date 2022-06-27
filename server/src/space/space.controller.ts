@@ -47,24 +47,17 @@ export class SpaceController {
   }
 
   @Get('refresh-space-alias-cache/:id')
-  async refreshSpaceAliasCache(@Param('id') spaceId: number, aliasVersionId?: number) {
-    console.log(spaceId, aliasVersionId)
+  async refreshSpaceAliasCache(@Param('id') spaceId: number, @Param('aliasName')aliasName: string) {
+    // console.log(spaceId, aliasVersionId)
     const aliasVersions = await this.prismaService.spaceVersionAlias.findMany({
       where: {
         spaceId: +spaceId,
-        ...(aliasVersionId ? {
-          AND: [
-            { versionId: aliasVersionId, }
-          ],
-        } : {
-          OR: [
-            { name: 'latest' },
-          ],
-        }),
-      }
+        AND: [{ name: aliasName || 'latest' }],
+      },
     });
+
     for (const v of aliasVersions) {
-      await this.cacheManager.set(`${spaceId}--${v.name}`, `${spaceId}/${v.versionId}`, {
+      await this.cacheManager.set(`${spaceId}--${aliasName}`, `${spaceId}/${v.versionId}`, {
         ttl: 0 // ttl 为 0 表示永久生效
       });
       if (v.name === 'latest') {
@@ -73,6 +66,45 @@ export class SpaceController {
         });
       }
     }
+    return {
+      data: aliasVersions.length,
+    };
+  }
+
+  async setAliasCache(@Param('id') spaceId: number, @Param('versionId')aliasVersionId: number, @Param('aliasName')aliasName: string) {
+
+    const aliasVersions = await this.prismaService.spaceVersionAlias.findMany({
+      where: {
+        spaceId,
+        versionId: aliasVersionId,
+        // name: aliasName,
+      }
+    });
+    // for (const v of aliasVersions) {
+    //   await this.cacheManager.set(`${spaceId}--${v.name}`, `${spaceId}/${v.versionId}`, {
+    //     ttl: 0 // ttl 为 0 表示永久生效
+    //   });
+    // }
+    await this.cacheManager.set(`${spaceId}--${aliasName}`, `${spaceId}/${aliasVersionId}`, {
+      ttl: 0 // ttl 为 0 表示永久生效
+    });
+    // // console.log(spaceId, aliasVersionId)
+    // const aliasVersions = await this.prismaService.spaceVersionAlias.findMany({
+    //   where: {
+    //     versionId: aliasVersionId,
+    //     name: aliasName,
+    //   }
+    // });
+    // for (const v of aliasVersions) {
+    //   await this.cacheManager.set(`${spaceId}--${v.name}`, `${spaceId}/${v.versionId}`, {
+    //     ttl: 0 // ttl 为 0 表示永久生效
+    //   });
+    //   // if (v.name === 'latest') {
+    //   //   await this.cacheManager.set(`${spaceId}`, `${spaceId}/${v.versionId}`, {
+    //   //     ttl: 0 // ttl 为 0 表示永久生效
+    //   //   });
+    //   // }
+    // }
     return {
       data: aliasVersions.length,
     };
@@ -276,7 +308,7 @@ export class SpaceController {
       });
     }
     if (res?.id) {
-      await this.refreshSpaceAliasCache(+spaceId, res?.id)
+      await this.setAliasCache(+spaceId, res?.versionId, aliasName);
     }
   }
 
@@ -532,7 +564,8 @@ export class SpaceController {
       if (version?.id && versionAliasName) {
         const alias = await this.prismaService.spaceVersionAlias.findFirst({
           where: {
-            versionId: version.id,
+            // versionId: version.id,
+            name: versionAliasName,
             // version: version,
             spaceId: +spaceId,
           },
@@ -541,7 +574,8 @@ export class SpaceController {
           }
         })
         if (alias) {
-          await this.refreshSpaceAliasCache(+spaceId, alias.id);
+          // await this.refreshSpaceAliasCache(+spaceId);
+          await this.setAliasCache(+spaceId, version.id, versionAliasName);
         }
       }
     }

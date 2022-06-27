@@ -22,7 +22,20 @@ export async function startServer(port = 3000) {
   //   protocol: 'http',
   // };
 
-  axios.defaults.timeout = 40000;
+  // @ts-ignore
+  if(!axios._is_config) {
+    axios.defaults.timeout = 40000;
+
+    axios.interceptors.response.use(res => res, error => {
+      console.log({
+        config: error.response?.config,
+        retData: error.response?.data
+      })
+      return Promise.reject(error);
+    });
+    // @ts-ignore
+    axios._is_config = true;
+  }
 
   const dbType = Config.singleInstance().get('db.type');
 
